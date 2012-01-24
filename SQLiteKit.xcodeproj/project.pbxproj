@@ -7,13 +7,39 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FA179AD914CF4199002FB17F /* SQLGlobal.h in Headers */ = {isa = PBXBuildFile; fileRef = FA179AD714CF4199002FB17F /* SQLGlobal.h */; };
+		FA179ADA14CF4199002FB17F /* SQLGlobal.m in Sources */ = {isa = PBXBuildFile; fileRef = FA179AD814CF4199002FB17F /* SQLGlobal.m */; };
+		FA179ADD14CF4F56002FB17F /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = FA179ADC14CF4F56002FB17F /* libsqlite3.dylib */; };
+		FA179AE514CF5FAF002FB17F /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA179AE414CF5FAF002FB17F /* SenTestingKit.framework */; };
+		FA179AE814CF5FAF002FB17F /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA30A947148AD33900A269C8 /* Foundation.framework */; };
+		FA179AFF14CF60C9002FB17F /* SQLDatabaseTests.m in Sources */ = {isa = PBXBuildFile; fileRef = FA179AFE14CF60C9002FB17F /* SQLDatabaseTests.m */; };
+		FA179B0214CF6839002FB17F /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = FA179ADC14CF4F56002FB17F /* libsqlite3.dylib */; };
+		FA179B0314CF69B9002FB17F /* libSQLiteKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FA30A944148AD33900A269C8 /* libSQLiteKit.a */; };
 		FA30A948148AD33900A269C8 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA30A947148AD33900A269C8 /* Foundation.framework */; };
-		FAA1F9AC148AD4F20013D31B /* SQLiteKit.pch in Headers */ = {isa = PBXBuildFile; fileRef = FAA1F9AB148AD4F20013D31B /* SQLiteKit.pch */; };
 		FAA1F9AF148AD5330013D31B /* SQLDatabase.h in Headers */ = {isa = PBXBuildFile; fileRef = FAA1F9AD148AD5330013D31B /* SQLDatabase.h */; };
 		FAA1F9B0148AD5330013D31B /* SQLDatabase.m in Sources */ = {isa = PBXBuildFile; fileRef = FAA1F9AE148AD5330013D31B /* SQLDatabase.m */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		FA179B0014CF6130002FB17F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA30A93B148AD33900A269C8 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = FA30A943148AD33900A269C8;
+			remoteInfo = SQLiteKit;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		FA179AD714CF4199002FB17F /* SQLGlobal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SQLGlobal.h; sourceTree = "<group>"; };
+		FA179AD814CF4199002FB17F /* SQLGlobal.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SQLGlobal.m; sourceTree = "<group>"; };
+		FA179ADC14CF4F56002FB17F /* libsqlite3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.dylib; path = usr/lib/libsqlite3.dylib; sourceTree = SDKROOT; };
+		FA179AE314CF5FAF002FB17F /* SQKLiteTests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SQKLiteTests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
+		FA179AE414CF5FAF002FB17F /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = Library/Frameworks/SenTestingKit.framework; sourceTree = DEVELOPER_DIR; };
+		FA179AF614CF6052002FB17F /* SQKLiteTests.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SQKLiteTests.pch; sourceTree = "<group>"; };
+		FA179AF714CF6052002FB17F /* SQKLiteTests.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = SQKLiteTests.plist; sourceTree = "<group>"; };
+		FA179AFD14CF60C9002FB17F /* SQLDatabaseTests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SQLDatabaseTests.h; sourceTree = "<group>"; };
+		FA179AFE14CF60C9002FB17F /* SQLDatabaseTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SQLDatabaseTests.m; sourceTree = "<group>"; };
 		FA30A944148AD33900A269C8 /* libSQLiteKit.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libSQLiteKit.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		FA30A947148AD33900A269C8 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		FAA1F9AB148AD4F20013D31B /* SQLiteKit.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SQLiteKit.pch; sourceTree = "<group>"; };
@@ -22,22 +48,44 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		FA179ADF14CF5FAF002FB17F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FA179AE814CF5FAF002FB17F /* Foundation.framework in Frameworks */,
+				FA179AE514CF5FAF002FB17F /* SenTestingKit.framework in Frameworks */,
+				FA179B0214CF6839002FB17F /* libsqlite3.dylib in Frameworks */,
+				FA179B0314CF69B9002FB17F /* libSQLiteKit.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		FA30A941148AD33900A269C8 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				FA30A948148AD33900A269C8 /* Foundation.framework in Frameworks */,
+				FA179ADD14CF4F56002FB17F /* libsqlite3.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		FA179AE914CF5FAF002FB17F /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				FA179AFD14CF60C9002FB17F /* SQLDatabaseTests.h */,
+				FA179AFE14CF60C9002FB17F /* SQLDatabaseTests.m */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
 		FA30A939148AD33900A269C8 = {
 			isa = PBXGroup;
 			children = (
 				FAA1F9AA148AD4B00013D31B /* Sources */,
 				FA30A954148AD37000A269C8 /* Ressources */,
+				FA179AE914CF5FAF002FB17F /* Tests */,
 				FA30A946148AD33900A269C8 /* Frameworks */,
 				FA30A945148AD33900A269C8 /* Products */,
 			);
@@ -47,6 +95,7 @@
 			isa = PBXGroup;
 			children = (
 				FA30A944148AD33900A269C8 /* libSQLiteKit.a */,
+				FA179AE314CF5FAF002FB17F /* SQKLiteTests.octest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -55,6 +104,8 @@
 			isa = PBXGroup;
 			children = (
 				FA30A947148AD33900A269C8 /* Foundation.framework */,
+				FA179ADC14CF4F56002FB17F /* libsqlite3.dylib */,
+				FA179AE414CF5FAF002FB17F /* SenTestingKit.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -63,6 +114,8 @@
 			isa = PBXGroup;
 			children = (
 				FAA1F9AB148AD4F20013D31B /* SQLiteKit.pch */,
+				FA179AF614CF6052002FB17F /* SQKLiteTests.pch */,
+				FA179AF714CF6052002FB17F /* SQKLiteTests.plist */,
 			);
 			path = Ressources;
 			sourceTree = "<group>";
@@ -70,6 +123,8 @@
 		FAA1F9AA148AD4B00013D31B /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				FA179AD714CF4199002FB17F /* SQLGlobal.h */,
+				FA179AD814CF4199002FB17F /* SQLGlobal.m */,
 				FAA1F9AD148AD5330013D31B /* SQLDatabase.h */,
 				FAA1F9AE148AD5330013D31B /* SQLDatabase.m */,
 			);
@@ -83,14 +138,33 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FAA1F9AC148AD4F20013D31B /* SQLiteKit.pch in Headers */,
 				FAA1F9AF148AD5330013D31B /* SQLDatabase.h in Headers */,
+				FA179AD914CF4199002FB17F /* SQLGlobal.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
+		FA179AE214CF5FAF002FB17F /* SQKLiteTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FA179AF314CF5FAF002FB17F /* Build configuration list for PBXNativeTarget "SQKLiteTests" */;
+			buildPhases = (
+				FA179ADE14CF5FAF002FB17F /* Sources */,
+				FA179ADF14CF5FAF002FB17F /* Frameworks */,
+				FA179AE014CF5FAF002FB17F /* Resources */,
+				FA179AE114CF5FAF002FB17F /* ShellScript */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				FA179B0114CF6130002FB17F /* PBXTargetDependency */,
+			);
+			name = SQKLiteTests;
+			productName = SQKLiteTests;
+			productReference = FA179AE314CF5FAF002FB17F /* SQKLiteTests.octest */;
+			productType = "com.apple.product-type.bundle";
+		};
 		FA30A943148AD33900A269C8 /* SQLiteKit */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = FA30A951148AD33900A269C8 /* Build configuration list for PBXNativeTarget "SQLiteKit" */;
@@ -129,22 +203,96 @@
 			projectRoot = "";
 			targets = (
 				FA30A943148AD33900A269C8 /* SQLiteKit */,
+				FA179AE214CF5FAF002FB17F /* SQKLiteTests */,
 			);
 		};
 /* End PBXProject section */
 
+/* Begin PBXResourcesBuildPhase section */
+		FA179AE014CF5FAF002FB17F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		FA179AE114CF5FAF002FB17F /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Run the unit tests in this test bundle.\n\"${SYSTEM_DEVELOPER_DIR}/Tools/RunUnitTests\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
+		FA179ADE14CF5FAF002FB17F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FA179AFF14CF60C9002FB17F /* SQLDatabaseTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		FA30A940148AD33900A269C8 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				FAA1F9B0148AD5330013D31B /* SQLDatabase.m in Sources */,
+				FA179ADA14CF4199002FB17F /* SQLGlobal.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		FA179B0114CF6130002FB17F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = FA30A943148AD33900A269C8 /* SQLiteKit */;
+			targetProxy = FA179B0014CF6130002FB17F /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		FA179AF414CF5FAF002FB17F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(DEVELOPER_LIBRARY_DIR)/Frameworks",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = Ressources/SQKLiteTests.pch;
+				INFOPLIST_FILE = Ressources/SQKLiteTests.plist;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = octest;
+			};
+			name = Debug;
+		};
+		FA179AF514CF5FAF002FB17F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(DEVELOPER_LIBRARY_DIR)/Frameworks",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = Ressources/SQKLiteTests.pch;
+				INFOPLIST_FILE = Ressources/SQKLiteTests.plist;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = octest;
+			};
+			name = Release;
+		};
 		FA30A94F148AD33900A269C8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -214,6 +362,14 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		FA179AF314CF5FAF002FB17F /* Build configuration list for PBXNativeTarget "SQKLiteTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FA179AF414CF5FAF002FB17F /* Debug */,
+				FA179AF514CF5FAF002FB17F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
 		FA30A93E148AD33900A269C8 /* Build configuration list for PBXProject "SQLiteKit" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
