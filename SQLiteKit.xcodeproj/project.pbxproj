@@ -15,6 +15,8 @@
 		FA179AFF14CF60C9002FB17F /* SQLDatabaseTests.m in Sources */ = {isa = PBXBuildFile; fileRef = FA179AFE14CF60C9002FB17F /* SQLDatabaseTests.m */; };
 		FA179B0214CF6839002FB17F /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = FA179ADC14CF4F56002FB17F /* libsqlite3.dylib */; };
 		FA179B0314CF69B9002FB17F /* libSQLiteKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FA30A944148AD33900A269C8 /* libSQLiteKit.a */; };
+		FA179B0A14D07629002FB17F /* SQLStatement.h in Headers */ = {isa = PBXBuildFile; fileRef = FA179B0814D07629002FB17F /* SQLStatement.h */; };
+		FA179B0B14D07629002FB17F /* SQLStatement.m in Sources */ = {isa = PBXBuildFile; fileRef = FA179B0914D07629002FB17F /* SQLStatement.m */; };
 		FA30A948148AD33900A269C8 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA30A947148AD33900A269C8 /* Foundation.framework */; };
 		FAA1F9AF148AD5330013D31B /* SQLDatabase.h in Headers */ = {isa = PBXBuildFile; fileRef = FAA1F9AD148AD5330013D31B /* SQLDatabase.h */; };
 		FAA1F9B0148AD5330013D31B /* SQLDatabase.m in Sources */ = {isa = PBXBuildFile; fileRef = FAA1F9AE148AD5330013D31B /* SQLDatabase.m */; };
@@ -40,6 +42,8 @@
 		FA179AF714CF6052002FB17F /* SQKLiteTests.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = SQKLiteTests.plist; sourceTree = "<group>"; };
 		FA179AFD14CF60C9002FB17F /* SQLDatabaseTests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SQLDatabaseTests.h; sourceTree = "<group>"; };
 		FA179AFE14CF60C9002FB17F /* SQLDatabaseTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SQLDatabaseTests.m; sourceTree = "<group>"; };
+		FA179B0814D07629002FB17F /* SQLStatement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SQLStatement.h; sourceTree = "<group>"; };
+		FA179B0914D07629002FB17F /* SQLStatement.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SQLStatement.m; sourceTree = "<group>"; };
 		FA30A944148AD33900A269C8 /* libSQLiteKit.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libSQLiteKit.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		FA30A947148AD33900A269C8 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		FAA1F9AB148AD4F20013D31B /* SQLiteKit.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SQLiteKit.pch; sourceTree = "<group>"; };
@@ -127,6 +131,8 @@
 				FA179AD814CF4199002FB17F /* SQLGlobal.m */,
 				FAA1F9AD148AD5330013D31B /* SQLDatabase.h */,
 				FAA1F9AE148AD5330013D31B /* SQLDatabase.m */,
+				FA179B0814D07629002FB17F /* SQLStatement.h */,
+				FA179B0914D07629002FB17F /* SQLStatement.m */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -140,6 +146,7 @@
 			files = (
 				FAA1F9AF148AD5330013D31B /* SQLDatabase.h in Headers */,
 				FA179AD914CF4199002FB17F /* SQLGlobal.h in Headers */,
+				FA179B0A14D07629002FB17F /* SQLStatement.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -249,6 +256,7 @@
 			files = (
 				FAA1F9B0148AD5330013D31B /* SQLDatabase.m in Sources */,
 				FA179ADA14CF4199002FB17F /* SQLGlobal.m in Sources */,
+				FA179B0B14D07629002FB17F /* SQLStatement.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -6,7 +6,7 @@
 //  Copyright (c) 2011 __MyCompanyName__. All rights reserved.
 //
 
-#import "sqlite3.h"
+#import <sqlite3.h>
 
 @interface SQLDatabase : NSObject
 {

@@ -7,12 +7,7 @@
 //
 
 #import "SQLDatabase.h"
-
-@interface SQLDatabase ()
-
-- (void)_bindStatement:(sqlite3_stmt *)preparedStatement withObject:(id)object atIndex:(int)index;
-
-@end
+#import "SQLStatement.h"
 
 @implementation SQLDatabase
 
@@ -148,18 +143,15 @@
     sqlitekit_verbose(@"Execute new query (query = %@).", SQLQuery);
 
     // PREPARE STATEMENT
-    sqlite3_stmt *preparedStatement;
-    int resultPrepare = sqlite3_prepare_v2(self.connectionHandle, [SQLQuery UTF8String], SQLQuery.length, &preparedStatement, NULL);
+    SQLStatement *statement = [SQLStatement statementWithDatabase:self query:SQLQuery];
 
-    if ( resultPrepare != SQLITE_OK )
+    if ( statement == nil )
     {
-        sqlitekit_verbose(@"A problem occurred while compiling the prepared statement.");
-        sqlitekit_warning(@"%s", sqlite3_errmsg(self.connectionHandle));
         return NO;
     }
 
     // BIND PARAMETERS
-    int argumentsCount = sqlite3_bind_parameter_count(preparedStatement);
+    int argumentsCount = sqlite3_bind_parameter_count(statement.preparedStatement);
 
     if ( argumentsCount > 0 )
     {
@@ -170,7 +162,7 @@
         while (index < argumentsCount)
         {
             index++; // First index starts at one.
-            [self _bindStatement:preparedStatement withObject:va_arg(arguments, id) atIndex:index];
+            [statement bindObject:va_arg(arguments, id) atIndex:index];
         }
         va_end(arguments);
     }
@@ -180,7 +172,7 @@
 
     while ( isExecuting == YES )
     {
-        switch ( sqlite3_step(preparedStatement) )
+        switch ( sqlite3_step(statement.preparedStatement) )
         {
             case SQLITE_DONE:
             {
@@ -203,92 +195,7 @@
     }
 
     // FINALIZE
-    int resultFinalize = sqlite3_finalize(preparedStatement);
-
-    if ( resultFinalize == SQLITE_OK )
-    {
-        sqlitekit_verbose(@"The execution of the request was performed successfully.");
-        return YES;
-    }
-    sqlitekit_verbose(@"A problem occurred while finalizing the prepared statement.");
-    sqlitekit_warning(@"%s", sqlite3_errmsg(self.connectionHandle));
-    return NO;
-}
-
-#pragma mark -
-#pragma mark Private
-
-- (void)_bindStatement:(sqlite3_stmt *)preparedStatement withObject:(id)object atIndex:(int)index
-{
-    NSParameterAssert(preparedStatement);
-    NSParameterAssert(object);
-
-    if ( [object isKindOfClass:[NSData class]] == YES )
-    {
-        NSData *data = (NSData *)object;
-
-        sqlite3_bind_blob(preparedStatement, index, data.bytes, (int)data.length, SQLITE_STATIC);
-    }
-    else if ( [object isKindOfClass:[NSNumber class]] == YES )
-    {
-        NSNumber *number = (NSNumber *)object;
-        const char *encodedType = [number objCType];
-        NSCAssert(encodedType != NULL && strlen(encodedType) > 0, @"The encoded type returned is invalid (Must not null and have a length greater than zero).");
-
-        /// @see http://developer.apple.com/library/ios/#documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtTypeEncodings.html
-        switch ( encodedType[0] )
-        {
-            case 'B': // C++ bool or a C99 _Bool
-            case 'c': // char
-            case 'i': // int
-            case 's': // short
-            case 'l': // long (l is treated as a 32-bit quantity on 64-bit programs.)
-            case 'L': // unsigned long
-            case 'C': // unsigned char
-            case 'I': // unsigned integer
-            case 'S': // unsigned short
-            {
-                sqlite3_bind_int(preparedStatement, index, [number intValue]);
-                break;
-            }
-            case 'q': // long long
-            case 'Q': // unsigned long long
-            {
-                sqlite3_bind_int64(preparedStatement, index, [number longLongValue]);
-                break;
-            }
-            case 'f': // float
-            case 'd': // double
-            {
-                sqlite3_bind_double(preparedStatement, index, [number doubleValue]);
-                break;
-            }
-            default:
-            {
-                sqlitekit_warning(@"The encoded type for the specified NSNumber is invalid (type = %c).", encodedType[0]);
-                // Makes sure to have the same treatment than if it was a string.
-
-                [self _bindStatement:preparedStatement withObject:[number description] atIndex:index];
-                break;
-            }
-        }
-    }
-    else if ( [object isKindOfClass:[NSDate class]] == YES )
-    {
-        NSDate *date = (NSDate *)object;
-
-        sqlite3_bind_double(preparedStatement, index, date.timeIntervalSince1970);
-    }
-    else if ( object == nil || [object isEqual:[NSNull null]] == YES )
-    {
-        sqlite3_bind_null(preparedStatement, index);
-    }
-    else
-    {
-        NSString *stringValue = [object description];
-
-        sqlite3_bind_text(preparedStatement, index, [stringValue UTF8String], [stringValue length], SQLITE_STATIC);
-    }
+    return [statement finialize];
 }
 
 @end
