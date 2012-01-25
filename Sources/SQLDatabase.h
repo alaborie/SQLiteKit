@@ -8,6 +8,8 @@
 
 #import <sqlite3.h>
 
+@class SQLQuery;
+
 @interface SQLDatabase : NSObject
 {
 @private
@@ -47,6 +49,9 @@
 
 #pragma mark -
 
-- (BOOL)executeQuery:(NSString *)SQLQuery, ...;
+- (BOOL)executeSQLStatement:(NSString *)statement, ...;
+- (BOOL)executeQuery:(SQLQuery *)query;
+- (BOOL)executeQuery:(SQLQuery *)query thenEnumerateRowsUsingBlock:(void (^)(id row, BOOL *stop))block;
+- (BOOL)executeQuery:(SQLQuery *)query withOptions:(int)options thenEnumerateRowsUsingBlock:(void (^)(id row, BOOL *stop))block;
 
 @end

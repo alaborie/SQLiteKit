@@ -3,38 +3,31 @@
 //  SQLiteKit
 //
 //  Created by Alexandre Laborie on 1/25/12.
-//  Copyright (c) 2012 CouchSurfing International. All rights reserved.
+//  Copyright (c) 2011 __MyCompanyName__. All rights reserved.
 //
 
 #import <sqlite3.h>
 
 @class SQLDatabase;
+@class SQLQuery;
 
 @interface SQLStatement : NSObject
 {
 @private
     SQLDatabase *_database;
-@private
-    sqlite3_stmt *_preparedStatement;
+    sqlite3_stmt *_compiledStatement;
 }
 
 @property (nonatomic, readonly) SQLDatabase *database;
-@property (nonatomic, readonly) sqlite3_stmt *preparedStatement;
+@property (nonatomic, readonly) sqlite3_stmt *compiledStatement;
 
-+ (id)statementWithDatabase:(SQLDatabase *)database query:(NSString *)SQLQuery;
++ (id)statementWithDatabase:(SQLDatabase *)database query:(SQLQuery *)query;
 
 /**
  @param database Must not be nil!
- @param SQLQuery Must not be nil!
+ @param query Must not be nil!
  */
-- (id)initWithDatabase:(SQLDatabase *)database query:(NSString *)SQLQuery;
-
-#pragma mark -
-
-/**
- @param object Must not be nil!
- */
-- (void)bindObject:(id)object atIndex:(int)index;
+- (id)initWithDatabase:(SQLDatabase *)database query:(SQLQuery *)query;
 
 #pragma mark -
 

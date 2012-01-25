@@ -7,6 +7,7 @@
 //
 
 #import "SQLDatabase.h"
+#import "SQLQuery.h"
 #import "SQLStatement.h"
 
 @implementation SQLDatabase
@@ -131,7 +132,28 @@
 
 #pragma mark -
 
-- (BOOL)executeQuery:(NSString *)SQLQuery, ...
+- (BOOL)executeSQLStatement:(NSString *)statement, ...
+{
+    SQLQuery *newSQLQuery;
+    va_list arguments;
+
+    va_start(arguments, statement);
+    newSQLQuery = [SQLQuery queryWithSQLStatement:statement arguments:arguments];
+    va_end(arguments);
+    return [self executeQuery:newSQLQuery withOptions:0 thenEnumerateRowsUsingBlock:NULL];
+}
+
+- (BOOL)executeQuery:(SQLQuery *)query
+{
+    return [self executeQuery:query withOptions:0 thenEnumerateRowsUsingBlock:NULL];
+}
+
+- (BOOL)executeQuery:(SQLQuery *)query thenEnumerateRowsUsingBlock:(void (^)(id row, BOOL *stop))block
+{
+    return [self executeQuery:query withOptions:0 thenEnumerateRowsUsingBlock:block];
+}
+
+- (BOOL)executeQuery:(SQLQuery *)query withOptions:(int)options thenEnumerateRowsUsingBlock:(void (^)(id row, BOOL *stop))block
 {
     if ( self.connectionHandle == NULL )
     {
@@ -139,32 +161,15 @@
         return NO;
     }
 
-    NSParameterAssert(SQLQuery);
-    sqlitekit_verbose(@"Execute new query (query = %@).", SQLQuery);
+    NSParameterAssert(query);
+    sqlitekit_verbose(@"Execute new query (query = %@).", query);
 
     // PREPARE STATEMENT
-    SQLStatement *statement = [SQLStatement statementWithDatabase:self query:SQLQuery];
+    SQLStatement *statement = [SQLStatement statementWithDatabase:self query:query];
 
     if ( statement == nil )
     {
         return NO;
-    }
-
-    // BIND PARAMETERS
-    int argumentsCount = sqlite3_bind_parameter_count(statement.preparedStatement);
-
-    if ( argumentsCount > 0 )
-    {
-        va_list arguments;
-        int index = 0;
-
-        va_start(arguments, SQLQuery);
-        while (index < argumentsCount)
-        {
-            index++; // First index starts at one.
-            [statement bindObject:va_arg(arguments, id) atIndex:index];
-        }
-        va_end(arguments);
     }
 
     // STEP
@@ -172,7 +177,7 @@
 
     while ( isExecuting == YES )
     {
-        switch ( sqlite3_step(statement.preparedStatement) )
+        switch ( sqlite3_step(statement.compiledStatement) )
         {
             case SQLITE_DONE:
             {
@@ -182,13 +187,23 @@
             case SQLITE_ROW:
             {
                 sqlitekit_verbose(@"A new row of data is ready for processing.");
+                if (block != NULL)
+                {
+                    BOOL stop = NO;
+
+                    block(nil, &stop);
+                    if (stop == YES)
+                    {
+                        return [statement finialize];
+                    }
+                }
                 break;
             }
             default:
             {
-                isExecuting = NO;
-                sqlitekit_verbose(@"A problem occurred while executing the prepared statement (query = %@).", SQLQuery);
+                sqlitekit_verbose(@"A problem occurred while executing the prepared statement (query = %@).", query);
                 sqlitekit_warning(@"%s", sqlite3_errmsg(self.connectionHandle));
+                isExecuting = NO;
                 break;
             }
         }

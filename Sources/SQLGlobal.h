@@ -6,8 +6,6 @@
 //  Copyright (c) 2011 __MyCompanyName__. All rights reserved.
 //
 
-#import <Foundation/NSString.h>
-
 void __sqlitekit_log(id object, NSString *format, ...);
 void __sqlitekit_warning(id object, NSString *format, ...);
 void __sqlitekit_error(id object, NSString *format, ...);

@@ -3,36 +3,43 @@
 //  SQLiteKit
 //
 //  Created by Alexandre Laborie on 1/25/12.
-//  Copyright (c) 2012 CouchSurfing International. All rights reserved.
+//  Copyright (c) 2011 __MyCompanyName__. All rights reserved.
 //
 
 #import "SQLStatement.h"
 #import "SQLDatabase.h"
+#import "SQLQuery.h"
+
+@interface SQLStatement ()
+
+- (BOOL)_bindObject:(id)object atIndex:(int)index;
+
+@end
 
 @implementation SQLStatement
 
 @synthesize database = _database;
-@synthesize preparedStatement = _preparedStatement;
+@synthesize compiledStatement = _compiledStatement;
 
 #pragma mark -
 #pragma mark Lifecycle
 
-+ (id)statementWithDatabase:(SQLDatabase *)database query:(NSString *)SQLQuery
++ (id)statementWithDatabase:(SQLDatabase *)database query:(SQLQuery *)query
 {
-    return [[[[self class] alloc] initWithDatabase:database query:SQLQuery] autorelease];
+    return [[[[self class] alloc] initWithDatabase:database query:query] autorelease];
 }
 
-- (id)initWithDatabase:(SQLDatabase *)database query:(NSString *)SQLQuery
+- (id)initWithDatabase:(SQLDatabase *)database query:(SQLQuery *)query
 {
     NSParameterAssert(database);
-    NSParameterAssert(SQLQuery);
+    NSParameterAssert(query);
 
     self = [super init];
     if ( self != nil )
     {
         _database = [database retain];
 
-        int resultPrepare = sqlite3_prepare_v2(database.connectionHandle, [SQLQuery UTF8String], SQLQuery.length, &_preparedStatement, NULL);
+        int resultPrepare = sqlite3_prepare_v2(database.connectionHandle, [query.SQLStatement UTF8String], query.SQLStatement.length, &_compiledStatement, NULL);
 
         if ( resultPrepare != SQLITE_OK )
         {
@@ -40,6 +47,23 @@
             sqlitekit_warning(@"%s", sqlite3_errmsg(database.connectionHandle));
             [self autorelease];
             return nil;
+        }
+
+        int argumentsCount = sqlite3_bind_parameter_count(_compiledStatement);
+
+        if ( argumentsCount > 0 )
+        {
+            int index = 0;
+
+            while (index < argumentsCount)
+            {
+                index++; // First index starts at one.
+                if ( [self _bindObject:[query nextArgument] atIndex:index] == NO )
+                {
+                    [self autorelease];
+                    return nil;
+                }
+            }
         }
     }
     return self;
@@ -55,15 +79,48 @@
 #pragma mark -
 #pragma mark Public
 
-- (void)bindObject:(id)object atIndex:(int)index
+- (BOOL)reset
+{
+    int resultReset = sqlite3_reset(self.compiledStatement);
+
+    if ( resultReset == SQLITE_OK )
+    {
+        return YES;
+    }
+    sqlitekit_verbose(@"A problem occurred while resetting the prepared statement.");
+    sqlitekit_warning(@"%s", sqlite3_errmsg(self.database.connectionHandle));
+    return NO;
+}
+
+
+- (BOOL)finialize
+{
+    int resultFinalize = sqlite3_finalize(self.compiledStatement);
+
+    if ( resultFinalize == SQLITE_OK )
+    {
+        return YES;
+    }
+    sqlitekit_verbose(@"A problem occurred while finalizing the prepared statement.");
+    sqlitekit_warning(@"%s", sqlite3_errmsg(self.database.connectionHandle));
+    return NO;
+}
+
+#pragma mark -
+#pragma mark Private
+
+- (BOOL)_bindObject:(id)object atIndex:(int)index
 {
     NSParameterAssert(object);
+    NSParameterAssert(self.compiledStatement);
+
+    int resultBind;
 
     if ( [object isKindOfClass:[NSData class]] == YES )
     {
         NSData *data = (NSData *)object;
 
-        sqlite3_bind_blob(self.preparedStatement, index, data.bytes, (int)data.length, SQLITE_STATIC);
+        resultBind = sqlite3_bind_blob(self.compiledStatement, index, data.bytes, (int)data.length, SQLITE_STATIC);
     }
     else if ( [object isKindOfClass:[NSNumber class]] == YES )
     {
@@ -84,27 +141,26 @@
             case 'I': // unsigned integer
             case 'S': // unsigned short
             {
-                sqlite3_bind_int(self.preparedStatement, index, [number intValue]);
+                resultBind = sqlite3_bind_int(self.compiledStatement, index, [number intValue]);
                 break;
             }
             case 'q': // long long
             case 'Q': // unsigned long long
             {
-                sqlite3_bind_int64(self.preparedStatement, index, [number longLongValue]);
+                resultBind = sqlite3_bind_int64(self.compiledStatement, index, [number longLongValue]);
                 break;
             }
             case 'f': // float
             case 'd': // double
             {
-                sqlite3_bind_double(self.preparedStatement, index, [number doubleValue]);
+                resultBind = sqlite3_bind_double(self.compiledStatement, index, [number doubleValue]);
                 break;
             }
             default:
             {
                 sqlitekit_warning(@"The encoded type for the specified NSNumber is invalid (type = %c).", encodedType[0]);
                 // Makes sure to have the same treatment than if it was a string.
-                [self bindObject:[number description] atIndex:index];
-                break;
+                return [self _bindObject:object atIndex:index];
             }
         }
     }
@@ -112,45 +168,23 @@
     {
         NSDate *date = (NSDate *)object;
 
-        sqlite3_bind_double(self.preparedStatement, index, date.timeIntervalSince1970);
+        resultBind = sqlite3_bind_double(self.compiledStatement, index, date.timeIntervalSince1970);
     }
     else if ( object == nil || [object isEqual:[NSNull null]] == YES )
     {
-        sqlite3_bind_null(self.preparedStatement, index);
+        resultBind = sqlite3_bind_null(self.compiledStatement, index);
     }
     else
     {
         NSString *stringValue = [object description];
 
-        sqlite3_bind_text(self.preparedStatement, index, [stringValue UTF8String], [stringValue length], SQLITE_STATIC);
+        resultBind = sqlite3_bind_text(self.compiledStatement, index, [stringValue UTF8String], [stringValue length], SQLITE_STATIC);
     }
-}
-
-#pragma mark -
-
-- (BOOL)reset
-{
-    int resultReset = sqlite3_reset(self.preparedStatement);
-
-    if ( resultReset == SQLITE_OK )
+    if ( resultBind == SQLITE_OK )
     {
         return YES;
     }
-    sqlitekit_verbose(@"A problem occurred while resetting the prepared statement.");
-    sqlitekit_warning(@"%s", sqlite3_errmsg(self.database.connectionHandle));
-    return NO;
-}
-
-
-- (BOOL)finialize
-{
-    int resultFinalize = sqlite3_finalize(self.preparedStatement);
-
-    if ( resultFinalize == SQLITE_OK )
-    {
-        return YES;
-    }
-    sqlitekit_verbose(@"A problem occurred while finalizing the prepared statement.");
+    sqlitekit_verbose(@"A problem occurred while binding an object (index = %i, object = %@).", index, object);
     sqlitekit_warning(@"%s", sqlite3_errmsg(self.database.connectionHandle));
     return NO;
 }
