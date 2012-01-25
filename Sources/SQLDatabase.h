@@ -45,5 +45,8 @@
  */
 - (BOOL)close;
 
+#pragma mark -
+
+- (BOOL)executeQuery:(NSString *)SQLQuery, ...;
 
 @end
