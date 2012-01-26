@@ -53,9 +53,35 @@
 
 #pragma mark -
 
-- (BOOL)executeSQLStatement:(NSString *)statement, ...;
+/**
+ @param SQLStatement Must not be nil!
+ */
+- (BOOL)executeStatement:(NSString *)SQLStatement;
+
+/**
+ @param SQLStatement Must not be nil!
+ @note The arguments list must be nil terminated.
+ */
+- (BOOL)executeWithStatementAndArguments:(NSString *)SQLStatement, ... __attribute__((sentinel));
+
+/**
+ @param SQLStatement Must not be nil!
+ */
+- (BOOL)executeWithStatement:(NSString *)SQLStatement arguments:(NSArray *)arguments;
+
+/**
+ @param query Must not be nil!
+ */
 - (BOOL)executeQuery:(SQLQuery *)query;
+
+/**
+ @param query Must not be nil!
+ */
 - (BOOL)executeQuery:(SQLQuery *)query thenEnumerateRowsUsingBlock:(void (^)(SQLRow *row, NSUInteger index, BOOL *stop))block;
+
+/**
+ @param query Must not be nil!
+ */
 - (BOOL)executeQuery:(SQLQuery *)query withOptions:(int)options thenEnumerateRowsUsingBlock:(void (^)(SQLRow *row, NSUInteger index, BOOL *stop))block;
 
 @end

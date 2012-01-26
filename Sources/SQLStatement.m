@@ -57,8 +57,7 @@
 
             while (index < argumentsCount)
             {
-                index++; // First index starts at one.
-                if ( [self _bindObject:[query nextArgument] atIndex:index] == NO )
+                if ( [self _bindObject:[query.arguments objectAtIndex:index] atIndex:++index] == NO )
                 {
                     [self autorelease];
                     return nil;
@@ -170,7 +169,7 @@
 
         resultBind = sqlite3_bind_double(self.compiledStatement, index, date.timeIntervalSince1970);
     }
-    else if ( object == nil || [object isEqual:[NSNull null]] == YES )
+    else if ( [object isEqual:[NSNull null]] == YES )
     {
         resultBind = sqlite3_bind_null(self.compiledStatement, index);
     }

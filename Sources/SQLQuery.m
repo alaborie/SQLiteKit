@@ -11,45 +11,78 @@
 @implementation SQLQuery
 
 @synthesize SQLStatement = _SQLStatement;
+@synthesize arguments = _arguments;
 
 #pragma mark -
 #pragma mark Lifecycle
 
-+ (id)queryWithSQLStatement:(NSString *)statement, ...
++ (id)queryWithStatement:(NSString *)SQLStatement
 {
-    va_list arguments;
-    SQLQuery *newSQLQuery;
-
-    va_start(arguments, statement);
-    newSQLQuery = [[[self alloc] initWithSQLStatement:statement arguments:arguments] autorelease];
-    va_end(arguments);
-    return newSQLQuery;
+    return [[[self alloc] initWithStatement:SQLStatement arguments:nil orArgumentsList:NULL] autorelease];
 }
 
-+ (id)queryWithSQLStatement:(NSString *)statement arguments:(va_list)arguments
++ (id)queryWithStatementAndArguments:(NSString *)SQLStatement, ...
 {
-    return [[[self alloc] initWithSQLStatement:statement arguments:arguments] autorelease];
+    va_list argumentsList;
+    SQLQuery *query;
+
+    va_start(argumentsList, SQLStatement);
+    query = [[[self alloc] initWithStatement:SQLStatement arguments:nil orArgumentsList:argumentsList] autorelease];
+    va_end(argumentsList);
+    return query;
 }
 
-- (id)initWithSQLStatement:(NSString *)statement, ...
++ (id)queryWithStatement:(NSString *)SQLStatement arguments:(NSArray *)arguments
 {
-    va_list arguments;
+    return [[[self alloc] initWithStatement:SQLStatement arguments:arguments orArgumentsList:NULL] autorelease];
+}
 
-    va_start(arguments, statement);
-    self = [self initWithSQLStatement:statement arguments:arguments];
-    va_end(arguments);
+- (id)initWithStatement:(NSString *)SQLStatement
+{
+    return [self initWithStatement:SQLStatement arguments:nil orArgumentsList:NULL];
+}
+
+- (id)initWithStatementAndArguments:(NSString *)SQLStatement, ...
+{
+    va_list argumentsList;
+
+    va_start(argumentsList, SQLStatement);
+    self = [self initWithStatement:SQLStatement arguments:nil orArgumentsList:argumentsList];
+    va_end(argumentsList);
     return self;
 }
 
-- (id)initWithSQLStatement:(NSString *)statement arguments:(va_list)arguments
+- (id)initWithStatement:(NSString *)SQLStatement arguments:(NSArray *)arguments
 {
-    NSParameterAssert(statement);
+    return [self initWithStatement:SQLStatement arguments:arguments orArgumentsList:NULL];
+}
 
-    self = [super self];
+- (id)initWithStatement:(NSString *)SQLStatement arguments:(NSArray *)arguments orArgumentsList:(va_list)argumentsList
+{
+    NSParameterAssert(SQLStatement);
+
+    self = [super init];
     if ( self != nil )
     {
-        _SQLStatement = [statement retain];
-        va_copy(_arguments, arguments);
+        _SQLStatement = [SQLStatement retain];
+        if ( arguments != nil )
+        {
+            _arguments = [arguments retain];
+        }
+        else if ( argumentsList != NULL )
+        {
+            id argument = va_arg(argumentsList, id);
+
+            if ( argument != nil )
+            {
+                _arguments = [[NSMutableArray alloc] init];
+                while ( argument != nil )
+                {
+                    [(NSMutableArray *)_arguments addObject:argument];
+                    argument = va_arg(argumentsList, id);
+                }
+            }
+        }
     }
     return self;
 }
@@ -57,16 +90,20 @@
 - (void)dealloc
 {
     [_SQLStatement release];
-    va_end(_arguments);
+    [_arguments release];
     [super dealloc];
 }
 
 #pragma mark -
-#pragma mark Public
+#pragma mark NSObject
 
-- (id)nextArgument
+- (NSString *)description
 {
-    return va_arg(_arguments, id);
+    if ( self.arguments == nil )
+    {
+        return self.SQLStatement;
+    }
+    return [NSString stringWithFormat:@"%@ [%@]", self.SQLStatement, [self.arguments componentsJoinedByString:@", "]];
 }
 
 @end

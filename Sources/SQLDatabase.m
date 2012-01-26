@@ -143,15 +143,37 @@
 
 #pragma mark -
 
-- (BOOL)executeSQLStatement:(NSString *)statement, ...
+- (BOOL)executeStatement:(NSString *)SQLStatement
 {
-    SQLQuery *newSQLQuery;
-    va_list arguments;
+    NSParameterAssert(SQLStatement);
 
-    va_start(arguments, statement);
-    newSQLQuery = [SQLQuery queryWithSQLStatement:statement arguments:arguments];
-    va_end(arguments);
-    return [self executeQuery:newSQLQuery withOptions:0 thenEnumerateRowsUsingBlock:NULL];
+    SQLQuery *query;
+
+    query = [[[SQLQuery alloc] initWithStatement:SQLStatement] autorelease];
+    return [self executeQuery:query withOptions:0 thenEnumerateRowsUsingBlock:NULL];
+}
+
+- (BOOL)executeWithStatementAndArguments:(NSString *)SQLStatement, ...
+{
+    NSParameterAssert(SQLStatement);
+
+    SQLQuery *query;
+    va_list argumentsList;
+
+    va_start(argumentsList, SQLStatement);
+    query = [[[SQLQuery alloc] initWithStatement:SQLStatement arguments:nil orArgumentsList:argumentsList] autorelease];
+    va_end(argumentsList);
+    return [self executeQuery:query withOptions:0 thenEnumerateRowsUsingBlock:NULL];
+}
+
+- (BOOL)executeWithStatement:(NSString *)SQLStatement arguments:(NSArray *)arguments
+{
+    NSParameterAssert(SQLStatement);
+
+    SQLQuery *query;
+
+    query = [[[SQLQuery alloc] initWithStatement:SQLStatement] autorelease];
+    return [self executeQuery:query withOptions:0 thenEnumerateRowsUsingBlock:NULL];
 }
 
 - (BOOL)executeQuery:(SQLQuery *)query
