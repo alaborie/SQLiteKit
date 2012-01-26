@@ -81,4 +81,62 @@
     [database release];
 }
 
+- (void)testExecuteFile
+{
+    NSError *error = nil;
+    NSString *filePath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"movie-db.sql"];
+    NSString *databaseDump = @"\
+    PRAGMA foreign_keys=OFF;\
+    BEGIN TRANSACTION;\
+    CREATE TABLE movies(ID INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, rating INTEGER);\
+    INSERT INTO movies VALUES(1,'The Shawshank Redemption',9.2);\
+    INSERT INTO movies VALUES(2,'The Godfather',9.2);\
+    INSERT INTO movies VALUES(3,'The Godfather: Part II',9);\
+    INSERT INTO movies VALUES(4,'The Good, the Bad and the Ugly',8.9);\
+    INSERT INTO movies VALUES(5,'Pulp Fiction',8.9);\
+    CREATE TABLE actors(ID INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT);\
+    INSERT INTO actors VALUES(1,'Morgan Freeman');\
+    INSERT INTO actors VALUES(2,'Tim Robbins');\
+    INSERT INTO actors VALUES(3,'Marlon Brando');\
+    INSERT INTO actors VALUES(4,'Al Pacino');\
+    INSERT INTO actors VALUES(5,'Robert Duvall');\
+    INSERT INTO actors VALUES(6,'Eli Wallach');\
+    INSERT INTO actors VALUES(7,'Clint Eastwood');\
+    INSERT INTO actors VALUES(8,'John Travolta');\
+    INSERT INTO actors VALUES(9,'Samuel L. Jackson');\
+    CREATE TABLE act(movie_ID INTEGER, actor_ID INTEGER);\
+    INSERT INTO act VALUES(1,1);\
+    INSERT INTO act VALUES(1,2);\
+    INSERT INTO act VALUES(2,3);\
+    INSERT INTO act VALUES(2,4);\
+    INSERT INTO act VALUES(3,4);\
+    INSERT INTO act VALUES(3,5);\
+    INSERT INTO act VALUES(4,6);\
+    INSERT INTO act VALUES(4,7);\
+    INSERT INTO act VALUES(5,8);\
+    INSERT INTO act VALUES(5,9);\
+    DELETE FROM sqlite_sequence;\
+    INSERT INTO sqlite_sequence VALUES('movies',5);\
+    INSERT INTO sqlite_sequence VALUES('actors',9);\
+    COMMIT;";
+
+    [databaseDump writeToFile:filePath atomically:YES encoding:NSASCIIStringEncoding error:&error];
+    STAssertNil(error, [error localizedDescription]);
+
+    NSString *databaseLocalPath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"movie.db"];
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+
+    [fileManager removeItemAtPath:databaseLocalPath error:&error];
+    if ( error != nil && error.code != NSFileNoSuchFileError )
+    {
+        STAssertNil(error, [error localizedDescription]);
+    }
+
+    SQLDatabase *movieDatabase = [SQLDatabase databaseWithPath:databaseLocalPath];
+
+    [movieDatabase open];
+    [movieDatabase executeSQLFileAtPath:filePath];
+    [movieDatabase close];
+}
+
 @end

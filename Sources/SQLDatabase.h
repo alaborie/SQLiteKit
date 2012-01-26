@@ -70,6 +70,11 @@
 - (BOOL)executeWithStatement:(NSString *)SQLStatement arguments:(NSArray *)arguments;
 
 /**
+ @param path Must not be nil;
+ */
+- (BOOL)executeSQLFileAtPath:(NSString *)path;
+
+/**
  @param query Must not be nil!
  */
 - (BOOL)executeQuery:(SQLQuery *)query;

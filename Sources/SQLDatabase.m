@@ -176,6 +176,32 @@
     return [self executeQuery:query withOptions:0 thenEnumerateRowsUsingBlock:NULL];
 }
 
+- (BOOL)executeSQLFileAtPath:(NSString *)path
+{
+    /// @todo This is only a quick version. Should be rewritten to improves the performances, errors management, etc.
+    NSParameterAssert(path);
+
+    NSError *error = nil;
+    NSString *contentOfFile = [NSString stringWithContentsOfFile:path encoding:NSASCIIStringEncoding error:&error];
+    NSAssert(error == nil, [error localizedDescription]);
+
+    NSRange searchRange = NSMakeRange(0, contentOfFile.length);
+    NSRange eofRange = [contentOfFile rangeOfString:@";"];
+    NSCharacterSet *whitespaceAndNewlineCharacterSet = [NSCharacterSet whitespaceAndNewlineCharacterSet];
+
+    while ( eofRange.location !=  NSNotFound ) {
+        NSRange lineRange = NSMakeRange(searchRange.location, NSMaxRange(eofRange) - searchRange.location);
+        NSString *line = [[contentOfFile substringWithRange:lineRange] stringByTrimmingCharactersInSet:whitespaceAndNewlineCharacterSet];
+
+        [self executeStatement:line];
+        searchRange.location = NSMaxRange(lineRange);
+        searchRange.length -= lineRange.length;
+        eofRange = [contentOfFile rangeOfString:@";" options:0 range:searchRange];
+    }
+    NSAssert(searchRange.length == 0, @"Syntax error");
+    return YES;
+}
+
 - (BOOL)executeQuery:(SQLQuery *)query
 {
     return [self executeQuery:query withOptions:0 thenEnumerateRowsUsingBlock:NULL];
