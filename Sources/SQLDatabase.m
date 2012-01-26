@@ -9,6 +9,7 @@
 #import "SQLDatabase.h"
 #import "SQLQuery.h"
 #import "SQLStatement.h"
+#import "SQLRow.h"
 
 @implementation SQLDatabase
 
@@ -148,12 +149,12 @@
     return [self executeQuery:query withOptions:0 thenEnumerateRowsUsingBlock:NULL];
 }
 
-- (BOOL)executeQuery:(SQLQuery *)query thenEnumerateRowsUsingBlock:(void (^)(id row, BOOL *stop))block
+- (BOOL)executeQuery:(SQLQuery *)query thenEnumerateRowsUsingBlock:(void (^)(SQLRow *row, NSUInteger index, BOOL *stop))block
 {
     return [self executeQuery:query withOptions:0 thenEnumerateRowsUsingBlock:block];
 }
 
-- (BOOL)executeQuery:(SQLQuery *)query withOptions:(int)options thenEnumerateRowsUsingBlock:(void (^)(id row, BOOL *stop))block
+- (BOOL)executeQuery:(SQLQuery *)query withOptions:(int)options thenEnumerateRowsUsingBlock:(void (^)(SQLRow *row, NSUInteger index, BOOL *stop))block
 {
     if ( self.connectionHandle == NULL )
     {
@@ -166,6 +167,7 @@
 
     // PREPARE STATEMENT
     SQLStatement *statement = [SQLStatement statementWithDatabase:self query:query];
+    SQLRow *row = nil;
 
     if ( statement == nil )
     {
@@ -174,6 +176,7 @@
 
     // STEP
     BOOL isExecuting = YES;
+    NSUInteger index = 0;
 
     while ( isExecuting == YES )
     {
@@ -186,16 +189,20 @@
             }
             case SQLITE_ROW:
             {
-                sqlitekit_verbose(@"A new row of data is ready for processing.");
                 if (block != NULL)
                 {
                     BOOL stop = NO;
 
-                    block(nil, &stop);
-                    if (stop == YES)
+                    if ( row == nil )
+                    {
+                        row = [SQLRow rowWithDatabase:self statement:statement];
+                    }
+                    block(row, index, &stop);
+                    if ( stop == YES )
                     {
                         return [statement finialize];
                     }
+                    index++;
                 }
                 break;
             }
