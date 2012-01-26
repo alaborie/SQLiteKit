@@ -23,6 +23,9 @@
 
 #pragma mark -
 
++ (id)databaseWithURL:(NSURL *)storeURL;
++ (id)databaseWithPath:(NSString *)storePath;
+
 - (id)initWithURL:(NSURL *)storeURL;
 
 /**

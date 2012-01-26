@@ -19,6 +19,16 @@
 #pragma mark -
 #pragma mark Lifecycle
 
++ (id)databaseWithURL:(NSURL *)storeURL
+{
+    return [[[self alloc] initWithURL:storeURL] autorelease];
+}
+
++ (id)databaseWithPath:(NSString *)storePath
+{
+    return [[[self alloc] initWithPath:storePath] autorelease];
+}
+
 - (id)init
 {
     return [self initWithPath:nil];

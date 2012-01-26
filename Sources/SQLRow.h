@@ -42,4 +42,7 @@
 - (id)objectForColumn:(NSString *)name;
 - (id)objectForColumnAtIndex:(NSUInteger)index;
 
+- (NSArray *)objects;
+- (NSDictionary *)objectsDict;
+
 @end

@@ -138,4 +138,35 @@
     return [NSNull null];
 }
 
+- (NSArray *)objects
+{
+    if ( self.columnCount == 0 )
+    {
+        return nil;
+    }
+
+    NSMutableArray *objects = [NSMutableArray arrayWithCapacity:self.columnCount];
+
+    for ( NSUInteger index = 0; index < self.columnCount; index++ )
+    {
+        [objects addObject:[self objectForColumnAtIndex:index]];
+    }
+    return objects;
+}
+
+- (NSDictionary *)objectsDict
+{
+    if ( self.columnCount == 0 )
+    {
+        return nil;
+    }
+
+    NSMutableDictionary *objectsDict = [NSMutableDictionary dictionaryWithCapacity:self.columnCount];
+
+    [self.columnNameDict enumerateKeysAndObjectsUsingBlock:^(id key, id object, BOOL *stop) {
+        [objectsDict setObject:[self objectForColumnAtIndex:[object unsignedIntegerValue]] forKey:key];
+    }];
+    return objectsDict;
+}
+
 @end

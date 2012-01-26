@@ -47,17 +47,33 @@
     [database executeSQLStatement:@"INSERT INTO user(full_name) VALUES(?);", @"Romain Gary"];
     [database executeSQLStatement:@"INSERT INTO user(full_name) VALUES(?);", @"Hermann Hesse"];
     [database executeSQLStatement:@"INSERT INTO user(full_name) VALUES(?);", @"Paulo Coelho"];
+    [database executeSQLStatement:@"INSERT INTO user(full_name) VALUES(?);", @"Jean Jacques Rousseau"];
+    [database executeSQLStatement:@"INSERT INTO user(full_name) VALUES(?);", @"Joseph Conrad"];
 
     SQLQuery *queryAllUsers = [SQLQuery queryWithSQLStatement:@"SELECT * FROM user;"];
 
     [database executeQuery:queryAllUsers thenEnumerateRowsUsingBlock:^(SQLRow *row, NSUInteger index, BOOL *stop) {
-        NSLog(@"#%u - %@", index, row);
+        NSLog(@"#%02u - %@", index, row);
     }];
 
     SQLQuery *queryCountUsers = [SQLQuery queryWithSQLStatement:@"SELECT count(ID) AS `number of users` FROM user;"];
 
     [database executeQuery:queryCountUsers thenEnumerateRowsUsingBlock:^(SQLRow *row, NSUInteger index, BOOL *stop) {
         NSLog(@"#%u - %@", index, row);
+    }];
+
+    SQLQuery *queryBorisVian = [SQLQuery queryWithSQLStatement:@"SELECT * FROM user WHERE full_name = 'Boris Vian';"];
+
+    [database executeQuery:queryBorisVian thenEnumerateRowsUsingBlock:^(SQLRow *row, NSUInteger index, BOOL *stop) {
+        NSLog(@"array = %@", [row objects]);
+        NSLog(@"dictionary = %@", [row objectsDict]);
+    }];
+
+    SQLQuery *queryLike = [SQLQuery queryWithSQLStatement:@"SELECT * FROM user WHERE full_name LIKE 'J%';"];
+
+    [database executeQuery:queryLike thenEnumerateRowsUsingBlock:^(SQLRow *row, NSUInteger index, BOOL *stop) {
+        NSLog(@"array = %@", [row objects]);
+        NSLog(@"dictionary = %@", [row objectsDict]);
     }];
 
     [database close];
