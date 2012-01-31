@@ -17,15 +17,18 @@
 		FA179B0314CF69B9002FB17F /* libSQLiteKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FA30A944148AD33900A269C8 /* libSQLiteKit.a */; };
 		FA179B0A14D07629002FB17F /* SQLStatement.h in Headers */ = {isa = PBXBuildFile; fileRef = FA179B0814D07629002FB17F /* SQLStatement.h */; };
 		FA179B0B14D07629002FB17F /* SQLStatement.m in Sources */ = {isa = PBXBuildFile; fileRef = FA179B0914D07629002FB17F /* SQLStatement.m */; };
-		FA179B0E14D09AAD002FB17F /* SQLQuery.h in Headers */ = {isa = PBXBuildFile; fileRef = FA179B0C14D09AAD002FB17F /* SQLQuery.h */; };
+		FA179B0E14D09AAD002FB17F /* SQLQuery.h in Headers */ = {isa = PBXBuildFile; fileRef = FA179B0C14D09AAD002FB17F /* SQLQuery.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		FA179B0F14D09AAD002FB17F /* SQLQuery.m in Sources */ = {isa = PBXBuildFile; fileRef = FA179B0D14D09AAD002FB17F /* SQLQuery.m */; };
-		FA179B1214D0C156002FB17F /* SQLRow.h in Headers */ = {isa = PBXBuildFile; fileRef = FA179B1014D0C156002FB17F /* SQLRow.h */; };
+		FA179B1214D0C156002FB17F /* SQLRow.h in Headers */ = {isa = PBXBuildFile; fileRef = FA179B1014D0C156002FB17F /* SQLRow.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		FA179B1314D0C156002FB17F /* SQLRow.m in Sources */ = {isa = PBXBuildFile; fileRef = FA179B1114D0C156002FB17F /* SQLRow.m */; };
 		FA179B1614D1F60C002FB17F /* SQLQueryTests.m in Sources */ = {isa = PBXBuildFile; fileRef = FA179B1514D1F60C002FB17F /* SQLQueryTests.m */; };
 		FA30A948148AD33900A269C8 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA30A947148AD33900A269C8 /* Foundation.framework */; };
+		FA581ED314D8990800B362D1 /* NSOperationQueue+SQLiteKitAdditions.h in Headers */ = {isa = PBXBuildFile; fileRef = FA581ED114D8990800B362D1 /* NSOperationQueue+SQLiteKitAdditions.h */; };
+		FA581ED414D8990800B362D1 /* NSOperationQueue+SQLiteKitAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = FA581ED214D8990800B362D1 /* NSOperationQueue+SQLiteKitAdditions.m */; };
 		FA93395614D705AA00151B4B /* SQLRowTests.m in Sources */ = {isa = PBXBuildFile; fileRef = FA93395514D705AA00151B4B /* SQLRowTests.m */; };
-		FAA1F9AF148AD5330013D31B /* SQLDatabase.h in Headers */ = {isa = PBXBuildFile; fileRef = FAA1F9AD148AD5330013D31B /* SQLDatabase.h */; };
+		FAA1F9AF148AD5330013D31B /* SQLDatabase.h in Headers */ = {isa = PBXBuildFile; fileRef = FAA1F9AD148AD5330013D31B /* SQLDatabase.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		FAA1F9B0148AD5330013D31B /* SQLDatabase.m in Sources */ = {isa = PBXBuildFile; fileRef = FAA1F9AE148AD5330013D31B /* SQLDatabase.m */; };
+		FACBCB2714D8A27B00004567 /* SQLiteKit.h in Headers */ = {isa = PBXBuildFile; fileRef = FACBCB2614D8A27B00004567 /* SQLiteKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -58,11 +61,14 @@
 		FA179B1514D1F60C002FB17F /* SQLQueryTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SQLQueryTests.m; sourceTree = "<group>"; };
 		FA30A944148AD33900A269C8 /* libSQLiteKit.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libSQLiteKit.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		FA30A947148AD33900A269C8 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		FA581ED114D8990800B362D1 /* NSOperationQueue+SQLiteKitAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSOperationQueue+SQLiteKitAdditions.h"; sourceTree = "<group>"; };
+		FA581ED214D8990800B362D1 /* NSOperationQueue+SQLiteKitAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSOperationQueue+SQLiteKitAdditions.m"; sourceTree = "<group>"; };
 		FA93395414D705AA00151B4B /* SQLRowTests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SQLRowTests.h; sourceTree = "<group>"; };
 		FA93395514D705AA00151B4B /* SQLRowTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SQLRowTests.m; sourceTree = "<group>"; };
 		FAA1F9AB148AD4F20013D31B /* SQLiteKit.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SQLiteKit.pch; sourceTree = "<group>"; };
 		FAA1F9AD148AD5330013D31B /* SQLDatabase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SQLDatabase.h; sourceTree = "<group>"; };
 		FAA1F9AE148AD5330013D31B /* SQLDatabase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SQLDatabase.m; sourceTree = "<group>"; };
+		FACBCB2614D8A27B00004567 /* SQLiteKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SQLiteKit.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -142,9 +148,19 @@
 			path = Ressources;
 			sourceTree = "<group>";
 		};
+		FA581ECF14D898C100B362D1 /* Categories */ = {
+			isa = PBXGroup;
+			children = (
+				FA581ED114D8990800B362D1 /* NSOperationQueue+SQLiteKitAdditions.h */,
+				FA581ED214D8990800B362D1 /* NSOperationQueue+SQLiteKitAdditions.m */,
+			);
+			name = Categories;
+			sourceTree = "<group>";
+		};
 		FAA1F9AA148AD4B00013D31B /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				FACBCB2614D8A27B00004567 /* SQLiteKit.h */,
 				FA179AD714CF4199002FB17F /* SQLGlobal.h */,
 				FA179AD814CF4199002FB17F /* SQLGlobal.m */,
 				FAA1F9AD148AD5330013D31B /* SQLDatabase.h */,
@@ -155,8 +171,10 @@
 				FA179B0914D07629002FB17F /* SQLStatement.m */,
 				FA179B1014D0C156002FB17F /* SQLRow.h */,
 				FA179B1114D0C156002FB17F /* SQLRow.m */,
+				FA581ECF14D898C100B362D1 /* Categories */,
 			);
-			path = Sources;
+			name = Sources;
+			path = SQLiteKit;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -171,6 +189,8 @@
 				FA179B0A14D07629002FB17F /* SQLStatement.h in Headers */,
 				FA179B0E14D09AAD002FB17F /* SQLQuery.h in Headers */,
 				FA179B1214D0C156002FB17F /* SQLRow.h in Headers */,
+				FA581ED314D8990800B362D1 /* NSOperationQueue+SQLiteKitAdditions.h in Headers */,
+				FACBCB2714D8A27B00004567 /* SQLiteKit.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -285,6 +305,7 @@
 				FA179B0B14D07629002FB17F /* SQLStatement.m in Sources */,
 				FA179B0F14D09AAD002FB17F /* SQLQuery.m in Sources */,
 				FA179B1314D0C156002FB17F /* SQLRow.m in Sources */,
+				FA581ED414D8990800B362D1 /* NSOperationQueue+SQLiteKitAdditions.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
