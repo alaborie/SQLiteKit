@@ -39,10 +39,81 @@
 
 #pragma mark -
 
+/**
+ @return Returns the object located at the column that match the specified name. If name does not match to a column, returns nil.
+ */
 - (id)objectForColumn:(NSString *)name;
+
+/**
+ @warning If index is greater than the number of columns, an NSRangeException is raised.
+ */
 - (id)objectForColumnAtIndex:(NSUInteger)index;
 
 - (NSArray *)objects;
 - (NSDictionary *)objectsDict;
+
+#pragma mark -
+
+/**
+ @warning If name does not match to a column, an NSInvalidArgumentException is raised.
+ */
+- (int)intForColumn:(NSString *)name;
+
+/**
+ @warning If index is greater than the number of columns, an NSRangeException is raised.
+ */
+- (int)intForColumnAtIndex:(NSUInteger)index;
+
+/**
+ @warning If name does not match to a column, an NSInvalidArgumentException is raised.
+ */
+- (long long)longlongForColumn:(NSString *)name;
+
+/**
+ @warning If index is greater than the number of columns, an NSRangeException is raised.
+ */
+- (long long)longlongForColumnAtIndex:(NSUInteger)index;
+
+/**
+ @warning If name does not match to a column, an NSInvalidArgumentException is raised.
+ */
+- (double)doubleForColumn:(NSString *)name;
+
+/**
+ @warning If index is greater than the number of columns, an NSRangeException is raised.
+ */
+- (double)doubleForColumnAtIndex:(NSUInteger)index;
+
+/**
+ @warning If name does not match to a column, an NSInvalidArgumentException is raised.
+ */
+- (const char *)textForColumn:(NSString *)name;
+
+/**
+ @warning If index is greater than the number of columns, an NSRangeException is raised.
+ */
+- (const char *)textForColumnAtIndex:(NSUInteger)index;
+
+#pragma mark -
+
+/**
+ @warning If name does not match to a column, an NSInvalidArgumentException is raised.
+ */
+- (int)blobLengthForColumn:(NSString *)name;
+
+/**
+ @warning If index is greater than the number of columns, an NSRangeException is raised.
+ */
+- (int)blobLengthForColumnAtIndex:(NSUInteger)index;
+
+/**
+ @warning If name does not match to a column, an NSInvalidArgumentException is raised.
+ */
+- (void *)blobForColumn:(NSString *)name buffer:(void *)buffer length:(int *)length;
+
+/**
+ @warning If index is greater than the number of columns, an NSRangeException is raised.
+ */
+- (void *)blobForColumnAtIndex:(NSUInteger)index buffer:(void *)buffer length:(int *)length;
 
 @end
