@@ -37,47 +37,47 @@
     SQLDatabase *database = [[SQLDatabase alloc] initWithPath:databaseLocalPath];
     /// @todo Check the return values to make sure that the operations have succeed.
 
-    [database openWithFlags:(SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_SHAREDCACHE | SQLITE_OPEN_FULLMUTEX)];
-    [database executeStatement:@"CREATE TABLE IF NOT EXISTS user (ID INTEGER PRIMARY KEY AUTOINCREMENT, full_name TEXT);"];
-    [database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"John Steinbeck", nil];
-    [database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Alexandre Dumas", nil];
-    [database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Ernest Hemingway", nil];
-    [database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Jack Kerouac", nil];
-    [database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Victor Hugo", nil];
-    [database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Boris Vian", nil];
-    [database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Romain Gary", nil];
-    [database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Hermann Hesse", nil];
-    [database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Paulo Coelho", nil];
-    [database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Jean Jacques Rousseau", nil];
-    [database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Joseph Conrad", nil];
+    STAssertTrue([database openWithFlags:(SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_SHAREDCACHE | SQLITE_OPEN_FULLMUTEX)], @"Open operation failed (database = %@).", database);
+    STAssertTrue([database executeStatement:@"CREATE TABLE IF NOT EXISTS user (ID INTEGER PRIMARY KEY AUTOINCREMENT, full_name TEXT);"], @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"John Steinbeck", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Alexandre Dumas", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Ernest Hemingway", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Jack Kerouac", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Victor Hugo", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Boris Vian", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Romain Gary", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Hermann Hesse", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Paulo Coelho", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Jean Jacques Rousseau", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Joseph Conrad", nil]), @"Execute statement failed (database = %@).", database);
 
     SQLQuery *queryAllUsers = [SQLQuery queryWithStatement:@"SELECT * FROM user;"];
 
-    [database executeQuery:queryAllUsers thenEnumerateRowsUsingBlock:^(SQLRow *row, NSUInteger index, BOOL *stop) {
+    STAssertTrue([database executeQuery:queryAllUsers thenEnumerateRowsUsingBlock:^(SQLRow *row, NSUInteger index, BOOL *stop) {
         NSLog(@"#%02u - %@", index, row);
-    }];
+    }], @"Execute query failed (database = %@, query = %@).", database, queryAllUsers);
 
     SQLQuery *queryCountUsers = [SQLQuery queryWithStatement:@"SELECT count(ID) AS `number of users` FROM user;"];
 
-    [database executeQuery:queryCountUsers thenEnumerateRowsUsingBlock:^(SQLRow *row, NSUInteger index, BOOL *stop) {
+    STAssertTrue([database executeQuery:queryCountUsers thenEnumerateRowsUsingBlock:^(SQLRow *row, NSUInteger index, BOOL *stop) {
         NSLog(@"#%u - %@", index, row);
-    }];
+    }], @"Execute query failed (database = %@, query = %@).", database, queryCountUsers);
 
     SQLQuery *queryBorisVian = [SQLQuery queryWithStatementAndArguments:@"SELECT * FROM user WHERE full_name = ?;", @"Boris Vian", nil];
 
-    [database executeQuery:queryBorisVian thenEnumerateRowsUsingBlock:^(SQLRow *row, NSUInteger index, BOOL *stop) {
+    STAssertTrue([database executeQuery:queryBorisVian thenEnumerateRowsUsingBlock:^(SQLRow *row, NSUInteger index, BOOL *stop) {
         NSLog(@"array = %@", [row objects]);
         NSLog(@"dictionary = %@", [row objectsDict]);
-    }];
+    }], @"Execute query failed (database = %@, query = %@).", database, queryBorisVian);
 
     SQLQuery *queryLike = [SQLQuery queryWithStatement:@"SELECT * FROM user WHERE full_name LIKE 'J%';"];
 
-    [database executeQuery:queryLike thenEnumerateRowsUsingBlock:^(SQLRow *row, NSUInteger index, BOOL *stop) {
+    STAssertTrue([database executeQuery:queryLike thenEnumerateRowsUsingBlock:^(SQLRow *row, NSUInteger index, BOOL *stop) {
         NSLog(@"array = %@", [row objects]);
         NSLog(@"dictionary = %@", [row objectsDict]);
-    }];
+    }], @"Execute query failed (database = %@, query = %@).", database, queryLike);
 
-    [database close];
+    STAssertTrue([database close], @"Close operation failed (database = %@).", database);
     [database release];
 }
 
@@ -134,9 +134,9 @@
 
     SQLDatabase *movieDatabase = [SQLDatabase databaseWithPath:databaseLocalPath];
 
-    [movieDatabase open];
-    [movieDatabase executeSQLFileAtPath:filePath];
-    [movieDatabase close];
+    STAssertTrue([movieDatabase open], @"Open operation failed (database = %@).", movieDatabase);
+    STAssertTrue([movieDatabase executeSQLFileAtPath:filePath], @"Execute SQL file failed (database = %@, filePath = %@).", movieDatabase, filePath);
+    STAssertTrue([movieDatabase close], @"Close operation failed (database = %@).", movieDatabase);
 }
 
 @end

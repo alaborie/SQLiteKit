@@ -3,7 +3,7 @@
 //  SQLiteKit
 //
 //  Created by Alexandre Laborie on 1/30/12.
-//  Copyright (c) 2012 CouchSurfing International. All rights reserved.
+//  Copyright (c) 2011 __MyCompanyName__. All rights reserved.
 //
 
 #import "SQLRowTests.h"
@@ -27,17 +27,17 @@
 
     SQLDatabase *database = [SQLDatabase databaseWithPath:databaseLocalPath];
 
-    [database open];
-    [database executeStatement:@"CREATE TABLE IF NOT EXISTS  provider(ID INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, thumbnail BLOB, ratio REAL);"];
-    [database executeStatement:@"INSERT INTO provider(name, ratio) values('rtc2004', 2.4);"];
-    [database executeStatement:@"INSERT INTO provider(name, ratio) values('hugo_2', 0.61);"];
-    [database executeStatement:@"INSERT INTO provider(name, ratio) values('@l3)(', 1.02);"];
-    [database executeStatement:@"INSERT INTO provider(name, ratio) values('anibal', 1.2);"];
-    [database executeStatement:@"INSERT INTO provider(name, ratio) values('ttt', 0.834);"];
+    STAssertTrue([database open], @"Open operation failed (database = %@).", database);
+    STAssertTrue([database executeStatement:@"CREATE TABLE IF NOT EXISTS  provider(ID INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, thumbnail BLOB, ratio REAL);"], @"Execute statement failed (database = %@).", database);
+    STAssertTrue([database executeStatement:@"INSERT INTO provider(name, ratio) values('rtc2004', 2.4);"], @"Execute statement failed (database = %@).", database);
+    STAssertTrue([database executeStatement:@"INSERT INTO provider(name, ratio) values('hugo_2', 0.61);"], @"Execute statement failed (database = %@).", database);
+    STAssertTrue([database executeStatement:@"INSERT INTO provider(name, ratio) values('@l3)(', 1.02);"], @"Execute statement failed (database = %@).", database);
+    STAssertTrue([database executeStatement:@"INSERT INTO provider(name, ratio) values('anibal', 1.2);"], @"Execute statement failed (database = %@).", database);
+    STAssertTrue([database executeStatement:@"INSERT INTO provider(name, ratio) values('ttt', 0.834);"], @"Execute statement failed (database = %@).", database);
 
     SQLQuery *query = [SQLQuery queryWithStatement:@"SELECT * FROM provider;"];
 
-    [database executeQuery:query thenEnumerateRowsUsingBlock:^(SQLRow *row, NSUInteger index, BOOL *stop) {
+    STAssertTrue([database executeQuery:query thenEnumerateRowsUsingBlock:^(SQLRow *row, NSUInteger index, BOOL *stop) {
         STAssertThrows([row objectForColumnAtIndex:99], @"The index is greater than the number of columns, an exception should have been raised.");
         NSLog(@"#%u ----------------------", index);
         [row.columnNameDict enumerateKeysAndObjectsUsingBlock:^(id key, id object, BOOL *stop) {
@@ -59,8 +59,8 @@
                 free(blob);
             }
         }];
-    }];
-    [database close];
+    }], @"Execute query failed (database = %@, query = %@).", database, query);
+    STAssertTrue([database close], @"Close operation failed (database = %@).", database);
 }
 
 - (void)testBlob
@@ -77,8 +77,8 @@
 
     SQLDatabase *database = [SQLDatabase databaseWithPath:databaseLocalPath];
 
-    [database open];
-    [database executeStatement:@"CREATE TABLE IF NOT EXISTS  thumbnail(ID INTEGER PRIMARY KEY, data BLOB);"];
+    STAssertTrue([database open], @"Open operation failed (database = %@).", database);
+    STAssertTrue([database executeStatement:@"CREATE TABLE IF NOT EXISTS  thumbnail(ID INTEGER PRIMARY KEY, data BLOB);"], @"Execute statement failed (database = %@).", database);
     srandom(time(NULL));
 
     int rowCount = random() % 5 + 5;
@@ -108,7 +108,7 @@
 
     SQLQuery *query = [SQLQuery queryWithStatement:@"SELECT * FROM thumbnail ORDER BY ID ASC;"];
 
-    [database executeQuery:query thenEnumerateRowsUsingBlock:^(SQLRow *row, NSUInteger index, BOOL *stop) {
+    STAssertTrue([database executeQuery:query thenEnumerateRowsUsingBlock:^(SQLRow *row, NSUInteger index, BOOL *stop) {
         int databaseDataLength = 0;
         void *databaseData = [row blobForColumn:@"data" buffer:NULL length:&databaseDataLength];
 
@@ -126,7 +126,7 @@
         STAssertTrue(memcmp(databaseData, maxSourceData, databaseDataLength) == 0, @"#%u The data saved in the database are not equal to the source.", index);
 
         NSLog(@"#%u The data in the database are the same than the source (length %i)", index, databaseDataLength);
-    }];
+    }], @"Execute query failed (database = %@, query = %@).", database, query);
 
     free(sourceDataLength);
     for ( NSUInteger row = 0; row < rowCount; row++ )
@@ -135,7 +135,7 @@
     }
     free(sourceData);
     free(maxSourceData);
-    [database close];
+    STAssertTrue([database close], @"Close operation failed (database = %@).", database);
 }
 
 @end
