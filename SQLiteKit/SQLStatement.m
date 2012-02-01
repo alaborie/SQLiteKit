@@ -44,7 +44,7 @@
         if ( resultPrepare != SQLITE_OK )
         {
             sqlitekit_verbose(@"A problem occurred while compiling the prepared statement.");
-            sqlitekit_warning(@"%s", sqlite3_errmsg(database.connectionHandle));
+            sqlitekit_warning(@"%s.", sqlite3_errmsg(database.connectionHandle));
             [self autorelease];
             return nil;
         }
@@ -87,7 +87,7 @@
         return YES;
     }
     sqlitekit_verbose(@"A problem occurred while resetting the prepared statement.");
-    sqlitekit_warning(@"%s", sqlite3_errmsg(self.database.connectionHandle));
+    sqlitekit_warning(@"%s.", sqlite3_errmsg(self.database.connectionHandle));
     return NO;
 }
 
@@ -101,7 +101,7 @@
         return YES;
     }
     sqlitekit_verbose(@"A problem occurred while finalizing the prepared statement.");
-    sqlitekit_warning(@"%s", sqlite3_errmsg(self.database.connectionHandle));
+    sqlitekit_warning(@"%s.", sqlite3_errmsg(self.database.connectionHandle));
     return NO;
 }
 
@@ -184,7 +184,7 @@
         return YES;
     }
     sqlitekit_verbose(@"A problem occurred while binding an object (index = %i, object = %@).", index, object);
-    sqlitekit_warning(@"%s", sqlite3_errmsg(self.database.connectionHandle));
+    sqlitekit_warning(@"%s.", sqlite3_errmsg(self.database.connectionHandle));
     return NO;
 }
 

@@ -9,5 +9,3 @@
 #import "SQLDatabase.h"
 #import "SQLQuery.h"
 #import "SQLRow.h"
-
-#import "NSOperationQueue+SQLiteKitAdditions.h"

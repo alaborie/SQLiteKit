@@ -37,7 +37,7 @@
 
     SQLQuery *query = [SQLQuery queryWithStatement:@"SELECT * FROM provider;"];
 
-    STAssertTrue([database executeQuery:query thenEnumerateRowsUsingBlock:^(SQLRow *row, NSUInteger index, BOOL *stop) {
+    STAssertTrue([database executeQuery:query thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
         STAssertThrows([row objectForColumnAtIndex:99], @"The index is greater than the number of columns, an exception should have been raised.");
         NSLog(@"#%u ----------------------", index);
         [row.columnNameDict enumerateKeysAndObjectsUsingBlock:^(id key, id object, BOOL *stop) {
@@ -108,7 +108,7 @@
 
     SQLQuery *query = [SQLQuery queryWithStatement:@"SELECT * FROM thumbnail ORDER BY ID ASC;"];
 
-    STAssertTrue([database executeQuery:query thenEnumerateRowsUsingBlock:^(SQLRow *row, NSUInteger index, BOOL *stop) {
+    STAssertTrue([database executeQuery:query thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
         int databaseDataLength = 0;
         void *databaseData = [row blobForColumn:@"data" buffer:NULL length:&databaseDataLength];
 

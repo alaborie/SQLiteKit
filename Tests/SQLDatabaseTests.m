@@ -53,26 +53,26 @@
 
     SQLQuery *queryAllUsers = [SQLQuery queryWithStatement:@"SELECT * FROM user;"];
 
-    STAssertTrue([database executeQuery:queryAllUsers thenEnumerateRowsUsingBlock:^(SQLRow *row, NSUInteger index, BOOL *stop) {
+    STAssertTrue([database executeQuery:queryAllUsers thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
         NSLog(@"#%02u - %@", index, row);
     }], @"Execute query failed (database = %@, query = %@).", database, queryAllUsers);
 
     SQLQuery *queryCountUsers = [SQLQuery queryWithStatement:@"SELECT count(ID) AS `number of users` FROM user;"];
 
-    STAssertTrue([database executeQuery:queryCountUsers thenEnumerateRowsUsingBlock:^(SQLRow *row, NSUInteger index, BOOL *stop) {
+    STAssertTrue([database executeQuery:queryCountUsers thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
         NSLog(@"#%u - %@", index, row);
     }], @"Execute query failed (database = %@, query = %@).", database, queryCountUsers);
 
     SQLQuery *queryBorisVian = [SQLQuery queryWithStatementAndArguments:@"SELECT * FROM user WHERE full_name = ?;", @"Boris Vian", nil];
 
-    STAssertTrue([database executeQuery:queryBorisVian thenEnumerateRowsUsingBlock:^(SQLRow *row, NSUInteger index, BOOL *stop) {
+    STAssertTrue([database executeQuery:queryBorisVian thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
         NSLog(@"array = %@", [row objects]);
         NSLog(@"dictionary = %@", [row objectsDict]);
     }], @"Execute query failed (database = %@, query = %@).", database, queryBorisVian);
 
     SQLQuery *queryLike = [SQLQuery queryWithStatement:@"SELECT * FROM user WHERE full_name LIKE 'J%';"];
 
-    STAssertTrue([database executeQuery:queryLike thenEnumerateRowsUsingBlock:^(SQLRow *row, NSUInteger index, BOOL *stop) {
+    STAssertTrue([database executeQuery:queryLike thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
         NSLog(@"array = %@", [row objects]);
         NSLog(@"dictionary = %@", [row objectsDict]);
     }], @"Execute query failed (database = %@, query = %@).", database, queryLike);

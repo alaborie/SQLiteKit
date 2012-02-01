@@ -112,7 +112,7 @@
     }
     else
     {
-        sqlitekit_warning(@"%s", sqlite3_errmsg(self.connectionHandle));
+        sqlitekit_warning(@"%s.", sqlite3_errmsg(self.connectionHandle));
         /// @note We have to explicitly close the database even if the open failed.
         /// @see http://www.sqlite.org/c3ref/open.html
         [self close];
@@ -137,7 +137,7 @@
         return YES;
     }
     sqlitekit_verbose(@"A problem occurred while closing the database.");
-    sqlitekit_warning(@"%s", sqlite3_errmsg(self.connectionHandle));
+    sqlitekit_warning(@"%s.", sqlite3_errmsg(self.connectionHandle));
     return NO;
 }
 
@@ -207,12 +207,12 @@
     return [self executeQuery:query withOptions:0 thenEnumerateRowsUsingBlock:NULL];
 }
 
-- (BOOL)executeQuery:(SQLQuery *)query thenEnumerateRowsUsingBlock:(void (^)(SQLRow *row, NSUInteger index, BOOL *stop))block
+- (BOOL)executeQuery:(SQLQuery *)query thenEnumerateRowsUsingBlock:(void (^)(SQLRow *row, NSInteger index, BOOL *stop))block
 {
     return [self executeQuery:query withOptions:0 thenEnumerateRowsUsingBlock:block];
 }
 
-- (BOOL)executeQuery:(SQLQuery *)query withOptions:(int)options thenEnumerateRowsUsingBlock:(void (^)(SQLRow *row, NSUInteger index, BOOL *stop))block
+- (BOOL)executeQuery:(SQLQuery *)query withOptions:(int)options thenEnumerateRowsUsingBlock:(void (^)(SQLRow *row, NSInteger index, BOOL *stop))block
 {
     if ( self.connectionHandle == NULL )
     {
@@ -234,7 +234,7 @@
 
     // STEP
     BOOL isExecuting = YES;
-    NSUInteger index = 0;
+    NSInteger index = 0;
 
     while ( isExecuting == YES )
     {
@@ -242,6 +242,10 @@
         {
             case SQLITE_DONE:
             {
+                if ( index == 0 && block != NULL )
+                {
+                    block(nil, NSNotFound, NULL);
+                }
                 isExecuting = NO;
                 break;
             }
@@ -267,7 +271,7 @@
             default:
             {
                 sqlitekit_verbose(@"A problem occurred while executing the prepared statement (query = %@).", query);
-                sqlitekit_warning(@"%s", sqlite3_errmsg(self.connectionHandle));
+                sqlitekit_warning(@"%s.", sqlite3_errmsg(self.connectionHandle));
                 isExecuting = NO;
                 break;
             }

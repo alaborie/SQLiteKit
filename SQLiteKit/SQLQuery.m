@@ -103,7 +103,7 @@
     {
         return self.SQLStatement;
     }
-    return [NSString stringWithFormat:@"%@ [%@]", self.SQLStatement, [self.arguments componentsJoinedByString:@", "]];
+    return [NSString stringWithFormat:@"%@ [ %@ ]", self.SQLStatement, [self.arguments componentsJoinedByString:@", "]];
 }
 
 @end
