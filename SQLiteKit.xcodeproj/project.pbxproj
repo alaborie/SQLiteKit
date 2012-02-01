@@ -314,7 +314,9 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Ressources/SQKLiteTests.pch;
 				INFOPLIST_FILE = Ressources/SQKLiteTests.plist;
+				OTHER_CFLAGS = "-DSQLITEKIT_VERBOSE";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				WARNING_CFLAGS = "";
 				WRAPPER_EXTENSION = octest;
 			};
 			name = Debug;
@@ -329,7 +331,9 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Ressources/SQKLiteTests.pch;
 				INFOPLIST_FILE = Ressources/SQKLiteTests.plist;
+				OTHER_CFLAGS = "-DSQLITEKIT_VERBOSE";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				WARNING_CFLAGS = "";
 				WRAPPER_EXTENSION = octest;
 			};
 			name = Release;
@@ -353,6 +357,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
+				OTHER_CFLAGS = "-DSQLITEKIT_VERBOSE";
 				SDKROOT = iphoneos;
 			};
 			name = Debug;
@@ -369,6 +374,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
+				OTHER_CFLAGS = "-DSQLITEKIT_VERBOSE";
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
 			};
