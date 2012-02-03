@@ -54,18 +54,21 @@
     SQLQuery *queryAllUsers = [SQLQuery queryWithStatement:@"SELECT * FROM user;"];
 
     STAssertTrue([database executeQuery:queryAllUsers thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
-        NSLog(@"#%02u - %@", index, row);
+        NSLog(@"#%u ----------------------", index);
+        NSLog(@"%@", row);
     }], @"Execute query failed (database = %@, query = %@).", database, queryAllUsers);
 
     SQLQuery *queryCountUsers = [SQLQuery queryWithStatement:@"SELECT count(ID) AS `number of users` FROM user;"];
 
     STAssertTrue([database executeQuery:queryCountUsers thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
-        NSLog(@"#%u - %@", index, row);
+        NSLog(@"#%u ----------------------", index);
+        NSLog(@"%@", row);
     }], @"Execute query failed (database = %@, query = %@).", database, queryCountUsers);
 
     SQLQuery *queryBorisVian = [SQLQuery queryWithStatementAndArguments:@"SELECT * FROM user WHERE full_name = ?;", @"Boris Vian", nil];
 
     STAssertTrue([database executeQuery:queryBorisVian thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
+        NSLog(@"#%u ----------------------", index);
         NSLog(@"array = %@", [row objects]);
         NSLog(@"dictionary = %@", [row objectsDict]);
     }], @"Execute query failed (database = %@, query = %@).", database, queryBorisVian);
@@ -73,9 +76,18 @@
     SQLQuery *queryLike = [SQLQuery queryWithStatement:@"SELECT * FROM user WHERE full_name LIKE 'J%';"];
 
     STAssertTrue([database executeQuery:queryLike thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
+        NSLog(@"#%u ----------------------", index);
         NSLog(@"array = %@", [row objects]);
         NSLog(@"dictionary = %@", [row objectsDict]);
     }], @"Execute query failed (database = %@, query = %@).", database, queryLike);
+
+    SQLQuery *queryNoResult = [SQLQuery queryWithStatement:@"SELECT * FROM user WHERE full_name = 'Arthur Rimbaud';"];
+
+    STAssertTrue([database executeQuery:queryNoResult thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
+        NSAssert(row == nil, @"This request should have return no result.");
+        NSAssert(index == NSNotFound, @"This request should have return no result.");
+        NSAssert(stop == NULL, @"This request should have return no result.");
+    }], @"Execute query failed (database = %@, query = %@).", database, queryNoResult);
 
     STAssertTrue([database close], @"Close operation failed (database = %@).", database);
     [database release];
