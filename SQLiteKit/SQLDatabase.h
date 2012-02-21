@@ -13,6 +13,12 @@
 
 enum
 {
+    /**
+     An option that allows to cache the compiled statement. This option should be use for all the queries executed multiple times with different parameters.
+
+     @note Using this option properly can result in a significant performance improvement.
+     @see http://www.sqlite.org/cintro.html [3.0 Binding Parameters and Reusing Prepared Statements]
+     */
     SQLDatabaseOptionCacheStatement    =   1 << 1,
 };
 
