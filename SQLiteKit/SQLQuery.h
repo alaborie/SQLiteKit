@@ -14,7 +14,7 @@
 }
 
 @property (nonatomic, readonly) NSString *SQLStatement;
-@property (nonatomic, readonly) NSArray *arguments;
+@property (nonatomic, retain, readwrite) NSArray *arguments;
 
 /**
  @param SQLStatement Must not be nil!

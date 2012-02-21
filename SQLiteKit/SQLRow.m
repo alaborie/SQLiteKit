@@ -8,7 +8,7 @@
 
 #import "SQLRow.h"
 #import "SQLDatabase.h"
-#import "SQLStatement.h"
+#import "SQLPreparedStatement.h"
 
 @interface SQLRow ()
 
@@ -51,12 +51,12 @@
 #pragma mark -
 #pragma mark Lifecycle
 
-+ (id)rowWithDatabase:(SQLDatabase *)database statement:(SQLStatement *)statement
++ (id)rowWithDatabase:(SQLDatabase *)database statement:(SQLPreparedStatement *)statement
 {
     return [[[self alloc] initWithDatabase:database statement:statement] autorelease];
 }
 
-- (id)initWithDatabase:(SQLDatabase *)database statement:(SQLStatement *)statement
+- (id)initWithDatabase:(SQLDatabase *)database statement:(SQLPreparedStatement *)statement
 {
     NSParameterAssert(database);
     NSParameterAssert(statement);

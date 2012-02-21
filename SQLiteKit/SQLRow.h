@@ -8,13 +8,13 @@
 #import <sqlite3.h>
 
 @class SQLDatabase;
-@class SQLStatement;
+@class SQLPreparedStatement;
 
 @interface SQLRow : NSObject
 {
 @private
     SQLDatabase *_database;
-    SQLStatement *_statement;
+    SQLPreparedStatement *_statement;
 
 @private
     dispatch_once_t _columnCountPredicate;
@@ -24,18 +24,18 @@
 }
 
 @property (nonatomic, readonly) SQLDatabase *database;
-@property (nonatomic, readonly) SQLStatement *statement;
+@property (nonatomic, readonly) SQLPreparedStatement *statement;
 
 @property (nonatomic, readonly) NSUInteger columnCount;
 @property (nonatomic, readonly) NSDictionary *columnNameDict;
 
-+ (id)rowWithDatabase:(SQLDatabase *)database statement:(SQLStatement *)statement;
++ (id)rowWithDatabase:(SQLDatabase *)database statement:(SQLPreparedStatement *)statement;
 
 /**
  @param database Must not be nil!
  @param statement Must not be nil!
  */
-- (id)initWithDatabase:(SQLDatabase *)database statement:(SQLStatement *)statement;
+- (id)initWithDatabase:(SQLDatabase *)database statement:(SQLPreparedStatement *)statement;
 
 #pragma mark -
 

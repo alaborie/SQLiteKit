@@ -50,6 +50,102 @@
     STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Paulo Coelho", nil]), @"Execute statement failed (database = %@).", database);
     STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Jean Jacques Rousseau", nil]), @"Execute statement failed (database = %@).", database);
     STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Joseph Conrad", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Czeslaw Milosz", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"George Bernard Shaw", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Wallace Stevens", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Rumi", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"W.G. Sebald", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Robert Hayden", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Henry Miller", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Robert Heinlein", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Lorine Niedecker", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"George Eliot", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"David Mamet", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Derek Walcott", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Isak Dinesen", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Maryse Conde", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Joyce Cary", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Frank O'Hara", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Gabriel Garcia Marquez", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Carson McCullers", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Flann O'Brien", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Julio Cortazar", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Saul Bellow", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Jonathan Swift", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Ezra Pound", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Philip K. Dick", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Percy Shelley", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"James Agee", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Stanley Elkin", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Walter Benjamin", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Harold Pinter", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"John Berryman", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"James Baldwin", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Tu Fu", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Jorge Luis Borges", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Malcolm Lowry", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Willa Cather", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Edgar Allan Poe", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Henrik Ibsen", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"W.H. Auden", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Thomas Pynchon", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Emily Brontë/Charlotte Brontë", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Flannery O'Connor", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Leo Tolstoy", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Tennessee Williams", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Nathaniel Hawthorne", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"T.S. Eliot", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Sophocles", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Johann Wolfgang von Goethe", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Toni Morrison", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Charles Olson", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Eugene O'Neill", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Gustave Flaubert", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Ivan Turgenev", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Charles Baudelaire", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Robert Lowell", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Mark Twain", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Robert Creeley", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Iris Murdoch", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Arthur Rimbaud", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Mary Shelley", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Virgil", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Emily Dickinson", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Walt Whitman", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"D.H. Lawrence", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"William Carlos Williams", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Samuel Coleridge", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Henry James", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"John Keats", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"William Wordsworth", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Ovid", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"William Blake", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Dr. Johnson", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Lord Byron", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"George Orwell", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Stendhal", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Euripides", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Miguel Cervantes", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Laurence Sterne", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Herman Melville", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"William Butler Yeats", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Homer", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Charles Dickens", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"John Ashbery", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Virginia Woolf", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Geoffrey Chaucer", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Dante", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Fyodor Doestoyevsky", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Marcel Proust", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Anton Chekhov", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Vladimir Nabokov", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Samuel Beckett", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"John Milton", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Gertrude Stein", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"James Joyce", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"William Shakespeare", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Franz Kafka", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO user(full_name) VALUES(?);", @"William Faulkner", nil]), @"Execute statement failed (database = %@).", database);
 
     SQLQuery *queryAllUsers = [SQLQuery queryWithStatement:@"SELECT * FROM user;"];
 
@@ -81,7 +177,7 @@
         NSLog(@"dictionary = %@", [row objectsDict]);
     }], @"Execute query failed (database = %@, query = %@).", database, queryLike);
 
-    SQLQuery *queryNoResult = [SQLQuery queryWithStatement:@"SELECT * FROM user WHERE full_name = 'Arthur Rimbaud';"];
+    SQLQuery *queryNoResult = [SQLQuery queryWithStatement:@"SELECT * FROM user WHERE full_name = 'Alain Damasio';"];
 
     STAssertTrue([database executeQuery:queryNoResult thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
         NSAssert(row == nil, @"This request should have return no result.");
@@ -89,6 +185,21 @@
         NSAssert(stop == NULL, @"This request should have return no result.");
     }], @"Execute query failed (database = %@, query = %@).", database, queryNoResult);
 
+    SQLQuery *queryCached = [SQLQuery queryWithStatement:@"SELECT * FROM user where full_name LIKE ?;" arguments:[NSArray arrayWithObject:@"W%"]];
+
+    STAssertTrue([database executeQuery:queryCached withOptions:SQLDatabaseOptionCacheStatement thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
+        NSLog(@"#%u ----------------------", index);
+        NSLog(@"array = %@", [row objects]);
+        NSLog(@"dictionary = %@", [row objectsDict]);
+    }], @"Execute query failed (database = %@, query = %@).", database, queryLike);
+    queryCached.arguments = [NSArray arrayWithObject:@"S%"];
+    STAssertTrue([database executeQuery:queryCached withOptions:SQLDatabaseOptionCacheStatement thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
+        NSLog(@"#%u ----------------------", index);
+        NSLog(@"array = %@", [row objects]);
+        NSLog(@"dictionary = %@", [row objectsDict]);
+    }], @"Execute query failed (database = %@, query = %@).", database, queryLike);
+
+    [database printRuntimeStatusWithResetFlag:NO];
     STAssertTrue([database close], @"Close operation failed (database = %@).", database);
     [database release];
 }

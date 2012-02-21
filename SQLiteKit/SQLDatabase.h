@@ -11,11 +11,19 @@
 @class SQLQuery;
 @class SQLRow;
 
-@interface SQLDatabase : NSObject
+enum
+{
+    SQLDatabaseOptionCacheStatement    =   1 << 1,
+};
+
+@interface SQLDatabase : NSObject <NSCacheDelegate>
 {
 @private
     sqlite3 *_connectionHandle;
     NSString *_localPath;
+
+@private
+    NSCache *_statementsCache;
 }
 
 @property (nonatomic, readonly) sqlite3 *connectionHandle;
@@ -89,5 +97,9 @@
  @param block If the query returns no row, the block will be called once with a row equals to nil, an index equals to NSNotFound and a stop value equals to NULL.
  */
 - (BOOL)executeQuery:(SQLQuery *)query withOptions:(int)options thenEnumerateRowsUsingBlock:(void (^)(SQLRow *row, NSInteger index, BOOL *stop))block;
+
+#pragma mark -
+
+- (void)printRuntimeStatusWithResetFlag:(BOOL)shouldReset;
 
 @end

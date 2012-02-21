@@ -1,5 +1,5 @@
 //
-//  SQLStatement.h
+//  SQLPreparedStatement.h
 //  SQLiteKit
 //
 //  Created by Alexandre Laborie on 1/25/12.
@@ -11,7 +11,7 @@
 @class SQLDatabase;
 @class SQLQuery;
 
-@interface SQLStatement : NSObject
+@interface SQLPreparedStatement : NSObject
 {
 @private
     SQLDatabase *_database;
@@ -40,5 +40,17 @@
  @return YES if the statement was finalized successfully. Returns NO if an error occured.
  */
 - (BOOL)finialize;
+
+#pragma mark -
+
+/**
+ @return YES if the bindings were cleared successfully. Returns NO if an error occured.
+ */
+- (BOOL)clearBindings;
+
+/**
+ @return YES if the arguments were bound successfully. Returns NO if an error occurred.
+ */
+- (BOOL)bindArguments:(NSArray *)arguments;
 
 @end

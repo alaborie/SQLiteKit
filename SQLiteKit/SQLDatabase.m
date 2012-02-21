@@ -8,13 +8,23 @@
 
 #import "SQLDatabase.h"
 #import "SQLQuery.h"
-#import "SQLStatement.h"
+#import "SQLPreparedStatement.h"
 #import "SQLRow.h"
+
+@interface SQLDatabase ()
+
+@property (nonatomic, readonly) NSCache *statementsCache;
+
+- (NSString *)_humanReadableStringWithBytes:(int)numberOfBytes;
+
+@end
 
 @implementation SQLDatabase
 
 @synthesize connectionHandle = _connectionHandle;
 @synthesize localPath = _localPath;
+
+@synthesize statementsCache = _statementsCache;
 
 #pragma mark -
 #pragma mark Lifecycle
@@ -51,6 +61,8 @@
     if ( self != nil )
     {
         _localPath = [storePath retain];
+        _statementsCache = [[NSCache alloc] init];
+        _statementsCache.delegate = self;
         sqlitekit_verbose(@"The database has been initialized (storePath = %@).", storePath);
     }
     return self;
@@ -58,9 +70,26 @@
 
 - (void)dealloc
 {
-    /// @todo Close the database if it's still opened.
+    if ( _connectionHandle != NULL )
+    {
+        [self close];
+    }
+
     [_localPath release];
+    [_statementsCache release];
     [super dealloc];
+}
+
+#pragma mark -
+#pragma mark NSCacheDelegate
+
+- (void)cache:(NSCache *)cache willEvictObject:(id)object
+{
+    SQLPreparedStatement *preparedStatement = (SQLPreparedStatement *)object;
+    NSAssert([preparedStatement isKindOfClass:[SQLPreparedStatement class]] == YES, @"Invalid kind of class.");
+
+    // Finalizes the prepared statement before removing it from the cache.
+    [preparedStatement finialize];
 }
 
 #pragma mark -
@@ -127,11 +156,15 @@
         sqlitekit_warning(@"Cannot close a database that is not open.");
         return NO;
     }
+    // We have to remove all the prepared statements otherwise the close operation will fail.
+    /// @note The prepared statement will be finalized in the delegate method of NSCache.
+    [self.statementsCache removeAllObjects];
 
     int resultClose = sqlite3_close(self.connectionHandle);
 
     if ( resultClose == SQLITE_OK )
     {
+        // NULL out the connection handle as soon as the close operation succeed, the pointer became obsolete.
         _connectionHandle = NULL;
         sqlitekit_verbose(@"The database was closed successfully.");
         return YES;
@@ -224,15 +257,34 @@
     sqlitekit_verbose(@"Execute new query (query = %@).", query);
 
     // PREPARE STATEMENT
-    SQLStatement *statement = [SQLStatement statementWithDatabase:self query:query];
-    SQLRow *row = nil;
+    SQLPreparedStatement *statement = [self.statementsCache objectForKey:query.SQLStatement];
+    BOOL shouldFinalizeStatement = YES;
 
     if ( statement == nil )
     {
-        return NO;
+        // If no cached statement has been found for this query, we create a new one.
+        statement = [SQLPreparedStatement statementWithDatabase:self query:query];
+        if ( statement == nil )
+        {
+            return NO;
+        }
+        if ( options & SQLDatabaseOptionCacheStatement )
+        {
+            shouldFinalizeStatement = NO;
+            sqlitekit_verbose(@"Add the prepared statement in cache (query = %@).", query);
+            [self.statementsCache setObject:statement forKey:query.SQLStatement];
+        }
+    }
+    else
+    {
+        sqlitekit_verbose(@"Prepared statement retrieved from the cache (query = %@).", query);
+        shouldFinalizeStatement = NO;
+        [statement clearBindings];
+        [statement bindArguments:query.arguments];
     }
 
     // STEP
+    SQLRow *row = nil;
     BOOL isExecuting = YES;
     NSInteger index = 0;
 
@@ -279,7 +331,143 @@
     }
 
     // FINALIZE
-    return [statement finialize];
+    if ( shouldFinalizeStatement == YES )
+    {
+        return [statement finialize];
+    }
+    return [statement reset];
+}
+
+#pragma mark -
+
+- (void)printRuntimeStatusWithResetFlag:(BOOL)shouldReset
+{
+    const int mesureParameters[] =
+    {
+        SQLITE_STATUS_MEMORY_USED,
+        SQLITE_STATUS_MALLOC_SIZE,
+        SQLITE_STATUS_MALLOC_COUNT,
+        SQLITE_STATUS_PAGECACHE_USED,
+        SQLITE_STATUS_PAGECACHE_OVERFLOW,
+        SQLITE_STATUS_PAGECACHE_SIZE,
+        SQLITE_STATUS_SCRATCH_USED,
+        SQLITE_STATUS_SCRATCH_OVERFLOW,
+        SQLITE_STATUS_SCRATCH_SIZE,
+        SQLITE_STATUS_PARSER_STACK
+    };
+    const int mesureParametersCount = 10;
+    int parameterIndex = 0;
+    int currentValue;
+    int maxValue;
+    int resetFlag = ( shouldReset == YES ) ? true : false;
+    int statusResult;
+    NSMutableString *output = [NSMutableString string];
+
+    while ( parameterIndex < mesureParametersCount )
+    {
+        statusResult = sqlite3_status(mesureParameters[parameterIndex], &currentValue, &maxValue, resetFlag);
+        if ( statusResult != SQLITE_OK )
+        {
+            sqlitekit_verbose(@"A problem occurred while fetching the runtime status (parameterIndex = %d).", parameterIndex);
+            sqlitekit_warning(@"%s.", sqlite3_errmsg(self.connectionHandle));
+            return;
+        }
+        switch ( mesureParameters[parameterIndex] )
+        {
+                // Malloc.
+            case SQLITE_STATUS_MEMORY_USED:
+            {
+                [output setString:@""];
+                [output appendFormat:@"MEMORY: used = %@ [ max = % @]", [self _humanReadableStringWithBytes:currentValue], [self _humanReadableStringWithBytes:maxValue]];
+                break;
+            }
+            case SQLITE_STATUS_MALLOC_SIZE:
+            {
+                [output appendFormat:@", largest_allocation = %@", [self _humanReadableStringWithBytes:maxValue]];
+                break;
+            }
+            case SQLITE_STATUS_MALLOC_COUNT:
+            {
+                [output appendFormat:@", allocation_count = %d", currentValue];
+                sqlitekit_log(@"%@", output);
+                break;
+            }
+                // Page.
+            case SQLITE_STATUS_PAGECACHE_USED:
+            {
+                [output setString:@""];
+                [output appendFormat:@"PAGE: used = %@ [ max = %@ ]", [self _humanReadableStringWithBytes:currentValue], [self _humanReadableStringWithBytes:maxValue]];
+                break;
+            }
+            case SQLITE_STATUS_PAGECACHE_OVERFLOW:
+            {
+                [output appendFormat:@", overflow = %@ [ max = %@]", [self _humanReadableStringWithBytes:currentValue], [self _humanReadableStringWithBytes:maxValue]];
+                break;
+            }
+            case SQLITE_STATUS_PAGECACHE_SIZE:
+            {
+                [output appendFormat:@", cache_size = %@", [self _humanReadableStringWithBytes:maxValue]];
+                sqlitekit_log(@"%@", output);
+                break;
+            }
+                // Stack.
+            case SQLITE_STATUS_SCRATCH_USED:
+            {
+                [output setString:@""];
+                [output appendFormat:@"SCRATCH: %@ [ max = %@ ]", [self _humanReadableStringWithBytes:currentValue], [self _humanReadableStringWithBytes:maxValue]];
+                break;
+            }
+            case SQLITE_STATUS_SCRATCH_OVERFLOW:
+            {
+                [output appendFormat:@", overflow = %@ [ max = %@ ]", [self _humanReadableStringWithBytes:currentValue], [self _humanReadableStringWithBytes:maxValue]];
+                break;
+            }
+            case SQLITE_STATUS_SCRATCH_SIZE:
+            {
+                [output appendFormat:@", largest_allocation = %@", [self _humanReadableStringWithBytes:maxValue]];
+                sqlitekit_log(@"%@", output);
+                break;
+            }
+                // Misc.
+            case SQLITE_STATUS_PARSER_STACK:
+            {
+                sqlitekit_log(@"PARSER: deepest_stack = %d", currentValue);
+                break;
+            }
+            default:
+            {
+                sqlitekit_warning(@"Cannot print the details of an invalid status parameter.");
+                break;
+            }
+        }
+        parameterIndex++;
+    }
+
+}
+
+#pragma mark -
+#pragma mark Private
+
+- (NSString *)_humanReadableStringWithBytes:(int)numberOfBytes
+{
+    if ( numberOfBytes >= 1099511627776 )
+    {
+        return [NSString stringWithFormat:@"%.2fTB", ((float)numberOfBytes / 1099511627776.0f)];
+
+    }
+    else if ( numberOfBytes >= 1073741824 )
+    {
+        return [NSString stringWithFormat:@"%.2fGB", ((float)numberOfBytes / 1073741824.0f)];
+    }
+    else if ( numberOfBytes >=  1048576 )
+    {
+        return [NSString stringWithFormat:@"%.2fMB", ((float)numberOfBytes / 1048576.0f)];
+    }
+    else if ( numberOfBytes >= 1024 )
+    {
+        return [NSString stringWithFormat:@"%.2fkB", ((float)numberOfBytes / 1024.0f)];
+    }
+    return [NSString stringWithFormat:@"%dB", numberOfBytes];
 }
 
 @end

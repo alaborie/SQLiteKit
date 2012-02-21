@@ -1,22 +1,22 @@
 //
-//  SQLStatement.m
+//  SQLPreparedStatement.m
 //  SQLiteKit
 //
 //  Created by Alexandre Laborie on 1/25/12.
 //  Copyright (c) 2011 __MyCompanyName__. All rights reserved.
 //
 
-#import "SQLStatement.h"
+#import "SQLPreparedStatement.h"
 #import "SQLDatabase.h"
 #import "SQLQuery.h"
 
-@interface SQLStatement ()
+@interface SQLPreparedStatement ()
 
 - (BOOL)_bindObject:(id)object atIndex:(int)index;
 
 @end
 
-@implementation SQLStatement
+@implementation SQLPreparedStatement
 
 @synthesize database = _database;
 @synthesize compiledStatement = _compiledStatement;
@@ -48,21 +48,10 @@
             [self autorelease];
             return nil;
         }
-
-        int argumentsCount = sqlite3_bind_parameter_count(_compiledStatement);
-
-        if ( argumentsCount > 0 )
+        if ( [self bindArguments:query.arguments] == NO )
         {
-            int index = 0;
-
-            while (index < argumentsCount)
-            {
-                if ( [self _bindObject:[query.arguments objectAtIndex:index] atIndex:++index] == NO )
-                {
-                    [self autorelease];
-                    return nil;
-                }
-            }
+            [self autorelease];
+            return nil;
         }
     }
     return self;
@@ -70,7 +59,11 @@
 
 - (void)dealloc
 {
-    /// @todo Check if statement is NULL, if not must be finalized.
+    if ( _compiledStatement != NULL )
+    {
+        [self finialize];
+    }
+
     [_database release];
     [super dealloc];
 }
@@ -91,18 +84,54 @@
     return NO;
 }
 
-
 - (BOOL)finialize
 {
     int resultFinalize = sqlite3_finalize(self.compiledStatement);
 
     if ( resultFinalize == SQLITE_OK )
     {
+        // NULL out the compiled statement as soon as the finalize operation succeed, the pointer became obsolete.
+        _compiledStatement = NULL;
         return YES;
     }
     sqlitekit_verbose(@"A problem occurred while finalizing the prepared statement.");
     sqlitekit_warning(@"%s.", sqlite3_errmsg(self.database.connectionHandle));
     return NO;
+}
+
+#pragma mark -
+
+- (BOOL)clearBindings
+{
+    int resultClearBindings = sqlite3_clear_bindings(self.compiledStatement);
+
+    if ( resultClearBindings == SQLITE_OK )
+    {
+        return YES;
+    }
+    sqlitekit_verbose(@"A problem occurred while clearing the bindings of the prepared statement.");
+    sqlitekit_warning(@"%s.", sqlite3_errmsg(self.database.connectionHandle));
+    return NO;
+}
+
+- (BOOL)bindArguments:(NSArray *)arguments
+{
+    int argumentsCount = sqlite3_bind_parameter_count(_compiledStatement);
+    NSAssert([arguments count] == argumentsCount, @"The number of arguments doesn't match.");
+
+    if ( argumentsCount > 0 )
+    {
+        int index = 0;
+
+        while (index < argumentsCount)
+        {
+            if ( [self _bindObject:[arguments objectAtIndex:index] atIndex:++index] == NO )
+            {
+                return NO;
+            }
+        }
+    }
+    return YES;
 }
 
 #pragma mark -
