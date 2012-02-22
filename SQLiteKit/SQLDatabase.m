@@ -103,12 +103,6 @@ void sqldatabase_update_hook(void *object, int type, char const *databaseName, c
 
 - (id)initWithURL:(NSURL *)storeURL
 {
-    if ( storeURL != nil && storeURL.isFileURL == NO )
-    {
-        sqlitekit_warning(@"The database must be initialized with an URL that is a local file.");
-        [self autorelease];
-        return nil;
-    }
     return [self initWithPath:storeURL.absoluteString];
 }
 

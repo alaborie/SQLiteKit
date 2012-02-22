@@ -274,7 +274,7 @@
         STAssertNil(error, [error localizedDescription]);
     }
 
-    SQLDatabase *database = [SQLDatabase databaseWithURL:[NSURL fileURLWithPath:databaseLocalPath]];
+    SQLDatabase *database = [SQLDatabase databaseWithURL:[NSURL URLWithString:databaseLocalPath]];
 
     STAssertTrue([database open], @"Open operation failed (database = %@).", database);
 
