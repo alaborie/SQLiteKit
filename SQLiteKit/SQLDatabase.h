@@ -51,6 +51,7 @@ typedef NSUInteger SQLDatabaseObservingOptions;
 
 #pragma mark -
 
++ (id)database;
 + (id)databaseWithURL:(NSURL *)storeURL;
 + (id)databaseWithPath:(NSString *)storePath;
 

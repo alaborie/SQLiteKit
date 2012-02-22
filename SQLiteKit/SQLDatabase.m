@@ -86,6 +86,11 @@ void sqldatabase_update_hook(void *object, int type, char const *databaseName, c
 #pragma mark -
 #pragma mark Lifecycle
 
++ (id)database
+{
+    return [[[self alloc] init] autorelease];
+}
+
 + (id)databaseWithURL:(NSURL *)storeURL
 {
     return [[[self alloc] initWithURL:storeURL] autorelease];
@@ -129,6 +134,16 @@ void sqldatabase_update_hook(void *object, int type, char const *databaseName, c
     [_localPath release];
     [_statementsCache release];
     [super dealloc];
+}
+
+#pragma mark -
+#pragma mark NSObject
+
++ (void)load
+{
+#ifdef SQLITEKIT_VERBOSE
+    NSLog(@"> SQLite version %s [ ID %s ] ", sqlite3_libversion(), sqlite3_sourceid());
+#endif
 }
 
 #pragma mark -
@@ -185,7 +200,7 @@ void sqldatabase_update_hook(void *object, int type, char const *databaseName, c
         sqlitekit_verbose(@"The database was opened successfully (flags = %i).", flags);
         return YES;
     }
-    sqlitekit_verbose(@"A problem occurred while opening the database.");
+    sqlitekit_verbose(@"A problem occurred while opening the database (filename = %s).", filename);
     if ( self.connectionHandle == NULL )
     {
         sqlitekit_warning(@"Cannot allocate memory to hold the sqlite3 object.");
