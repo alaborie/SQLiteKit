@@ -11,6 +11,12 @@
 @class SQLQuery;
 @class SQLRow;
 
+extern NSString * const kSQLDatabaseInsertNotification;
+extern NSString * const kSQLDatabaseUpdateNotification;
+extern NSString * const kSQLDatabaseDeleteNotification;
+extern NSString * const kSQLDatabaseCommitNotification;
+extern NSString * const kSQLDatabaseRollbackNotification;
+
 enum
 {
     /**
@@ -22,14 +28,6 @@ enum
     SQLDatabaseExecutingOptionCacheStatement     =   1 << 1,
 };
 typedef NSUInteger SQLDatabaseExecutingOptions;
-
-enum
-{
-    SQLDatabaseObservingOptionInsert    =   1 << 1,
-    SQLDatabaseObservingOptionDelete    =   1 << 2,
-    SQLDatabaseObservingOptionUpdate    =   1 << 3,
-};
-typedef NSUInteger SQLDatabaseObservingOptions;
 
 @interface SQLDatabase : NSObject <NSCacheDelegate>
 {
@@ -122,16 +120,16 @@ typedef NSUInteger SQLDatabaseObservingOptions;
 #pragma mark -
 
 /**
- Begins the generation of notifications for all updates (INSERT, DELETE and UPDATE) on the database tables.
+ Begins the generation of notifications of database changes. A notification will be send for each commit, each rollback, each row inserted in a table, each row updated in a table and each row delete in a table.
 
- @param notificationCenter Must not be nil!
+ @param notificationCenter The notification center that will be used to dispatch the notifications. Must not be nil!
 
- @note The name of the notification is created according to the following rule: databaseName.tableName#operation. For instance an insertion on the table bike of the main database will send the notification: main.bike#insert.
- @warning The update hook implementation must not do anything that will modify the database connection that invoked the update hook. Any actions to modify the database connection must be deferred until after the completion of the sqlite3_step() call that triggered the update hook. Note that sqlite3_prepare_v2() and sqlite3_step() both modify their database connections for the meaning of "modify" in this paragraph.
+ @note The receiver will post kSQLDatabaseCommitNotification to inform of a commit on the database. It will post kSQLDatabaseRollbackNotification to inform of a rollback. Then, to be informed of updates on a specific table an observer should be added using the following constants: kSQLDatabaseInsertNotification, kSQLDatabaseUpdateNotification and kSQLDatabaseDeleteNotification. For instance to be informed of an insertion on the table bike of the main database, an observer should be add for the notification [kSQLDatabaseDeleteNotification stringByAppendingString:@"main.bike"]. A more generic way will be [kSQLDatabaseDeleteNotification stringByAppendingFormat:@"%@.%@", databaseName, tableName].
+ @warning The responder of a notification must not modify the database that posted the notification! Any actions to modify the database connection must be deferred until after the completion of the operation that triggered the notification. A good pratice is to add an operation to a queue that will modify the database later.
  */
-- (void)beginGeneratingUpdateNotificationsIntoCenter:(NSNotificationCenter *)notificationCenter __attribute__ ((nonnull(1)));
+- (void)beginGeneratingNotificationsIntoCenter:(NSNotificationCenter *)notificationCenter __attribute__ ((nonnull(1)));
 
-- (void)endGeneratingUpdateNotifications;
+- (void)endGeneratingNotifications;
 
 #pragma mark -
 

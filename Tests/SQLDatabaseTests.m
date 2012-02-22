@@ -262,7 +262,7 @@
     STAssertTrue([movieDatabase close], @"Close operation failed (database = %@).", movieDatabase);
 }
 
-- (void)testObservation
+- (void)testNotifications
 {
     NSString *databaseLocalPath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"observation.sqlite"];
     NSFileManager *fileManager = [NSFileManager defaultManager];
@@ -279,12 +279,28 @@
     STAssertTrue([database open], @"Open operation failed (database = %@).", database);
 
     NSNotificationCenter *defaultCenter = [NSNotificationCenter defaultCenter];
+    id commitObserver = nil;
+    __block NSInteger commitNotificationCount = 0;
+    NSInteger commitNotificationExpectedCount = 13;
+
+    id rollbackObserver = nil;
+    __block NSInteger rollbackNotificationCount = 0;
+    NSInteger rollbackNotificationExpectedCount = 1;
+
     id notificationObserver = nil;
     __block NSInteger notificationCount = 0;
     NSInteger notificationExpectedCount = 9;
 
-    [database beginGeneratingUpdateNotificationsIntoCenter:defaultCenter];
-    notificationObserver = [defaultCenter addObserverForName:@"main.country#insert" object:nil queue:nil usingBlock:^(NSNotification *note) {
+    commitObserver = [defaultCenter addObserverForName:kSQLDatabaseCommitNotification object:database queue:nil usingBlock:^(NSNotification *note) {
+        NSLog(@"Received a commit notification (notification = %@)", note);
+        commitNotificationCount++;
+    }];
+    rollbackObserver = [defaultCenter addObserverForName:kSQLDatabaseRollbackNotification object:database queue:nil usingBlock:^(NSNotification *note) {
+       NSLog(@"Received a rollback notification (notification = %@)", note);
+        rollbackNotificationCount++;
+    }];
+    [database beginGeneratingNotificationsIntoCenter:defaultCenter];
+    notificationObserver = [defaultCenter addObserverForName:[kSQLDatabaseInsertNotification stringByAppendingString:@"main.country"] object:nil queue:nil usingBlock:^(NSNotification *note) {
         NSLog(@"Received an insertion notification (notification = %@)", note);
         notificationCount++;
     }];
@@ -300,21 +316,22 @@
     STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO country(name, area) VALUES(?, ?);", @"Kazakhstan", [NSNumber numberWithInteger:2724900], nil]), @"Execute statement failed (database = %@).", database);
     STAssertTrue(notificationCount == notificationExpectedCount, @"Invalid number of notifications sent (sent = %u, expected = %u)", notificationCount, notificationExpectedCount);
     [defaultCenter removeObserver:notificationObserver];
-    notificationObserver = [defaultCenter addObserverForName:@"main.country#insert" object:nil queue:nil usingBlock:^(NSNotification *note) {
+    notificationObserver = [defaultCenter addObserverForName:[kSQLDatabaseInsertNotification stringByAppendingString:@"main.country"] object:nil queue:nil usingBlock:^(NSNotification *note) {
         STAssertTrue(false, @"This method should not been called, the observer has been removed!");
     }];
     [defaultCenter removeObserver:notificationObserver];
     STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO country(name, area) VALUES(?, ?);", @"Algeria", [NSNumber numberWithInteger:2381741], nil]), @"Execute statement failed (database = %@).", database);
     [defaultCenter removeObserver:notificationObserver];
-    notificationObserver = [defaultCenter addObserverForName:@"main.country#delete" object:nil queue:nil usingBlock:^(NSNotification *note) {
+    notificationObserver = [defaultCenter addObserverForName:[kSQLDatabaseDeleteNotification stringByAppendingString:@"main.country"] object:nil queue:nil usingBlock:^(NSNotification *note) {
         NSLog(@"Received a deletion notification (notification = %@)", note);
         notificationCount++;
     }];
     notificationCount = 0;
     notificationExpectedCount = 3;
     STAssertTrue([database executeStatement:@"DELETE FROM country WHERE name LIKE 'A%';"], @"Execute statement failed (database = %@).", database);
+    STAssertTrue(notificationCount == notificationExpectedCount, @"Invalid number of notifications sent (sent = %u, expected = %u)", notificationCount, notificationExpectedCount);
     [defaultCenter removeObserver:notificationObserver];
-    notificationObserver = [defaultCenter addObserverForName:@"main.country#update" object:nil queue:nil usingBlock:^(NSNotification *note) {
+    notificationObserver = [defaultCenter addObserverForName:[kSQLDatabaseUpdateNotification stringByAppendingString:@"main.country"] object:nil queue:nil usingBlock:^(NSNotification *note) {
         NSLog(@"Received an update notification (notification = %@)", note);
         notificationCount++;
     }];
@@ -322,6 +339,15 @@
     notificationExpectedCount = 1;
     STAssertTrue([database executeStatement:@"UPDATE country SET area = 8514877 where name = 'Brazil';"], @"Execute statement failed (database = %@).", database);
     [defaultCenter removeObserver:notificationObserver];
+    STAssertTrue(notificationCount == notificationExpectedCount, @"Invalid number of notifications sent (sent = %u, expected = %u)", notificationCount, notificationExpectedCount);
+    STAssertTrue([database executeStatement:@"BEGIN TRANSACTION;"], @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO country(name, area) VALUES(?, ?);", @"Democratic Republic of the Congo", [NSNumber numberWithInteger:2344858], nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO country(name, area) VALUES(?, ?);", @"Greenland", [NSNumber numberWithInteger:2166086], nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue([database executeStatement:@"ROLLBACK TRANSACTION;"], @"Execute statement failed (database = %@).", database);
+    [defaultCenter removeObserver:commitObserver];
+    [defaultCenter removeObserver:rollbackObserver];
+    STAssertTrue(commitNotificationCount == commitNotificationExpectedCount, @"Invalid number of commit notifications sent (sent = %u, expected = %u)", commitNotificationCount, commitNotificationExpectedCount);
+    STAssertTrue(rollbackNotificationCount == rollbackNotificationExpectedCount, @"Invalid number of rollback notifications sent (sent = %u, expected = %u)", rollbackNotificationCount, rollbackNotificationExpectedCount);
     [database close];
 }
 
