@@ -187,13 +187,13 @@
 
     SQLQuery *queryCached = [SQLQuery queryWithStatement:@"SELECT * FROM user where full_name LIKE ?;" arguments:[NSArray arrayWithObject:@"W%"]];
 
-    STAssertTrue([database executeQuery:queryCached withOptions:SQLDatabaseOptionCacheStatement thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
+    STAssertTrue([database executeQuery:queryCached withOptions:SQLDatabaseExecutingOptionCacheStatement thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
         NSLog(@"#%u ----------------------", index);
         NSLog(@"array = %@", [row objects]);
         NSLog(@"dictionary = %@", [row objectsDict]);
     }], @"Execute query failed (database = %@, query = %@).", database, queryLike);
     queryCached.arguments = [NSArray arrayWithObject:@"S%"];
-    STAssertTrue([database executeQuery:queryCached withOptions:SQLDatabaseOptionCacheStatement thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
+    STAssertTrue([database executeQuery:queryCached withOptions:SQLDatabaseExecutingOptionCacheStatement thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
         NSLog(@"#%u ----------------------", index);
         NSLog(@"array = %@", [row objects]);
         NSLog(@"dictionary = %@", [row objectsDict]);
@@ -260,6 +260,69 @@
     STAssertTrue([movieDatabase open], @"Open operation failed (database = %@).", movieDatabase);
     STAssertTrue([movieDatabase executeSQLFileAtPath:filePath], @"Execute SQL file failed (database = %@, filePath = %@).", movieDatabase, filePath);
     STAssertTrue([movieDatabase close], @"Close operation failed (database = %@).", movieDatabase);
+}
+
+- (void)testObservation
+{
+    NSString *databaseLocalPath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"observation.sqlite"];
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSError *error = nil;
+
+    [fileManager removeItemAtPath:databaseLocalPath error:&error];
+    if ( error != nil && error.code != NSFileNoSuchFileError )
+    {
+        STAssertNil(error, [error localizedDescription]);
+    }
+
+    SQLDatabase *database = [SQLDatabase databaseWithURL:[NSURL fileURLWithPath:databaseLocalPath]];
+
+    STAssertTrue([database open], @"Open operation failed (database = %@).", database);
+
+    NSNotificationCenter *defaultCenter = [NSNotificationCenter defaultCenter];
+    id notificationObserver = nil;
+    __block NSInteger notificationCount = 0;
+    NSInteger notificationExpectedCount = 9;
+
+    [database beginGeneratingUpdateNotificationsIntoCenter:defaultCenter];
+    notificationObserver = [defaultCenter addObserverForName:@"main.country#insert" object:nil queue:nil usingBlock:^(NSNotification *note) {
+        NSLog(@"Received an insertion notification (notification = %@)", note);
+        notificationCount++;
+    }];
+    STAssertTrue([database executeStatement:@"CREATE TABLE IF NOT EXISTS country(ID INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, area INTEGER);"], @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO country(name, area) VALUES(?, ?);", @"Russia", [NSNumber numberWithInteger:17098242], nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO country(name, area) VALUES(?, ?);", @"Canada", [NSNumber numberWithInteger:9984670], nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO country(name, area) VALUES(?, ?);", @"China", [NSNumber numberWithInteger:9596961], nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO country(name, area) VALUES(?, ?);", @"United States", [NSNumber numberWithInteger:9522055], nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO country(name, area) VALUES(?, ?);", @"Brazil", [NSNumber numberWithInteger:851487], nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO country(name, area) VALUES(?, ?);", @"Australia", [NSNumber numberWithInteger:7692024], nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO country(name, area) VALUES(?, ?);", @"India", [NSNumber numberWithInteger:3166414], nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO country(name, area) VALUES(?, ?);", @"Argentina", [NSNumber numberWithInteger:2780400], nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO country(name, area) VALUES(?, ?);", @"Kazakhstan", [NSNumber numberWithInteger:2724900], nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(notificationCount == notificationExpectedCount, @"Invalid number of notifications sent (sent = %u, expected = %u)", notificationCount, notificationExpectedCount);
+    [defaultCenter removeObserver:notificationObserver];
+    notificationObserver = [defaultCenter addObserverForName:@"main.country#insert" object:nil queue:nil usingBlock:^(NSNotification *note) {
+        STAssertTrue(false, @"This method should not been called, the observer has been removed!");
+    }];
+    [defaultCenter removeObserver:notificationObserver];
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO country(name, area) VALUES(?, ?);", @"Algeria", [NSNumber numberWithInteger:2381741], nil]), @"Execute statement failed (database = %@).", database);
+    [defaultCenter removeObserver:notificationObserver];
+    notificationObserver = [defaultCenter addObserverForName:@"main.country#delete" object:nil queue:nil usingBlock:^(NSNotification *note) {
+        NSLog(@"Received a deletion notification (notification = %@)", note);
+        notificationCount++;
+    }];
+    notificationCount = 0;
+    notificationExpectedCount = 3;
+    STAssertTrue([database executeStatement:@"DELETE FROM country WHERE name LIKE 'A%';"], @"Execute statement failed (database = %@).", database);
+    [defaultCenter removeObserver:notificationObserver];
+    notificationObserver = [defaultCenter addObserverForName:@"main.country#update" object:nil queue:nil usingBlock:^(NSNotification *note) {
+        NSLog(@"Received an update notification (notification = %@)", note);
+        notificationCount++;
+    }];
+    notificationCount = 0;
+    notificationExpectedCount = 1;
+    STAssertTrue([database executeStatement:@"UPDATE country SET area = 8514877 where name = 'Brazil';"], @"Execute statement failed (database = %@).", database);
+    [defaultCenter removeObserver:notificationObserver];
+    [database close];
 }
 
 @end

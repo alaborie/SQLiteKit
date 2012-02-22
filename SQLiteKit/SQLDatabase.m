@@ -11,13 +11,68 @@
 #import "SQLPreparedStatement.h"
 #import "SQLRow.h"
 
+const NSString * const kSQLDatabaseInsertKey = @"insert";
+const NSString * const kSQLDatabaseUpdateKey = @"update";
+const NSString * const kSQLDatabaseDeleteKey = @"delete";
+
+void sqldatabase_update_hook(void *object, int type, char const *database, char const *table, sqlite3_int64 rowID);
+
 @interface SQLDatabase ()
 
 @property (nonatomic, readonly) NSCache *statementsCache;
 
+@property (atomic, retain, readwrite) NSNotificationCenter *notificationCenter;
+
 - (NSString *)_humanReadableStringWithBytes:(int)numberOfBytes;
 
 @end
+
+////////////////////////////////////////////////////////////////////////////////
+
+void sqldatabase_update_hook(void *object, int type, char const *databaseName, char const *tableName, sqlite3_int64 rowID)
+{
+    SQLDatabase *database = (SQLDatabase *)object;
+    NSCAssert([database isKindOfClass:[SQLDatabase class]] == YES, @"Invalid kind of class.");
+    NSString const * operation = nil;
+
+    switch ( type )
+    {
+        case SQLITE_INSERT:
+        {
+            operation = kSQLDatabaseInsertKey;
+            break;
+        }
+        case SQLITE_UPDATE:
+        {
+            operation = kSQLDatabaseUpdateKey;
+            break;
+        }
+        case SQLITE_DELETE:
+        {
+            operation = kSQLDatabaseDeleteKey;
+            break;
+        }
+        default:
+        {
+            sqlitekit_cwarning(database, @"Cannot determine the type of the update, call ignored (database = %s, table = %s).", databaseName, tableName);
+        }
+    }
+    if ( operation != nil )
+    {
+        NSString *notificationName = [NSString stringWithFormat:@"%s.%s#%@", databaseName, tableName, operation];
+        NSDictionary *userInfoDict = [NSDictionary dictionaryWithObjectsAndKeys:
+                                      [NSNumber numberWithLongLong:rowID], @"rowID",
+                                      [NSString stringWithUTF8String:databaseName], @"databaseName",
+                                      [NSString stringWithUTF8String:tableName], @"tableName",
+                                      operation, @"operation",
+                                      nil];
+
+        sqlitekit_cverbose(database, @"Posts notifaction %@.", notificationName);
+        [database.notificationCenter postNotificationName:notificationName object:database userInfo:userInfoDict];
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 @implementation SQLDatabase
 
@@ -25,6 +80,8 @@
 @synthesize localPath = _localPath;
 
 @synthesize statementsCache = _statementsCache;
+
+@synthesize notificationCenter = _notificationCenter;
 
 #pragma mark -
 #pragma mark Lifecycle
@@ -156,6 +213,8 @@
         sqlitekit_warning(@"Cannot close a database that is not open.");
         return NO;
     }
+    // We have to stop generating the update notifications.
+    [self endGeneratingUpdateNotifications];
     // We have to remove all the prepared statements otherwise the close operation will fail.
     /// @note The prepared statement will be finalized in the delegate method of NSCache.
     [self.statementsCache removeAllObjects];
@@ -206,6 +265,7 @@
     SQLQuery *query;
 
     query = [[[SQLQuery alloc] initWithStatement:SQLStatement] autorelease];
+    query.arguments = arguments;
     return [self executeQuery:query withOptions:0 thenEnumerateRowsUsingBlock:NULL];
 }
 
@@ -245,7 +305,7 @@
     return [self executeQuery:query withOptions:0 thenEnumerateRowsUsingBlock:block];
 }
 
-- (BOOL)executeQuery:(SQLQuery *)query withOptions:(int)options thenEnumerateRowsUsingBlock:(void (^)(SQLRow *row, NSInteger index, BOOL *stop))block
+- (BOOL)executeQuery:(SQLQuery *)query withOptions:(SQLDatabaseExecutingOptions)options thenEnumerateRowsUsingBlock:(void (^)(SQLRow *row, NSInteger index, BOOL *stop))block
 {
     if ( self.connectionHandle == NULL )
     {
@@ -268,7 +328,7 @@
         {
             return NO;
         }
-        if ( options & SQLDatabaseOptionCacheStatement )
+        if ( options & SQLDatabaseExecutingOptionCacheStatement )
         {
             shouldFinalizeStatement = NO;
             sqlitekit_verbose(@"Add the prepared statement in cache (query = %@).", query);
@@ -336,6 +396,33 @@
         return [statement finialize];
     }
     return [statement reset];
+}
+
+#pragma mark -
+
+- (void)beginGeneratingUpdateNotificationsIntoCenter:(NSNotificationCenter *)notificationCenter
+{
+    NSParameterAssert(notificationCenter);
+
+    if ( self.notificationCenter != nil )
+    {
+        if ( [self.notificationCenter isEqual:notificationCenter] == YES )
+        {
+            return;
+        }
+        [self endGeneratingUpdateNotifications];
+    }
+    self.notificationCenter = notificationCenter;
+    sqlite3_update_hook(self.connectionHandle, &sqldatabase_update_hook, self);
+}
+
+- (void)endGeneratingUpdateNotifications
+{
+    if ( self.notificationCenter != nil )
+    {
+        sqlite3_update_hook(self.connectionHandle, NULL, NULL);
+        self.notificationCenter = nil;
+    }
 }
 
 #pragma mark -
