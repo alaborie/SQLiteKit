@@ -15,6 +15,7 @@ void __sqlitekit_error(id object, NSString *format, ...);
 # define sqlitekit_cverbose(object, format, ...)  __sqlitekit_log(object, format, ##__VA_ARGS__)
 #else
 # define sqlitekit_verbose(format, ...)
+# define sqlitekit_cverbose(object, format, ...)
 #endif
 #define sqlitekit_log(format, ...)      __sqlitekit_log(self, format, ##__VA_ARGS__)
 #define sqlitekit_clog(object, format, ...)      __sqlitekit_log(object, format, ##__VA_ARGS__)
