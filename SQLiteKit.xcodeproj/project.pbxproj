@@ -128,8 +128,8 @@
 			isa = PBXGroup;
 			children = (
 				FA30A947148AD33900A269C8 /* Foundation.framework */,
-				FA179ADC14CF4F56002FB17F /* libsqlite3.dylib */,
 				FA179AE414CF5FAF002FB17F /* SenTestingKit.framework */,
+				FA179ADC14CF4F56002FB17F /* libsqlite3.dylib */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
