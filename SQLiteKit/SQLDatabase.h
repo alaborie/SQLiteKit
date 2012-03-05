@@ -119,6 +119,8 @@ typedef NSUInteger SQLDatabaseExecutingOptions;
  */
 - (BOOL)executeQuery:(SQLQuery *)query withOptions:(SQLDatabaseExecutingOptions)options thenEnumerateRowsUsingBlock:(void (^)(SQLRow *row, NSInteger index, BOOL *stop))block __attribute__ ((nonnull(1)));
 
+- (NSNumber *)lastInsertRowID;
+
 #pragma mark -
 
 /**

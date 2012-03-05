@@ -430,6 +430,23 @@ void sqldatabase_rollback_hook(void *object)
     return [statement reset];
 }
 
+- (NSNumber *)lastInsertRowID
+{
+    if ( self.connectionHandle == NULL )
+    {
+        sqlitekit_warning(@"Cannot retrieve the last row ID with a database that is not open.");
+        return nil;
+    }
+
+    sqlite3_int64 rowid = sqlite3_last_insert_rowid(self.connectionHandle);
+
+    if ( rowid == 0LL )
+    {
+        return nil;
+    }
+    return [NSNumber numberWithLongLong:rowid];
+}
+
 #pragma mark -
 
 - (void)beginGeneratingNotificationsIntoCenter:(NSNotificationCenter *)notificationCenter

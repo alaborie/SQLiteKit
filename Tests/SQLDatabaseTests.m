@@ -353,4 +353,49 @@
     [database close];
 }
 
+- (void)testAllExecutionType
+{
+    NSString *databaseLocalPath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"toto.sqlite"];
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSError *error = nil;
+
+    [fileManager removeItemAtPath:databaseLocalPath error:&error];
+    if ( error != nil && error.code != NSFileNoSuchFileError )
+    {
+        STAssertNil(error, [error localizedDescription]);
+    }
+
+    SQLDatabase *database = [SQLDatabase databaseWithPath:databaseLocalPath];
+
+    STAssertTrue([database open], @"Open operation failed (database = %@).", database);
+    STAssertTrue([database executeStatement:@"CREATE TABLE IF NOT EXISTS flights(ID INTEGER PRIMARY KEY, flight_number INTEGER, airline TEXT, from_airport TEXT, to_airport TEXT, arrival_time TEXT, remarks TEXT DEFAULT NULL);"], @"Execute statement failed (database = %@).", database);
+
+    STAssertTrue([database lastInsertRowID] == nil, @"No insert operation occurred yet, this method should have returned a nil pointer.");
+    STAssertTrue([database lastInsertRowID] == nil, @"No insert operation occurred yet, this method should have returned a nil pointer.");
+
+    SQLQuery *insertFlightQuery = [SQLQuery queryWithStatementAndArguments:@"INSERT INTO flights(flight_number, airline, from_airport, to_airport, arrival_time, remarks) VALUES(?, ?, ?, ?, ?, ?)",
+                                   [NSNumber numberWithInteger:5303],
+                                   @"AeroMexico",
+                                   @"ATL",
+                                   @"SFO",
+                                   @"6:56 PM",
+                                   [NSNull null],
+                                   nil];
+
+    STAssertNotNil(insertFlightQuery, @"Query creation failed.");
+    STAssertTrue([database executeQuery:insertFlightQuery withOptions:SQLDatabaseExecutingOptionCacheStatement thenEnumerateRowsUsingBlock:NULL], @"Execute statement failed (database = %@).", database);
+    STAssertTrue([[database lastInsertRowID] isEqualToNumber:[NSNumber numberWithLongLong:1]] == YES, @"Invalid row ID returned.");
+    STAssertTrue([[database lastInsertRowID] isEqualToNumber:[NSNumber numberWithLongLong:1]] == YES, @"Invalid row ID returned.");
+
+    SQLQuery *flightExistsQuery = [SQLQuery queryWithStatement:@"SELECT 1 FROM flights WHERE ID = last_insert_rowid();"];
+    __block BOOL insertedRowExists = NO;
+
+    STAssertNotNil(insertFlightQuery, @"Query creation failed.");
+    STAssertTrue([database executeQuery:flightExistsQuery thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
+        insertedRowExists = YES;
+    }], @"Execute statement failed (database = %@).", database);
+
+    STAssertTrue([database close], @"Close operation failed (database = %@).", database);
+}
+
 @end

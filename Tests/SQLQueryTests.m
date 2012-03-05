@@ -28,4 +28,24 @@
     STAssertNotNil([[SQLQuery alloc] initWithStatement:@"SELECT * FROM user WHERE name = ?;" arguments:[NSArray arrayWithObject:@"einstein"] orArgumentsList:NULL], @"Initialization operation failed.");
 }
 
+- (void)testArguments
+{
+    SQLQuery *insertQuery = [SQLQuery queryWithStatement:@"INSERT INTO user(name, age, job) values(?, ?, ?)"];
+
+    sqlitekit_verbose(@"%@", insertQuery);
+    STAssertNotNil(insertQuery, @"Initialization operation failed.");
+    insertQuery.arguments = [NSArray arrayWithObjects:@"Bob", [NSNumber numberWithInteger:12], @"ice cream maker", nil];
+    STAssertNotNil(insertQuery.arguments, @"The arguments property should not be nil.");
+    sqlitekit_verbose(@"%@", insertQuery);
+    insertQuery.arguments = [NSArray arrayWithObjects:@"Foo", [NSNumber numberWithInteger:12], @"teacher", nil];
+    STAssertNotNil(insertQuery.arguments, @"The arguments property should not be nil.");
+    sqlitekit_verbose(@"%@", insertQuery);
+    insertQuery.arguments = [NSArray arrayWithObjects:@"Bar", [NSNumber numberWithInteger:12], @"attorney", nil];
+    STAssertNotNil(insertQuery.arguments, @"The arguments property should not be nil.");
+    sqlitekit_verbose(@"%@", insertQuery);
+    insertQuery.arguments = nil;
+    STAssertNil(insertQuery.arguments, @"The arguments property should be nil.");
+    sqlitekit_verbose(@"%@", insertQuery);
+}
+
 @end
