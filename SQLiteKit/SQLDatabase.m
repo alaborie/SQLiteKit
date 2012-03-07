@@ -388,7 +388,10 @@ void sqldatabase_rollback_hook(void *object)
             {
                 if ( index == 0 && block != NULL )
                 {
-                    block(nil, NSNotFound, NULL);
+                    /// @note The flag stop is not used but we still have to provide a valid pointer, otherwise it might crash if the pointer is dereferenced.
+                    BOOL stop = NO;
+
+                    block(nil, NSNotFound, &stop);
                 }
                 isExecuting = NO;
                 break;
