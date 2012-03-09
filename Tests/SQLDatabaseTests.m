@@ -184,7 +184,6 @@
     STAssertTrue([database executeQuery:queryNoResult thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
         NSAssert(row == nil, @"This request should have return no result.");
         NSAssert(index == NSNotFound, @"This request should have return no result.");
-        NSAssert(stop == NULL, @"This request should have return no result.");
     }], @"Execute query failed (database = %@, query = %@).", database, queryNoResult);
 
     SQLQuery *queryCached = [SQLQuery queryWithStatement:@"SELECT * FROM user where full_name LIKE ?;" arguments:[NSArray arrayWithObject:@"W%"]];

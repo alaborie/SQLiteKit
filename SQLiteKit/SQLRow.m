@@ -76,6 +76,7 @@
 {
     [_database release];
     [_statement release];
+    [_columnNameDict release];
     [super dealloc];
 }
 
