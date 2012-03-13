@@ -206,9 +206,10 @@
     }
     else
     {
-        NSString *stringValue = [object description];
+        const char *cString = [object UTF8String];
+        NSUInteger cStringLength = strlen(cString);
 
-        resultBind = sqlite3_bind_text(self.compiledStatement, index, [stringValue UTF8String], [stringValue length], SQLITE_STATIC);
+        resultBind = sqlite3_bind_text(self.compiledStatement, index, cString, cStringLength, SQLITE_STATIC);
     }
     if ( resultBind == SQLITE_OK )
     {

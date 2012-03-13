@@ -352,9 +352,9 @@
     [database close];
 }
 
-- (void)testAllExecutionType
+- (void)testAllExecutionTypes
 {
-    NSString *databaseLocalPath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"toto.sqlite"];
+    NSString *databaseLocalPath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"airport.sqlite"];
     NSFileManager *fileManager = [NSFileManager defaultManager];
     NSError *error = nil;
 
@@ -394,6 +394,58 @@
         insertedRowExists = YES;
     }], @"Execute statement failed (database = %@).", database);
 
+    STAssertTrue([database close], @"Close operation failed (database = %@).", database);
+}
+
+- (void)testStringEncoding
+{
+    NSString *databaseLocalPath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"encoding.sqlite"];
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSError *error = nil;
+
+    [fileManager removeItemAtPath:databaseLocalPath error:&error];
+    if ( error != nil && error.code != NSFileNoSuchFileError )
+    {
+        STAssertNil(error, [error localizedDescription]);
+    }
+
+    SQLDatabase *database = [SQLDatabase databaseWithPath:databaseLocalPath];
+
+    STAssertTrue([database open], @"Open operation failed (database = %@).", database);
+    STAssertTrue([database executeStatement:@"CREATE TABLE IF NOT EXISTS sentences(ID INTEGER PRIMARY KEY, language TEXT, content TEXT);"], @"Execute statement failed (database = %@).", database);
+
+    NSArray *entries = [NSArray arrayWithObjects:
+                        [NSArray arrayWithObjects:@"Danish", @"[Quizdeltagerne spiste jordbær med fløde, mens cirkusklovnen Wolther spillede på xylofon.]", nil],
+                        [NSArray arrayWithObjects:@"German", @"[Zwölf Boxkämpfer jagten Eva quer über den Sylter Deich.]", nil],
+                        [NSArray arrayWithObjects:@"Greek", @"[Γαζέες καὶ μυρτιὲς δὲν θὰ βρῶ πιὰ στὸ χρυσαφὶ ξέφωτο.]", nil],
+                        [NSArray arrayWithObjects:@"English", @"[The quick brown fox jumps over the lazy dog.]", nil],
+                        [NSArray arrayWithObjects:@"Spanish", @"[El pingüino Wenceslao hizo kilómetros bajo exhaustiva lluvia y frío, añoraba a su querido cachorro.]", nil],
+                        [NSArray arrayWithObjects:@"French", @"[Le cœur déçu mais l'âme plutôt naïve, Louÿs rêva de crapaüter en canoë au delà des îles, près du mälström où brûlent les novæ.]", nil],
+                        [NSArray arrayWithObjects:@"Irish Gaelic", @"[D'fhuascail Íosa, Úrmhac na hÓighe Beannaithe, pór Éava agus Ádhaimh]", nil],
+                        [NSArray arrayWithObjects:@"Hungarian", @"[Árvíztűrő tükörfúrógép]", nil],
+                        [NSArray arrayWithObjects:@"Icelandic", @"[Kæmi ný öxi hér ykist þjófum nú bæði víl og ádrepa]", nil],
+                        [NSArray arrayWithObjects:@"Japanese (Hiragana)", @"[いろはにほへとちりぬるを わかよたれそつねならむ うゐのおくやまけふこえて あさきゆめみしゑひもせす]", nil],
+                        [NSArray arrayWithObjects:@"Japanese (Katakana)", @"[イロハニホヘト チリヌルヲ ワカヨタレソ ツネナラム ウヰノオクヤマ ケフコエテ アサキユメミシ ヱヒモセスン]", nil],
+                        [NSArray arrayWithObjects:@"Hebrew", @"[ג סקרן שט בים מאוכזב ולפתע מצא לו חברה איך הקליטה]", nil],
+                        [NSArray arrayWithObjects:@"Polish", @"[Pchnąć w tę łódź jeża lub ośm skrzyń fig]", nil],
+                        [NSArray arrayWithObjects:@"Russian", @"[В чащах юга жил бы цитрус? Да, но фальшивый экземпляр!]", nil],
+                        [NSArray arrayWithObjects:@"Thai", @"[ฉบับย่อกระโดดสีน้ำตาลมากกว่าสุนัขจิ้งจอกสุนัขขี้เกียจ]", nil],
+                        nil];
+    SQLQuery *insertQuery = [SQLQuery queryWithStatement:@"INSERT INTO sentences(language, content) VALUES(?, ?);"];
+
+    [entries enumerateObjectsUsingBlock:^(id object, NSUInteger index, BOOL *stop) {
+        insertQuery.arguments = (NSArray *)object;
+        STAssertTrue([database executeQuery:insertQuery withOptions:SQLDatabaseExecutingOptionCacheStatement thenEnumerateRowsUsingBlock:NULL], @"Execute statement failed (database = %@).", database);
+    }];
+
+    SQLQuery *selectQuery = [SQLQuery queryWithStatement:@"SELECT * FROM sentences;"];
+
+    [database executeQuery:selectQuery thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
+        NSString *sentence = [row objectForColumn:@"content"];
+        STAssertTrue([sentence isKindOfClass:[NSString class]] == YES, @"Invalid kind of class.");
+        STAssertTrue([sentence characterAtIndex:0] == '[', @"Invalid first character.");
+        STAssertTrue([sentence characterAtIndex:(sentence.length - 1)], @"Invalid last character.");
+    }];
     STAssertTrue([database close], @"Close operation failed (database = %@).", database);
 }
 
