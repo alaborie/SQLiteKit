@@ -433,6 +433,8 @@ void sqldatabase_rollback_hook(void *object)
     return [statement reset];
 }
 
+#pragma mark -
+
 - (NSNumber *)lastInsertRowID
 {
     if ( self.connectionHandle == NULL )
@@ -448,6 +450,16 @@ void sqldatabase_rollback_hook(void *object)
         return nil;
     }
     return [NSNumber numberWithLongLong:rowid];
+}
+
+- (NSUInteger)numberOfChanges
+{
+    return (NSUInteger)sqlite3_changes(self.connectionHandle);
+}
+
+- (NSUInteger)totalNumberOfChanges
+{
+    return (NSUInteger)sqlite3_total_changes(self.connectionHandle);
 }
 
 #pragma mark -
