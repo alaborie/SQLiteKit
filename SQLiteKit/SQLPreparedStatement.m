@@ -206,7 +206,7 @@
     }
     else
     {
-        const char *cString = [object UTF8String];
+        const char *cString = [[object description] UTF8String];
         NSUInteger cStringLength = strlen(cString);
 
         resultBind = sqlite3_bind_text(self.compiledStatement, index, cString, cStringLength, SQLITE_STATIC);

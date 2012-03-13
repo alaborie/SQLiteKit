@@ -449,4 +449,27 @@
     STAssertTrue([database close], @"Close operation failed (database = %@).", database);
 }
 
+- (void)testDataTypes
+{
+    NSString *databaseLocalPath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"data.sqlite"];
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSError *error = nil;
+
+    [fileManager removeItemAtPath:databaseLocalPath error:&error];
+    if ( error != nil && error.code != NSFileNoSuchFileError )
+    {
+        STAssertNil(error, [error localizedDescription]);
+    }
+
+    SQLDatabase *database = [SQLDatabase databaseWithPath:databaseLocalPath];
+
+    STAssertTrue([database open], @"Open operation failed (database = %@).", database);
+    STAssertTrue([database executeStatement:@"CREATE TABLE IF NOT EXISTS data(ID INTEGER PRIMARY KEY, description TEXT);"], @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO data(description) VALUES(?);", [NSURL URLWithString:@"http://www.apple.com"], nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO data(description) VALUES(?);", [NSData data], nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO data(description) VALUES(?);", [NSDate date], nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue(([database executeWithStatementAndArguments:@"INSERT INTO data(description) VALUES(?);", [NSIndexSet indexSetWithIndex:42], nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue([database close], @"Close operation failed (database = %@).", database);
+}
+
 @end
