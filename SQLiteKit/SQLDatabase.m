@@ -350,13 +350,13 @@ void sqldatabase_rollback_hook(void *object)
     sqlitekit_verbose(@"Execute new query (query = %@).", query);
 
     // PREPARE STATEMENT
-    SQLPreparedStatement *statement = [self.statementsCache objectForKey:query.SQLStatement];
+    SQLPreparedStatement *statement = [[self.statementsCache objectForKey:query.SQLStatement] retain];
     BOOL shouldFinalizeStatement = YES;
 
     if ( statement == nil )
     {
         // If no cached statement has been found for this query, we create a new one.
-        statement = [SQLPreparedStatement statementWithDatabase:self query:query];
+        statement = [[SQLPreparedStatement alloc] initWithDatabase:self query:query];
         if ( statement == nil )
         {
             return NO;
@@ -405,7 +405,7 @@ void sqldatabase_rollback_hook(void *object)
 
                     if ( row == nil )
                     {
-                        row = [SQLRow rowWithDatabase:self statement:statement];
+                        row = [[SQLRow alloc] initWithDatabase:self statement:statement];
                     }
                     block(row, index, &stop);
                     if ( stop == YES )
@@ -425,13 +425,13 @@ void sqldatabase_rollback_hook(void *object)
             }
         }
     }
+    [row release];
 
     // FINALIZE
-    if ( shouldFinalizeStatement == YES )
-    {
-        return [statement finialize];
-    }
-    return [statement reset];
+    BOOL executionResult = ( shouldFinalizeStatement == YES ) ? [statement finialize] : [statement reset];
+
+    [statement release];
+    return executionResult;
 }
 
 #pragma mark -
