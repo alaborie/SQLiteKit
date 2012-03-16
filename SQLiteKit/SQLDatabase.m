@@ -410,7 +410,11 @@ void sqldatabase_rollback_hook(void *object)
                     block(row, index, &stop);
                     if ( stop == YES )
                     {
-                        return [statement finialize];
+                        BOOL executionResult = [statement finialize];
+
+                        [row release];
+                        [statement release];
+                        return executionResult;
                     }
                     index++;
                 }
