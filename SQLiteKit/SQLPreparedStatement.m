@@ -75,6 +75,7 @@
 
 - (BOOL)reset
 {
+    NSAssert(self.compiledStatement != NULL, @"The compiled statement should not be NULL.");
     int resultReset = sqlite3_reset(self.compiledStatement);
 
     if ( resultReset == SQLITE_OK )
@@ -88,6 +89,7 @@
 
 - (BOOL)finialize
 {
+    NSAssert(self.compiledStatement != NULL, @"The compiled statement should not be NULL.");
     int resultFinalize = sqlite3_finalize(self.compiledStatement);
 
     if ( resultFinalize == SQLITE_OK )
@@ -105,6 +107,7 @@
 
 - (BOOL)clearBindings
 {
+    NSAssert(self.compiledStatement != NULL, @"The compiled statement should not be NULL.");
     int resultClearBindings = sqlite3_clear_bindings(self.compiledStatement);
 
     if ( resultClearBindings == SQLITE_OK )
@@ -118,6 +121,7 @@
 
 - (BOOL)bindArguments:(NSArray *)arguments
 {
+    NSAssert(self.compiledStatement != NULL, @"The compiled statement should not be NULL.");
     int argumentsCount = sqlite3_bind_parameter_count(_compiledStatement);
     NSAssert([arguments count] == argumentsCount, @"The number of arguments doesn't match.");
 
