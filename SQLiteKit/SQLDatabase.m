@@ -177,6 +177,7 @@ void sqldatabase_rollback_hook(void *object)
     SQLPreparedStatement *preparedStatement = (SQLPreparedStatement *)object;
     NSAssert([preparedStatement isKindOfClass:[SQLPreparedStatement class]] == YES, @"Invalid kind of class.");
 
+    sqlitekit_verbose(@"Will evict prepared statement: %s.", sqlite3_sql(preparedStatement.compiledStatement));
     // Finalizes the prepared statement before removing it from the cache.
     [preparedStatement finialize];
 }
@@ -277,7 +278,7 @@ void sqldatabase_rollback_hook(void *object)
     return [self executeQuery:query withOptions:0 thenEnumerateRowsUsingBlock:NULL];
 }
 
-- (BOOL)executeWithStatementAndArguments:(NSString *)SQLStatement, ...
+- (BOOL)executeStatementWithArguments:(NSString *)SQLStatement, ...
 {
     NSParameterAssert(SQLStatement);
 
@@ -290,7 +291,7 @@ void sqldatabase_rollback_hook(void *object)
     return [self executeQuery:query withOptions:0 thenEnumerateRowsUsingBlock:NULL];
 }
 
-- (BOOL)executeWithStatement:(NSString *)SQLStatement arguments:(NSArray *)arguments
+- (BOOL)executeStatement:(NSString *)SQLStatement withArguments:(NSArray *)arguments
 {
     NSParameterAssert(SQLStatement);
 

@@ -91,12 +91,12 @@ typedef NSUInteger SQLDatabaseExecutingOptions;
  @param SQLStatement Must not be nil!
  @note The arguments list must be nil terminated.
  */
-- (BOOL)executeWithStatementAndArguments:(NSString *)SQLStatement, ... __attribute__((sentinel));
+- (BOOL)executeStatementWithArguments:(NSString *)SQLStatement, ... __attribute__((sentinel));
 
 /**
  @param SQLStatement Must not be nil!
  */
-- (BOOL)executeWithStatement:(NSString *)SQLStatement arguments:(NSArray *)arguments __attribute__ ((nonnull(1)));
+- (BOOL)executeStatement:(NSString *)SQLStatement withArguments:(NSArray *)arguments __attribute__ ((nonnull(1)));
 
 /**
  @param path Must not be nil;

@@ -103,7 +103,7 @@
         {
             sourceData[row][byteIndex] = random() % 256;
         }
-        [database executeWithStatementAndArguments:@"INSERT INTO thumbnail values(?, ?)", [NSNumber numberWithInt:row], [NSData dataWithBytes:sourceData[row] length:sourceDataLength[row]], nil];
+        [database executeStatementWithArguments:@"INSERT INTO thumbnail values(?, ?)", [NSNumber numberWithInt:row], [NSData dataWithBytes:sourceData[row] length:sourceDataLength[row]], nil];
     }
     maxSourceData = malloc(maxSourceDataLength * sizeof(unsigned char *));
     STAssertTrue(maxSourceData != NULL, @"Cannot allocate memory to hold the random data (length = %i).", maxSourceDataLength);
