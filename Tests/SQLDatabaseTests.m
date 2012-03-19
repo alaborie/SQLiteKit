@@ -372,189 +372,74 @@
     STAssertTrue([database lastInsertRowID] == nil, @"No insert operation occurred yet, this method should have returned a nil pointer.");
     STAssertTrue([database lastInsertRowID] == nil, @"No insert operation occurred yet, this method should have returned a nil pointer.");
 
-    SQLQuery *insertAirportQuery = [SQLQuery queryWithStatement:@"INSERT INTO airports(fullname, short) VALUES(?, ?);"];
+    SQLQuery *insertAirportQuery = [SQLQuery queryWithStatement:@"INSERT INTO airports(fullname, short, country) VALUES(?, ?, ?);"];
     NSArray *insertAirportData = [NSArray arrayWithObjects:
-                                  [NSArray arrayWithObjects:@"San Francisco", @"SFO", nil],
-                                  [NSArray arrayWithObjects:@"Atlanta", @"ATL", nil],
-                                  [NSArray arrayWithObjects:@"Beijing", @"PEK", nil],
-                                  [NSArray arrayWithObjects:@"Boston", @"BOS", nil],
-                                  [NSArray arrayWithObjects:@"Buenos Aires", @"BUE", nil],
-                                  [NSArray arrayWithObjects:@"Charlotte", @"CLT", nil],
-                                  [NSArray arrayWithObjects:@"Los Angeles", @"LAX", nil],
-                                  [NSArray arrayWithObjects:@"Honolulu", @"HNL", nil],
-                                  [NSArray arrayWithObjects:@"Portland", @"PDX", nil],
-                                  [NSArray arrayWithObjects:@"Paris", @"CDG", nil],
-                                  [NSArray arrayWithObjects:@"Denver", @"DEN", nil],
-                                  [NSArray arrayWithObjects:@"Seatle", @"SEA", nil],
-                                  [NSArray arrayWithObjects:@"Sydney", @"SYD", nil],
-                                  [NSArray arrayWithObjects:@"Brisbane", @"BNE", nil],
-                                  [NSArray arrayWithObjects:@"Kuala Lumpur", @"KUL", nil],
-                                  [NSArray arrayWithObjects:@"Berlin", @"BER", nil],
-                                  [NSArray arrayWithObjects:@"London", @"LHR", nil],
-                                  [NSArray arrayWithObjects:@"Madrid", @"MAD", nil],
-                                  [NSArray arrayWithObjects:@"Rome", @"ROM", nil],
-                                  [NSArray arrayWithObjects:@"Prague", @"PRG", nil],
-                                  [NSArray arrayWithObjects:@"Wellington", @"WLG", nil],
-                                  [NSArray arrayWithObjects:@"Amsterdam", @"AMS", nil],
-                                  [NSArray arrayWithObjects:@"Athens", @"ATH", nil],
-                                  [NSArray arrayWithObjects:@"Austin", @"AUS", nil],
-                                  [NSArray arrayWithObjects:@"Barcelona", @"BCN", nil],
-                                  [NSArray arrayWithObjects:@"Bangkok", @"BKK", nil],
-                                  [NSArray arrayWithObjects:@"Baltimore", @"BWI", nil],
-                                  [NSArray arrayWithObjects:@"Chicago", @"CHI", nil],
-                                  [NSArray arrayWithObjects:@"Colombus", @"CMH", nil],
-                                  [NSArray arrayWithObjects:@"Cleveland", @"CLV", nil],
-                                  [NSArray arrayWithObjects:@"El Paso", @"ELP", nil],
-                                  [NSArray arrayWithObjects:@"Florence", @"FLR", nil],
-                                  [NSArray arrayWithObjects:@"Ouagadougou", @"OUA", nil],
-                                  [NSArray arrayWithObjects:@"Guatemala", @"GUA", nil],
-                                  [NSArray arrayWithObjects:@"Geneva", @"GVA", nil],
-                                  [NSArray arrayWithObjects:@"Hong Kong", @"HKG", nil],
-                                  [NSArray arrayWithObjects:@"Helsinki", @"HEL", nil],
-                                  [NSArray arrayWithObjects:@"Istanbul", @"IST", nil],
-                                  [NSArray arrayWithObjects:@"Kiev", @"KBP", nil],
-                                  [NSArray arrayWithObjects:@"Lima", @"LIM", nil],
-                                  [NSArray arrayWithObjects:@"Miami", @"MIA", nil],
-                                  [NSArray arrayWithObjects:@"Munich", @"MUC", nil],
-                                  [NSArray arrayWithObjects:@"Reno", @"RNO", nil],
-                                  [NSArray arrayWithObjects:@"Ulaanbaatar", @"ULN", nil],
-                                  [NSArray arrayWithObjects:@"Zurich", @"ZRH", nil],
-                                  [NSArray arrayWithObjects:@"Zagreb", @"ZAG", nil],
-                                  [NSArray arrayWithObjects:@"La Paz", @"LAP", nil],
-                                  [NSArray arrayWithObjects:@"Darwin", @"DRW", nil],
-                                  [NSArray arrayWithObjects:@"Tunis", @"TUN", nil],
-                                  [NSArray arrayWithObjects:@"Djibouti", @"JIB", nil],
-                                  [NSArray arrayWithObjects:@"Singapore", @"SIN", nil],
-                                  [NSArray arrayWithObjects:@"Bamako", @"BKO", nil],
-                                  [NSArray arrayWithObjects:@"Marrakesh", @"RAK", nil],
-                                  [NSArray arrayWithObjects:@"Casablanca", @"CMN", nil],
-                                  [NSArray arrayWithObjects:@"Cotonou", @"COO", nil],
-                                  [NSArray arrayWithObjects:@"Abidjan", @"ABJ", nil],
+                                  [NSArray arrayWithObjects:@"San Francisco", @"SFO", @"USA", nil],
+                                  [NSArray arrayWithObjects:@"Atlanta", @"ATL", @"USA", nil],
+                                  [NSArray arrayWithObjects:@"Beijing", @"PEK", @"China", nil],
+                                  [NSArray arrayWithObjects:@"Boston", @"BOS", @"USA", nil],
+                                  [NSArray arrayWithObjects:@"Buenos Aires", @"BUE", @"Argentina", nil],
+                                  [NSArray arrayWithObjects:@"Charlotte", @"CLT", @"USA", nil],
+                                  [NSArray arrayWithObjects:@"Los Angeles", @"LAX", @"USA", nil],
+                                  [NSArray arrayWithObjects:@"Honolulu", @"HNL", @"USA", nil],
+                                  [NSArray arrayWithObjects:@"Portland", @"PDX", @"USA", nil],
+                                  [NSArray arrayWithObjects:@"Paris", @"CDG", @"France", nil],
+                                  [NSArray arrayWithObjects:@"Denver", @"DEN", @"USA", nil],
+                                  [NSArray arrayWithObjects:@"Seatle", @"SEA", @"USA", nil],
+                                  [NSArray arrayWithObjects:@"Sydney", @"SYD", @"Australia", nil],
+                                  [NSArray arrayWithObjects:@"Brisbane", @"BNE", @"Australia", nil],
+                                  [NSArray arrayWithObjects:@"Kuala Lumpur", @"KUL", @"Malaysia", nil],
+                                  [NSArray arrayWithObjects:@"Berlin", @"BER", @"Germany", nil],
+                                  [NSArray arrayWithObjects:@"London", @"LHR", @"England", nil],
+                                  [NSArray arrayWithObjects:@"Madrid", @"MAD", @"Spain", nil],
+                                  [NSArray arrayWithObjects:@"Rome", @"ROM", @"Italia", nil],
+                                  [NSArray arrayWithObjects:@"Prague", @"PRG", @"Czech Republic", nil],
+                                  [NSArray arrayWithObjects:@"Wellington", @"WLG", @"New Zealand", nil],
+                                  [NSArray arrayWithObjects:@"Amsterdam", @"AMS", @"Holland", nil],
+                                  [NSArray arrayWithObjects:@"Athens", @"ATH", @"Greece", nil],
+                                  [NSArray arrayWithObjects:@"Austin", @"AUS", @"USA", nil],
+                                  [NSArray arrayWithObjects:@"Barcelona", @"BCN", @"Spain", nil],
+                                  [NSArray arrayWithObjects:@"Bangkok", @"BKK", @"Thailand",nil],
+                                  [NSArray arrayWithObjects:@"Baltimore", @"BWI", @"USA", nil],
+                                  [NSArray arrayWithObjects:@"Chicago", @"CHI", @"USA", nil],
+                                  [NSArray arrayWithObjects:@"Colombus", @"CMH", @"USA", nil],
+                                  [NSArray arrayWithObjects:@"Cleveland", @"CLV", @"USA", nil],
+                                  [NSArray arrayWithObjects:@"El Paso", @"ELP", @"USA", nil],
+                                  [NSArray arrayWithObjects:@"Florence", @"FLR", @"Italia", nil],
+                                  [NSArray arrayWithObjects:@"Ouagadougou", @"OUA", @"Burkina Faso", nil],
+                                  [NSArray arrayWithObjects:@"Guatemala", @"GUA", @"Guatemala", nil],
+                                  [NSArray arrayWithObjects:@"Geneva", @"GVA", @"Switzerland", nil],
+                                  [NSArray arrayWithObjects:@"Hong Kong", @"HKG", @"Taiwan", nil],
+                                  [NSArray arrayWithObjects:@"Helsinki", @"HEL", @"Finland", nil],
+                                  [NSArray arrayWithObjects:@"Istanbul", @"IST", @"Turkey", nil],
+                                  [NSArray arrayWithObjects:@"Kiev", @"KBP", @"Ukraine", nil],
+                                  [NSArray arrayWithObjects:@"Lima", @"LIM", @"Peru", nil],
+                                  [NSArray arrayWithObjects:@"Miami", @"MIA", @"USA", nil],
+                                  [NSArray arrayWithObjects:@"Munich", @"MUC", @"Germany", nil],
+                                  [NSArray arrayWithObjects:@"Reno", @"RNO", @"USA", nil],
+                                  [NSArray arrayWithObjects:@"Ulaanbaatar", @"ULN", @"Mongolia", nil],
+                                  [NSArray arrayWithObjects:@"Zurich", @"ZRH", @"Switzerland", nil],
+                                  [NSArray arrayWithObjects:@"Zagreb", @"ZAG", @"Croatia", nil],
+                                  [NSArray arrayWithObjects:@"La Paz", @"LAP", @"Mexico", nil],
+                                  [NSArray arrayWithObjects:@"Darwin", @"DRW", @"Australia", nil],
+                                  [NSArray arrayWithObjects:@"Tunis", @"TUN", @"Tunisia", nil],
+                                  [NSArray arrayWithObjects:@"Djibouti", @"JIB", @"Djibouti", nil],
+                                  [NSArray arrayWithObjects:@"Singapore", @"SIN", @"Singapore Republic", nil],
+                                  [NSArray arrayWithObjects:@"Bamako", @"BKO", @"Mali", nil],
+                                  [NSArray arrayWithObjects:@"Marrakesh", @"RAK", @"Morocco", nil],
+                                  [NSArray arrayWithObjects:@"Casablanca", @"CMN", @"Morocco", nil],
+                                  [NSArray arrayWithObjects:@"Cotonou", @"COO", @"Benin Republic", nil],
+                                  [NSArray arrayWithObjects:@"Abidjan", @"ABJ", @"Côte d'Ivoire", nil],
+                                  [NSArray arrayWithObjects:@"Toulouse", @"TLS", @"France", nil],
+                                  [NSArray arrayWithObjects:@"Nice", @"NCE", @"France", nil],
+                                  [NSArray arrayWithObjects:@"Marseille", @"MRS", @"France", nil],
+                                  [NSArray arrayWithObjects:@"New York", @"JFK", @"USA", nil],
                                   nil];
 
     [insertAirportData enumerateObjectsUsingBlock:^(id object, NSUInteger index, BOOL *stop) {
         insertAirportQuery.arguments = (NSArray *)object;
         STAssertTrue([database executeQuery:insertAirportQuery withOptions:SQLDatabaseExecutingOptionCacheStatement thenEnumerateRowsUsingBlock:NULL], @"Execute query failed (database = %@).", database);
     }];
-
-
-
-
-
-
-
-//    STAssertTrue([database executeStatement:@"CREATE TABLE IF NOT EXISTS flights(ID INTEGER PRIMARY KEY, flight_number INTEGER, airline TEXT, from_airport TEXT, to_airport TEXT, arrival_time TEXT, remarks TEXT DEFAULT NULL);"], @"Execute statement failed (database = %@).", database);
-//
-//
-//
-//    SQLQuery *insertAiportQuery = [SQLQuery queryWithStatement:@"INSERT INTO airports(name, code) VALUES(?, ?);"];
-//    NSArray *insertAirportData = [NSArray arrayWithObjects:
-//                                  [NSArray arrayWithObjects:@""
-//
-//
-//
-//    SQLQuery *insertQuery = [SQLQuery queryWithStatement:@"INSERT INTO flights(flight_number, airline, from_airport, to_airport, arrival_time, remarks) VALUES(?, ?, ?, ?, ?, ?)"];
-//    NSArray *insertData = [NSArray arrayWithObjects:
-//                           [NSArray arrayWithObjects:[NSNumber numberWithInteger:5303], @"AeroMexico", @"Atlanta", @"San Francisco", @"6:56 PM", [NSNull null], nil],
-//                           [NSArray arrayWithObjects:[NSNumber numberWithInteger:8888], @"Air China", @"Beijing", @"San Francisco", @"9:09 AM", [NSNull null], nil],
-//                           [NSArray arrayWithObjects:[NSNumber numberWithInteger:8703], @"Air China", @"Boston", @"San Francisco", @"9:20 AM", [NSNull null], nil],
-//                           [NSArray arrayWithObjects:[NSNumber numberWithInteger:8705], @"Air China", @"Boston", @"San Francisco", @"11:24 AM", [NSNull null], nil],
-//                           [NSArray arrayWithObjects:[NSNumber numberWithInteger:8720], @"Air China", @"Buenos Aires", @"San Francisco", @"2:23 PM", [NSNull null], nil],
-//                           [NSArray arrayWithObjects:[NSNumber numberWithInteger:8526], @"Air China", @"Charlotte", @"San Francisco", @"12:25 PM", [NSNull null], nil],
-//                           [NSArray arrayWithObjects:[NSNumber numberWithInteger:8717], @"Air China", @"Honolulu", @"San Francisco", @"7:34 AM", [NSNull null], nil],
-//                           [NSArray arrayWithObjects:[NSNumber numberWithInteger:8704], @"Air China", @"Los Angeles", @"San Francisco", @"2:55 PM", @"On Time", nil],
-//                           [NSArray arrayWithObjects:[NSNumber numberWithInteger:8710], @"Air China", @"Orlando", @"San Francisco", @"8:58 AM", [NSNull null], nil],
-//                           [NSArray arrayWithObjects:[NSNumber numberWithInteger:8739], @"Air China", @"Portland", @"San Francisco", @"10:52 AM", [NSNull null], nil],
-//                           [NSArray arrayWithObjects:[NSNumber numberWithInteger:8741], @"Air China", @"Portland", @"San Francisco", @"11:11 AM", [NSNull null], nil],
-//                           [NSArray arrayWithObjects:[NSNumber numberWithInteger:8732], @"Air China", @"Minneapolis", @"San Francisco", @"8:01 PM", @"On Time", nil],
-//                           [NSArray arrayWithObjects:[NSNumber numberWithInteger:8734], @"Air China", @"Denver", @"San Francisco", @"11:43 AM", [NSNull null], nil],
-//                           [NSArray arrayWithObjects:[NSNumber numberWithInteger:8879], @"Air China", @"Denver", @"San Francisco", @"11:33 AM", [NSNull null], nil],
-//
-//                           [NSArray arrayWithObjects:[NSNumber numberWithInteger:9027], @"Air France", @"Los Angeles", @"San Francisco", @"6:11 PM", [NSNull null], nil],
-//                           [NSArray arrayWithObjects:[NSNumber numberWithInteger:8400], @"Air France", @"Paris", @"San Francisco", @"2:38 PM", [NSNull null], nil],
-//                           [NSArray arrayWithObjects:[NSNumber numberWithInteger:9400], @"Air France", @"Salt Lake City", @"San Francisco", @"5:56 PM", [NSNull null], nil],
-//
-//                           [NSArray arrayWithObjects:[NSNumber numberWithInteger:8879], @"Air New Zealand", @"Auckland", @"San Francisco", @"10:13 AM", [NSNull null], nil],
-//
-//                           [NSArray arrayWithObjects:[NSNumber numberWithInteger:317], @"Alaska Airlines", @"Palm Springs", @"San Francisco", @"6:57 PM", [NSNull null], nil],
-//                           [NSArray arrayWithObjects:[NSNumber numberWithInteger:2523], @"Alaska Airlines", @"Portland", @"San Francisco", @"8:40 AM", [NSNull null], nil],
-//                           [NSArray arrayWithObjects:[NSNumber numberWithInteger:234], @"Alaska Airlines", @"Portland", @"San Francisco", @"12:11 PM", [NSNull null], nil],
-//                           [NSArray arrayWithObjects:[NSNumber numberWithInteger:231], @"Alaska Airlines", @"Puerto Vallarta", @"San Francisco", @"8:57 PM", [NSNull null], nil],
-//                           [NSArray arrayWithObjects:[NSNumber numberWithInteger:304], @"Alaska Airlines", @"Seattle", @"San Francisco", @"8:48 AM", [NSNull null], nil],
-//                           [NSArray arrayWithObjects:[NSNumber numberWithInteger:220], @"Alaska Airlines", @"Seattle", @"San Francisco", @"11:52 AM", [NSNull null], nil],
-//                           [NSArray arrayWithObjects:[NSNumber numberWithInteger:312], @"Alaska Airlines", @"Seattle", @"San Francisco", @"3:04 PM", [NSNull null], nil],
-//                           [NSArray arrayWithObjects:[NSNumber numberWithInteger:316], @"Alaska Airlines", @"Seattle", @"San Francisco", @"4:07 AM", [NSNull null], nil],
-//                           [NSArray arrayWithObjects:[NSNumber numberWithInteger:302], @"Alaska Airlines", @"Seattle", @"San Francisco", @"8:06 AM", [NSNull null], nil],
-//
-//                           [NSArray arrayWithObjects:[NSNumber numberWithInteger:2049], @"Delta", @"Atlanta", @"San Francisco", @"10:28 AM", [NSNull null], nil],
-//                           [NSArray arrayWithObjects:[NSNumber numberWithInteger:2049], @"Delta", @"Atlanta", @"San Francisco", @"10:28 AM", [NSNull null], nil],
-//                           [NSArray arrayWithObjects:[NSNumber numberWithInteger:2049], @"Delta", @"Atlanta", @"San Francisco", @"10:28 AM", [NSNull null], nil],
-//                           [NSArray arrayWithObjects:[NSNumber numberWithInteger:2049], @"Delta", @"Atlanta", @"San Francisco", @"10:28 AM", [NSNull null], nil],
-//                           [NSArray arrayWithObjects:[NSNumber numberWithInteger:2049], @"Delta", @"Atlanta", @"San Francisco", @"10:28 AM", [NSNull null], nil],
-//                           [NSArray arrayWithObjects:[NSNumber numberWithInteger:2049], @"Delta", @"Atlanta", @"San Francisco", @"10:28 AM", [NSNull null], nil],
-//                           [NSArray arrayWithObjects:[NSNumber numberWithInteger:2049], @"Delta", @"Atlanta", @"San Francisco", @"10:28 AM", [NSNull null], nil],
-//                           [NSArray arrayWithObjects:[NSNumber numberWithInteger:2049], @"Delta", @"Atlanta", @"San Francisco", @"10:28 AM", [NSNull null], nil],
-//                           [NSArray arrayWithObjects:[NSNumber numberWithInteger:2049], @"Delta", @"Atlanta", @"San Francisco", @"10:28 AM", [NSNull null], nil],
-//
-//
-//
-//                           /**
-//
-//                            AIRLINE	ARRIVING FROM	FLIGHT #	SCH. TIME	EST. TIME	REMARKS	TERMINAL	GATE	DETAILS
-//                            Delta Airlines	Atlanta	2049	10:30 AM	10:28 AM	 On Time	1	42	view
-//                            Delta Airlines	Atlanta	1680	1:32 PM	3:02 PM	 Now at 3:02 PM	1	40	view
-//                            Delta Airlines	Atlanta	1151	4:04 PM	4:04 PM	 On Time	1	40	view
-//                            Delta Airlines	Atlanta	1849	7:03 PM	7:03 PM	 On Time	1	47	view
-//                            Delta Airlines	Cincinnati	1679	11:06 AM	11:11 AM	 Now at 11:11 AM	1	45B	view
-//                            Delta Airlines	Detroit	745	11:09 AM	11:08 AM	 On Time	1	45A	view
-//                            Delta Airlines	Detroit	1145	6:09 PM	6:09 PM	 On Time	1	45B	view
-//                            Delta Airlines	London/Heathrow	4	7:16 PM	7:16 PM	 On Time	1	45A	view
-//                            Delta Airlines	Los Angeles	4708	8:10 AM	8:17 AM	Arrived at 8:11 AM	1	48	view
-//                            Delta Airlines	Los Angeles	4771	9:14 AM	10:20 AM	 Now at 10:20 AM	1	48	view
-//                            Delta Airlines	Los Angeles	4663	10:14 AM	10:14 AM	Cancelled	1	48	view
-//                            Delta Airlines	Los Angeles	4784	1:15 PM	1:15 PM	 On Time	1	48	view
-//                            Delta Airlines	Los Angeles	4720	2:15 PM	2:15 PM	 On Time	1	48	view
-//                            Delta Airlines	Los Angeles	4678	4:03 PM	4:03 PM	 On Time	1	48	view
-//                            Delta Airlines	Los Angeles	4795	5:11 PM	5:11 PM	Cancelled	1	48	view
-//                            Delta Airlines	Los Angeles	4780	6:11 PM	6:11 PM	 On Time	1	48	view
-//                            Delta Airlines	Los Angeles	4440	8:15 PM	8:15 PM	 On Time	1	44	view
-//                            Delta Airlines	Los Angeles	4577	12:15 PM	12:15 PM	Cancelled	1	48	view
-//                            Delta Airlines	Minneapolis	2305	11:37 AM	12:39 PM	 Now at 12:39 PM	1	44	view
-//                            Delta Airlines	Minneapolis	2105	1:51 PM	2:29 PM	 Now at 2:29 PM	1	45A	view
-//                            Delta Airlines	Minneapolis	979	4:53 PM	4:53 PM	 On Time	1	42	view
-//                            Delta Airlines	Minneapolis	1505	7:45 PM	7:45 PM	 On Time	1
-//                            Delta Airlines	New York/JFK	1865	10:40 AM	10:24 AM	 Now at 10:24 AM	1	47	view
-//                            Delta Airlines	New York/JFK	1765	1:32 PM	1:16 PM	 Now at 1:16 PM	1	45B	view
-//                            Delta Airlines	New York/JFK	4	7:16 PM	7:16 PM	 On Time	1	45A	view
-//                            Delta Airlines	New York/JFK	1565	9:06 PM	9:06 PM	 On Time	1
-//                            */
-//
-//
-//                           nil];
-
-
-//    SQLQuery *insertFlightQuery = [SQLQuery queryWithStatementAndArguments:@"INSERT INTO flights(flight_number, airline, from_airport, to_airport, arrival_time, remarks) VALUES(?, ?, ?, ?, ?, ?)",
-//                                   [NSNumber numberWithInteger:5303],
-//                                   @"AeroMexico",
-//                                   @"ATL",
-//                                   @"SFO",
-//                                   @"6:56 PM",
-//                                   [NSNull null],
-//                                   nil];
-//
-//    STAssertNotNil(insertFlightQuery, @"Query creation failed.");
-//    STAssertTrue([database executeQuery:insertFlightQuery withOptions:SQLDatabaseExecutingOptionCacheStatement thenEnumerateRowsUsingBlock:NULL], @"Execute statement failed (database = %@).", database);
-//    STAssertTrue([[database lastInsertRowID] isEqualToNumber:[NSNumber numberWithLongLong:1]] == YES, @"Invalid row ID returned.");
-//    STAssertTrue([[database lastInsertRowID] isEqualToNumber:[NSNumber numberWithLongLong:1]] == YES, @"Invalid row ID returned.");
-//
-//    SQLQuery *flightExistsQuery = [SQLQuery queryWithStatement:@"SELECT 1 FROM flights WHERE ID = last_insert_rowid();"];
-//    __block BOOL insertedRowExists = NO;
-//
-//    STAssertNotNil(insertFlightQuery, @"Query creation failed.");
-//    STAssertTrue([database executeQuery:flightExistsQuery thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
-//        insertedRowExists = YES;
-//    }], @"Execute statement failed (database = %@).", database);
-//
     STAssertTrue([database close], @"Close operation failed (database = %@).", database);
 }
 

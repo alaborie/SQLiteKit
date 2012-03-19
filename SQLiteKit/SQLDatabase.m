@@ -141,7 +141,6 @@ void sqldatabase_rollback_hook(void *object)
     {
         _localPath = [storePath retain];
         _statementsCache = [[NSCache alloc] init];
-        _statementsCache.delegate = self;
         sqlitekit_verbose(@"The database has been initialized (storePath = %@).", storePath);
     }
     return self;
@@ -153,6 +152,7 @@ void sqldatabase_rollback_hook(void *object)
     {
         [self close];
     }
+    _statementsCache.delegate = nil;
 
     [_localPath release];
     [_statementsCache release];
@@ -177,7 +177,6 @@ void sqldatabase_rollback_hook(void *object)
     SQLPreparedStatement *preparedStatement = (SQLPreparedStatement *)object;
     NSAssert([preparedStatement isKindOfClass:[SQLPreparedStatement class]] == YES, @"Invalid kind of class.");
 
-    sqlitekit_verbose(@"Will evict prepared statement: %s.", sqlite3_sql(preparedStatement.compiledStatement));
     // Finalizes the prepared statement before removing it from the cache.
     [preparedStatement finialize];
 }
@@ -250,7 +249,9 @@ void sqldatabase_rollback_hook(void *object)
     [self endGeneratingNotifications];
     // We have to remove all the prepared statements otherwise the close operation will fail.
     /// @note The prepared statement will be finalized in the delegate method of NSCache.
+    self.statementsCache.delegate = self;
     [self.statementsCache removeAllObjects];
+    self.statementsCache.delegate = nil;
 
     int resultClose = sqlite3_close(self.connectionHandle);
 
@@ -350,13 +351,13 @@ void sqldatabase_rollback_hook(void *object)
     sqlitekit_verbose(@"Execute new query (query = %@).", query);
 
     // PREPARE STATEMENT
-    SQLPreparedStatement *statement = [[self.statementsCache objectForKey:query.SQLStatement] retain];
+    SQLPreparedStatement *statement = [self.statementsCache objectForKey:query.SQLStatement];
     BOOL shouldFinalizeStatement = YES;
 
     if ( statement == nil )
     {
         // If no cached statement has been found for this query, we create a new one.
-        statement = [[SQLPreparedStatement alloc] initWithDatabase:self query:query];
+        statement = [SQLPreparedStatement statementWithDatabase:self query:query];
         if ( statement == nil )
         {
             return NO;
@@ -379,6 +380,7 @@ void sqldatabase_rollback_hook(void *object)
     // STEP
     SQLRow *row = nil;
     BOOL isExecuting = YES;
+    BOOL stop = NO;
     NSInteger index = 0;
 
     while ( isExecuting == YES )
@@ -390,8 +392,6 @@ void sqldatabase_rollback_hook(void *object)
                 if ( index == 0 && block != NULL )
                 {
                     /// @note The flag stop is not used but we still have to provide a valid pointer, otherwise it might crash if the pointer is dereferenced.
-                    BOOL stop = NO;
-
                     block(nil, NSNotFound, &stop);
                 }
                 isExecuting = NO;
@@ -401,21 +401,12 @@ void sqldatabase_rollback_hook(void *object)
             {
                 if (block != NULL)
                 {
-                    BOOL stop = NO;
-
                     if ( row == nil )
                     {
-                        row = [[SQLRow alloc] initWithDatabase:self statement:statement];
+                        row = [SQLRow rowWithDatabase:self statement:statement];
                     }
                     block(row, index, &stop);
-                    if ( stop == YES )
-                    {
-                        BOOL executionResult = [statement finialize];
-
-                        [row release];
-                        [statement release];
-                        return executionResult;
-                    }
+                    isExecuting = ( stop == NO );
                     index++;
                 }
                 break;
@@ -429,13 +420,9 @@ void sqldatabase_rollback_hook(void *object)
             }
         }
     }
-    [row release];
 
     // FINALIZE
-    BOOL executionResult = ( shouldFinalizeStatement == YES ) ? [statement finialize] : [statement reset];
-
-    [statement release];
-    return executionResult;
+    return ( shouldFinalizeStatement == YES ) ? [statement finialize] : [statement reset];
 }
 
 #pragma mark -
