@@ -9,25 +9,19 @@
  */
 
 #import "SQLRowTests.h"
-#import "SQLDatabase.h"
-#import "SQLQuery.h"
-#import "SQLRow.h"
+
+#import "SenTestCase+SQLiteKitAdditions.h"
 
 @implementation SQLRowTests
 
+#pragma mark -
+#pragma mark Tests
+
 - (void)testGetColumns
 {
-    NSString *databaseLocalPath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"server.db"];
-    NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSError *error = nil;
-
-    [fileManager removeItemAtPath:databaseLocalPath error:&error];
-    if ( error != nil && error.code != NSFileNoSuchFileError )
-    {
-        STAssertNil(error, [error localizedDescription]);
-    }
-
-    SQLDatabase *database = [SQLDatabase databaseWithPath:databaseLocalPath];
+    NSString *storePath = [self generateValidTemporaryPathWithComponent:@"testGetColumns.sqlite"];
+    STAssertNotNil(storePath, @"The path generated must be different than nil.");
+    SQLDatabase *database = [SQLDatabase databaseWithFilePath:storePath];
 
     STAssertTrue([database open], @"Open operation failed (database = %@).", database);
     STAssertTrue([database executeStatement:@"CREATE TABLE IF NOT EXISTS  provider(ID INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, thumbnail BLOB, ratio REAL);"], @"Execute statement failed (database = %@).", database);
@@ -67,17 +61,9 @@
 
 - (void)testBlob
 {
-    NSString *databaseLocalPath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"blob.db"];
-    NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSError *error = nil;
-
-    [fileManager removeItemAtPath:databaseLocalPath error:&error];
-    if ( error != nil && error.code != NSFileNoSuchFileError )
-    {
-        STAssertNil(error, [error localizedDescription]);
-    }
-
-    SQLDatabase *database = [SQLDatabase databaseWithPath:databaseLocalPath];
+    NSString *storePath = [self generateValidTemporaryPathWithComponent:@"testBlob.sqlite"];
+    STAssertNotNil(storePath, @"The path generated must be different than nil.");
+    SQLDatabase *database = [SQLDatabase databaseWithFilePath:storePath];
 
     STAssertTrue([database open], @"Open operation failed (database = %@).", database);
     STAssertTrue([database executeStatement:@"CREATE TABLE IF NOT EXISTS  thumbnail(ID INTEGER PRIMARY KEY, data BLOB);"], @"Execute statement failed (database = %@).", database);

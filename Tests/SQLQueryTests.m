@@ -9,9 +9,11 @@
  */
 
 #import "SQLQueryTests.h"
-#import "SQLQuery.h"
 
 @implementation SQLQueryTests
+
+#pragma mark -
+#pragma mark Tests
 
 - (void)testInitializations
 {

@@ -8,8 +8,48 @@
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#import "SQLiteKit.pch"
+#include <stdio.h>
 
-#ifdef __OBJC__
-# import <SenTestingKit/SenTestingKit.h>
-#endif
+#define BUFFER_DEFAULT_STREAM_SIZE 256
+#define BUFFER_DEFAULT_LINE_SIZE 256
+#define BUFFER_DEFAULT_REALLOC_PADDING 128
+
+#define OBJECT_BUFFER_DEFAULT_SIZE 16
+
+struct buffer
+{
+    char *data;
+    size_t size;
+    size_t length;
+};
+typedef struct buffer *buffer_t;
+
+@interface SQLFile : NSObject <NSFastEnumeration>
+{
+@private
+    NSString *_path;
+    FILE *_stream;
+    buffer_t _streamBuffer;
+    buffer_t _lineBuffer;
+    NSUInteger _streamBufferStartingIndex;
+}
+
+@property (nonatomic, readonly) NSString *path;
+
++ (id)fileWithFileURL:(NSURL *)fileURL;
++ (id)fileWithFilePath:(NSString *)filePath;
+
+- (id)initWithFileURL:(NSURL *)fileURL;
+
+/**
+ @param filePath Must not be nil!
+ @note Designated initializer.
+ */
+- (id)initWithFilePath:(NSString *)filePath __attribute__ ((nonnull(1)));
+
+#pragma mark -
+/// @name Enumeration
+
+- (void)enumerateRequestsUsingBlock:(void (^)(NSString *request, NSUInteger index, BOOL *stop))block;
+
+@end

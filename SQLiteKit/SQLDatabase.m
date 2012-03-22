@@ -12,6 +12,7 @@
 #import "SQLQuery.h"
 #import "SQLPreparedStatement.h"
 #import "SQLRow.h"
+#import "SQLFile.h"
 
 NSString * const kSQLDatabaseInsertNotification = @"@insert.";
 NSString * const kSQLDatabaseUpdateNotification = @"@update.";
@@ -114,27 +115,31 @@ void sqldatabase_rollback_hook(void *object)
     return [[[self alloc] init] autorelease];
 }
 
-+ (id)databaseWithURL:(NSURL *)storeURL
++ (id)databaseWithFileURL:(NSURL *)storeURL
 {
-    return [[[self alloc] initWithURL:storeURL] autorelease];
+    return [[[self alloc] initWithFileURL:storeURL] autorelease];
 }
 
-+ (id)databaseWithPath:(NSString *)storePath
++ (id)databaseWithFilePath:(NSString *)storePath
 {
-    return [[[self alloc] initWithPath:storePath] autorelease];
+    return [[[self alloc] initWithFilePath:storePath] autorelease];
 }
 
 - (id)init
 {
-    return [self initWithPath:nil];
+    return [self initWithFilePath:nil];
 }
 
-- (id)initWithURL:(NSURL *)storeURL
+- (id)initWithFileURL:(NSURL *)storeURL
 {
-    return [self initWithPath:storeURL.absoluteString];
+    if ( storeURL.isFileURL == NO )
+    {
+        return nil;
+    }
+    return [self initWithFilePath:storeURL.path];
 }
 
-- (id)initWithPath:(NSString *)storePath
+- (id)initWithFilePath:(NSString *)storePath
 {
     self = [super init];
     if ( self != nil )
@@ -164,8 +169,12 @@ void sqldatabase_rollback_hook(void *object)
 
 + (void)load
 {
+    if ( strcmp(sqlite3_sourceid(), SQLITE_SOURCE_ID) != 0 )
+    {
+        sqlitekit_warning(@"SQLite header and source version mismatch (header = %s, source = %s).", sqlite3_sourceid(), SQLITE_SOURCE_ID);
+    }
 #ifdef SQLITEKIT_VERBOSE
-    NSLog(@"> SQLite version %s [ ID %s ] ", sqlite3_libversion(), sqlite3_sourceid());
+    NSLog(@" > SQLite version %s [ ID %s ] ", sqlite3_libversion(), sqlite3_sourceid());
 #endif
 }
 
@@ -305,28 +314,21 @@ void sqldatabase_rollback_hook(void *object)
 
 - (BOOL)executeSQLFileAtPath:(NSString *)path
 {
-    /// @todo This is only a quick version. Should be rewritten to improves the performances, errors management, etc.
     NSParameterAssert(path);
+    SQLFile *file = [SQLFile fileWithFilePath:path];
+    __block BOOL executionSucceed = YES;
 
-    NSError *error = nil;
-    NSString *contentOfFile = [NSString stringWithContentsOfFile:path encoding:NSASCIIStringEncoding error:&error];
-    NSAssert(error == nil, [error localizedDescription]);
+    [file enumerateRequestsUsingBlock:^(NSString *request, NSUInteger index, BOOL *stop) {
+        NSParameterAssert(request);
 
-    NSRange searchRange = NSMakeRange(0, contentOfFile.length);
-    NSRange eofRange = [contentOfFile rangeOfString:@";"];
-    NSCharacterSet *whitespaceAndNewlineCharacterSet = [NSCharacterSet whitespaceAndNewlineCharacterSet];
-
-    while ( eofRange.location !=  NSNotFound ) {
-        NSRange lineRange = NSMakeRange(searchRange.location, NSMaxRange(eofRange) - searchRange.location);
-        NSString *line = [[contentOfFile substringWithRange:lineRange] stringByTrimmingCharactersInSet:whitespaceAndNewlineCharacterSet];
-
-        [self executeStatement:line];
-        searchRange.location = NSMaxRange(lineRange);
-        searchRange.length -= lineRange.length;
-        eofRange = [contentOfFile rangeOfString:@";" options:0 range:searchRange];
-    }
-    NSAssert(searchRange.length == 0, @"Syntax error");
-    return YES;
+        sqlitekit_verbose(@"#%u %@", index, request);
+        if ( [self executeStatement:request] == NO )
+        {
+            executionSucceed = NO;
+            *stop = YES;
+        }
+    }];
+    return executionSucceed;
 }
 
 - (BOOL)executeQuery:(SQLQuery *)query

@@ -52,16 +52,16 @@ typedef NSUInteger SQLDatabaseExecutingOptions;
 #pragma mark -
 
 + (id)database;
-+ (id)databaseWithURL:(NSURL *)storeURL;
-+ (id)databaseWithPath:(NSString *)storePath;
++ (id)databaseWithFileURL:(NSURL *)storeURL;
++ (id)databaseWithFilePath:(NSString *)storePath;
 
-- (id)initWithURL:(NSURL *)storeURL;
+- (id)initWithFileURL:(NSURL *)storeURL;
 
 /**
  @param storePath If nil, the database will be created in-memory. This in-memory database will vanish when the database connection is closed! The object property will be equal to @":memory:".
  @note Designated initializer.
  */
-- (id)initWithPath:(NSString *)storePath;
+- (id)initWithFilePath:(NSString *)storePath;
 
 #pragma mark -
 

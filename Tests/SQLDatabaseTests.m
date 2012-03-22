@@ -9,11 +9,13 @@
  */
 
 #import "SQLDatabaseTests.h"
-#import "SQLDatabase.h"
-#import "SQLQuery.h"
-#import "SQLRow.h"
+
+#import "SenTestCase+SQLiteKitAdditions.h"
 
 @implementation SQLDatabaseTests
+
+#pragma mark -
+#pragma mark Tests
 
 - (void)testLifeCycle
 {
@@ -26,17 +28,9 @@
 
 - (void)testLifeCycleAdvanced
 {
-    NSString *databaseLocalPath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"foo.db"];
-    NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSError *error = nil;
-
-    [fileManager removeItemAtPath:databaseLocalPath error:&error];
-    if ( error != nil && error.code != NSFileNoSuchFileError )
-    {
-        STAssertNil(error, [error localizedDescription]);
-    }
-
-    SQLDatabase *database = [[SQLDatabase alloc] initWithPath:databaseLocalPath];
+    NSString *storePath = [self generateValidTemporaryPathWithComponent:@"testLifeCycleAdvanced.sqlite"];
+    STAssertNotNil(storePath, @"The path generated must be different than nil.");
+    SQLDatabase *database = [[SQLDatabase alloc] initWithFilePath:storePath];
     /// @todo Check the return values to make sure that the operations have succeed.
 
     STAssertTrue([database openWithFlags:(SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_SHAREDCACHE | SQLITE_OPEN_FULLMUTEX)], @"Open operation failed (database = %@).", database);
@@ -207,75 +201,45 @@
 
 - (void)testExecuteFile
 {
-    NSError *error = nil;
-    NSString *filePath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"movie-db.sql"];
-    NSString *databaseDump = @"\
-    PRAGMA foreign_keys=OFF;\
-    BEGIN TRANSACTION;\
-    CREATE TABLE movies(ID INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, rating INTEGER);\
-    INSERT INTO movies VALUES(1,'The Shawshank Redemption',9.2);\
-    INSERT INTO movies VALUES(2,'The Godfather',9.2);\
-    INSERT INTO movies VALUES(3,'The Godfather: Part II',9);\
-    INSERT INTO movies VALUES(4,'The Good, the Bad and the Ugly',8.9);\
-    INSERT INTO movies VALUES(5,'Pulp Fiction',8.9);\
-    CREATE TABLE actors(ID INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT);\
-    INSERT INTO actors VALUES(1,'Morgan Freeman');\
-    INSERT INTO actors VALUES(2,'Tim Robbins');\
-    INSERT INTO actors VALUES(3,'Marlon Brando');\
-    INSERT INTO actors VALUES(4,'Al Pacino');\
-    INSERT INTO actors VALUES(5,'Robert Duvall');\
-    INSERT INTO actors VALUES(6,'Eli Wallach');\
-    INSERT INTO actors VALUES(7,'Clint Eastwood');\
-    INSERT INTO actors VALUES(8,'John Travolta');\
-    INSERT INTO actors VALUES(9,'Samuel L. Jackson');\
-    CREATE TABLE act(movie_ID INTEGER, actor_ID INTEGER);\
-    INSERT INTO act VALUES(1,1);\
-    INSERT INTO act VALUES(1,2);\
-    INSERT INTO act VALUES(2,3);\
-    INSERT INTO act VALUES(2,4);\
-    INSERT INTO act VALUES(3,4);\
-    INSERT INTO act VALUES(3,5);\
-    INSERT INTO act VALUES(4,6);\
-    INSERT INTO act VALUES(4,7);\
-    INSERT INTO act VALUES(5,8);\
-    INSERT INTO act VALUES(5,9);\
-    DELETE FROM sqlite_sequence;\
-    INSERT INTO sqlite_sequence VALUES('movies',5);\
-    INSERT INTO sqlite_sequence VALUES('actors',9);\
-    COMMIT;";
+    NSString *dumpFilePath = [self pathForSQLResource:@"dump_movie"];
+    STAssertNotNil(dumpFilePath, @"The path of the dump file must be different than nil.");
+    NSString *storePath = [self generateValidTemporaryPathWithComponent:@"testExecuteFile.sqlite"];
+    STAssertNotNil(storePath, @"The path generated must be different than nil.");
+    SQLDatabase *database = [SQLDatabase databaseWithFilePath:storePath];
 
-    [databaseDump writeToFile:filePath atomically:YES encoding:NSASCIIStringEncoding error:&error];
-    STAssertNil(error, [error localizedDescription]);
+    STAssertTrue([database open], @"Open operation failed (database = %@).", database);
+    STAssertTrue([database executeSQLFileAtPath:dumpFilePath], @"Execute SQL file failed (database = %@, filePath = %@).", database, dumpFilePath);
 
-    NSString *databaseLocalPath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"movie.db"];
-    NSFileManager *fileManager = [NSFileManager defaultManager];
+    SQLQuery *numberOfActorsQuery = [SQLQuery queryWithStatement:@"SELECT count(*) FROM actors;"];
+    __block NSUInteger numberOfActors = 0;
 
-    [fileManager removeItemAtPath:databaseLocalPath error:&error];
-    if ( error != nil && error.code != NSFileNoSuchFileError )
-    {
-        STAssertNil(error, [error localizedDescription]);
-    }
+    [database executeQuery:numberOfActorsQuery thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
+       if ( index != NSNotFound )
+       {
+           numberOfActors = (NSUInteger)[row intForColumnAtIndex:0];
+       }
+    }];
+    STAssertEquals(numberOfActors, 9u, @"Invalid number of actors (value = %u, expected = 9).", numberOfActors);
 
-    SQLDatabase *movieDatabase = [SQLDatabase databaseWithPath:databaseLocalPath];
+    SQLQuery *numberOfActorsInPulpFictionQuery = [SQLQuery queryWithStatementAndArguments:@"SELECT count(*) FROM act, actors, movies WHERE act.actor_id = actors.id AND act.movie_id = movies.id AND movies.title = ?;", @"Pulp Fiction", nil];
+    __block NSUInteger numberOfActorsInPulpFiction = 0;
 
-    STAssertTrue([movieDatabase open], @"Open operation failed (database = %@).", movieDatabase);
-    STAssertTrue([movieDatabase executeSQLFileAtPath:filePath], @"Execute SQL file failed (database = %@, filePath = %@).", movieDatabase, filePath);
-    STAssertTrue([movieDatabase close], @"Close operation failed (database = %@).", movieDatabase);
+    [database executeQuery:numberOfActorsInPulpFictionQuery withOptions:SQLDatabaseExecutingOptionCacheStatement thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
+       if ( index != NSNotFound )
+       {
+           numberOfActorsInPulpFiction = (NSUInteger)[row intForColumnAtIndex:0];
+       }
+    }];
+    STAssertEquals(numberOfActorsInPulpFiction, 2u, @"Invalid number of actors playing in 'Pulp Fiction' (value = %u, expected = 2).", numberOfActorsInPulpFiction);
+
+    STAssertTrue([database close], @"Close operation failed (database = %@).", database);
 }
 
 - (void)testNotifications
 {
-    NSString *databaseLocalPath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"observation.sqlite"];
-    NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSError *error = nil;
-
-    [fileManager removeItemAtPath:databaseLocalPath error:&error];
-    if ( error != nil && error.code != NSFileNoSuchFileError )
-    {
-        STAssertNil(error, [error localizedDescription]);
-    }
-
-    SQLDatabase *database = [SQLDatabase databaseWithURL:[NSURL URLWithString:databaseLocalPath]];
+    NSString *storePath = [self generateValidTemporaryPathWithComponent:@"testNotifications.sqlite"];
+    STAssertNotNil(storePath, @"The path generated must be different than nil.");
+    SQLDatabase *database = [SQLDatabase databaseWithFileURL:[NSURL fileURLWithPath:storePath]];
 
     STAssertTrue([database open], @"Open operation failed (database = %@).", database);
 
@@ -354,20 +318,12 @@
 
 - (void)testAllExecutionTypes
 {
-    NSString *databaseLocalPath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"travel.sqlite"];
-    NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSError *error = nil;
-
-    [fileManager removeItemAtPath:databaseLocalPath error:&error];
-    if ( error != nil && error.code != NSFileNoSuchFileError )
-    {
-        STAssertNil(error, [error localizedDescription]);
-    }
-
-    SQLDatabase *database = [SQLDatabase databaseWithPath:databaseLocalPath];
+    NSString *storePath = [self generateValidTemporaryPathWithComponent:@"testAllExecutionTypes.sqlite"];
+    STAssertNotNil(storePath, @"The path generated must be different than nil.");
+    SQLDatabase *database = [SQLDatabase databaseWithFilePath:storePath];
 
     STAssertTrue([database open], @"Open operation failed (database = %@).", database);
-    STAssertTrue([database executeStatement:@"CREATE TABLE IF NOT EXISTS airports(ID INTEGER PRIMARY KEY, fullname TEXT, short TEXT, country TEXT);"], @"Execute statement failed (database = %@).", database);
+    STAssertTrue([database executeStatement:@"CREATE TABLE IF NOT EXISTS airports(id INTEGER PRIMARY KEY, fullname TEXT, short TEXT, country TEXT);"], @"Execute statement failed (database = %@).", database);
 
     STAssertTrue([database lastInsertRowID] == nil, @"No insert operation occurred yet, this method should have returned a nil pointer.");
     STAssertTrue([database lastInsertRowID] == nil, @"No insert operation occurred yet, this method should have returned a nil pointer.");
@@ -395,6 +351,7 @@
                                   [NSArray arrayWithObjects:@"Rome", @"ROM", @"Italia", nil],
                                   [NSArray arrayWithObjects:@"Prague", @"PRG", @"Czech Republic", nil],
                                   [NSArray arrayWithObjects:@"Wellington", @"WLG", @"New Zealand", nil],
+                                  [NSArray arrayWithObjects:@"Auckland", @"AKL", @"New Zeland", nil],
                                   [NSArray arrayWithObjects:@"Amsterdam", @"AMS", @"Holland", nil],
                                   [NSArray arrayWithObjects:@"Athens", @"ATH", @"Greece", nil],
                                   [NSArray arrayWithObjects:@"Austin", @"AUS", @"USA", nil],
@@ -402,7 +359,7 @@
                                   [NSArray arrayWithObjects:@"Bangkok", @"BKK", @"Thailand",nil],
                                   [NSArray arrayWithObjects:@"Baltimore", @"BWI", @"USA", nil],
                                   [NSArray arrayWithObjects:@"Chicago", @"CHI", @"USA", nil],
-                                  [NSArray arrayWithObjects:@"Colombus", @"CMH", @"USA", nil],
+                                  [NSArray arrayWithObjects:@"Columbus", @"CMH", @"USA", nil],
                                   [NSArray arrayWithObjects:@"Cleveland", @"CLV", @"USA", nil],
                                   [NSArray arrayWithObjects:@"El Paso", @"ELP", @"USA", nil],
                                   [NSArray arrayWithObjects:@"Florence", @"FLR", @"Italia", nil],
@@ -424,6 +381,7 @@
                                   [NSArray arrayWithObjects:@"Darwin", @"DRW", @"Australia", nil],
                                   [NSArray arrayWithObjects:@"Tunis", @"TUN", @"Tunisia", nil],
                                   [NSArray arrayWithObjects:@"Djibouti", @"JIB", @"Djibouti", nil],
+                                  [NSArray arrayWithObjects:@"Accra", @"ACC", @"Ghana", nil],
                                   [NSArray arrayWithObjects:@"Singapore", @"SIN", @"Singapore Republic", nil],
                                   [NSArray arrayWithObjects:@"Bamako", @"BKO", @"Mali", nil],
                                   [NSArray arrayWithObjects:@"Marrakesh", @"RAK", @"Morocco", nil],
@@ -434,28 +392,183 @@
                                   [NSArray arrayWithObjects:@"Nice", @"NCE", @"France", nil],
                                   [NSArray arrayWithObjects:@"Marseille", @"MRS", @"France", nil],
                                   [NSArray arrayWithObjects:@"New York", @"JFK", @"USA", nil],
+                                  [NSArray arrayWithObjects:@"Dallas", @"DFW", @"USA", nil],
+                                  [NSArray arrayWithObjects:@"Shanghai", @"SH", @"China", nil],
+                                  [NSArray arrayWithObjects:@"Dubai", @"DBX", @"United Arab Emirates", nil],
+                                  [NSArray arrayWithObjects:@"Rio de Janeiro", @"GIG", @"Brazil", nil],
                                   nil];
 
     [insertAirportData enumerateObjectsUsingBlock:^(id object, NSUInteger index, BOOL *stop) {
         insertAirportQuery.arguments = (NSArray *)object;
         STAssertTrue([database executeQuery:insertAirportQuery withOptions:SQLDatabaseExecutingOptionCacheStatement thenEnumerateRowsUsingBlock:NULL], @"Execute query failed (database = %@).", database);
     }];
+
+    STAssertTrue([database executeStatement:@"CREATE TABLE IF NOT EXISTS companies(id INTEGER PRIMARY KEY, name TEXT);"], @"Execute statement failed (database = %@).", database);
+
+    SQLQuery *insertCompanyQuery = [SQLQuery queryWithStatement:@"INSERT INTO companies(name) VALUES(?);"];
+    NSArray *insertCompanyData = [NSArray arrayWithObjects:
+                                  [NSArray arrayWithObject:@"Alaska Airlines"],
+                                  [NSArray arrayWithObject:@"American Airlines"],
+                                  [NSArray arrayWithObject:@"Delta"],
+                                  [NSArray arrayWithObject:@"United"],
+                                  [NSArray arrayWithObject:@"US Airways"],
+                                  [NSArray arrayWithObject:@"Virgin America"],
+                                  [NSArray arrayWithObject:@"Air France"],
+                                  [NSArray arrayWithObject:@"Air China"],
+                                  [NSArray arrayWithObject:@"Air Nostrum LAMSA"],
+                                  [NSArray arrayWithObject:@"Turkish Airlines"],
+                                  [NSArray arrayWithObject:@"Iberia"],
+                                  [NSArray arrayWithObject:@"British Airways"],
+                                  [NSArray arrayWithObject:@"Virgin Australia"],
+                                  [NSArray arrayWithObject:@"Lufthansa"],
+                                  [NSArray arrayWithObject:@"China Eastern Air"],
+                                  [NSArray arrayWithObject:@"Hawaiian Airlines"],
+                                  [NSArray arrayWithObject:@"China Southern"],
+                                  [NSArray arrayWithObject:@"SWISS"],
+                                  [NSArray arrayWithObject:@"LAN Airlines"],
+                                  [NSArray arrayWithObject:@"Emirates"],
+                                  [NSArray arrayWithObject:@"Aerolineas Argentinas"],
+                                  [NSArray arrayWithObject:@"Malaysia Airlines"],
+                                  [NSArray arrayWithObject:@"Singapore Air"],
+                                  [NSArray arrayWithObject:@"Ethiopian Air"],
+                                  [NSArray arrayWithObject:@"Air New Zealand"],
+                                  [NSArray arrayWithObject:@"Hainan Airlines"],
+                                  nil];
+
+    [insertCompanyData enumerateObjectsUsingBlock:^(id object, NSUInteger index, BOOL *stop) {
+        insertCompanyQuery.arguments = (NSArray *)object;
+        STAssertTrue([database executeQuery:insertCompanyQuery withOptions:SQLDatabaseExecutingOptionCacheStatement thenEnumerateRowsUsingBlock:NULL], @"Execute query failed (database = %@).", database);
+    }];
+
+    STAssertTrue([database executeStatement:@"CREATE TABLE IF NOT EXISTS flights(id INTEGER PRIMARY KEY, take_off TEXT, landing TEXT, from_id INTEGER, to_id INTERGER, company id INTEGER, FOREIGN KEY(from_id) REFERENCES airports(id), FOREIGN KEY(to_id) REFERENCES airports(id), FOREIGN KEY(company) REFERENCES companies(id));"], @"Execute statement failed (database = %@).", database);
+
+    SQLQuery *insertFlightQuery = [SQLQuery queryWithStatement:@"INSERT INTO flights(take_off, landing, from_id, to_id, company) SELECT ?, ?, a1.id, a2.id, companies.id FROM airports AS a1, airports as a2, companies WHERE a1.fullname = ? AND a2.fullname = ? AND companies.name = ?;"];
+    NSArray *insertFlightData = [NSArray arrayWithObjects:
+                                 [NSArray arrayWithObjects:@"Tue 6:50a", @"Tue 8:10a", @"San Francisco", @"Los Angeles", @"Alaska Airlines", nil],
+                                 [NSArray arrayWithObjects:@"Tue 1:35p", @"Tue 2:55p", @"San Francisco", @"Los Angeles", @"Virgin America", nil],
+                                 [NSArray arrayWithObjects:@"Tue 6:00a", @"Tue 8:40a", @"El Paso", @"Dallas", @"American Airlines", nil],
+                                 [NSArray arrayWithObjects:@"Tue 10:00a", @"Tue 2:20p", @"Dallas", @"New York", @"American Airlines", nil],
+                                 [NSArray arrayWithObjects:@"Tue 11:00a", @"Tue 1:09p", @"Chicago", @"Columbus", @"United", nil],
+                                 [NSArray arrayWithObjects:@"Tue 5:45p", @"Tue 6:20p", @"Columbus", @"Chicago", @"American Airlines", nil],
+                                 [NSArray arrayWithObjects:@"Tue 7:00a", @"Tue 10:35a", @"Boston", @"Los Angeles", @"Virgin America", nil],
+                                 [NSArray arrayWithObjects:@"Tue 12:15p", @"Tue 3:05p", @"Boston", @"Atlanta", @"Delta", nil],
+                                 [NSArray arrayWithObjects:@"Tue 4:30p", @"Tue 6:22p", @"Atlanta", @"Los Angeles", @"Delta", nil],
+                                 [NSArray arrayWithObjects:@"Tue 1:35p", @"Tue 3:19p", @"Dallas", @"San Francisco", @"United", nil],
+
+                                 [NSArray arrayWithObjects:@"Tue 9:35a", @"Tue 11:05a", @"Toulouse", @"Paris", @"Air France", nil],
+                                 [NSArray arrayWithObjects:@"Tue 11:05a", @"Tue 12:25p", @"Toulouse", @"Nice", @"Air France", nil],
+                                 [NSArray arrayWithObjects:@"Tue 7:00a", @"Tue 8:20a", @"Toulouse", @"Madrid", @"Air Nostrum LAMSA", nil],
+                                 [NSArray arrayWithObjects:@"Tue 10:20a", @"Tue 10:10a", @"Madrid", @"Casablanca", @"Air Nostrum LAMSA", nil],
+                                 [NSArray arrayWithObjects:@"Tue 2:00p", @"Tue 8:30p", @"Casablanca", @"Istanbul", @"Turkish Airlines", nil],
+                                 [NSArray arrayWithObjects:@"Tue 4:10p", @"Tue 8:45p", @"Paris", @"Ouagadougou", @"Air France", nil],
+                                 [NSArray arrayWithObjects:@"Tue 5:50p", @"Wed 8:50a", @"Dallas", @"London", @"Iberia", nil],
+                                 [NSArray arrayWithObjects:@"Wed 9:55a", @"Wed 12:45p", @"London", @"Berlin", @"British Airways", nil],
+                                 [NSArray arrayWithObjects:@"Tue 6:45p", @"Wed 9:35a", @"Dallas", @"London", @"British Airways", nil],
+                                 [NSArray arrayWithObjects:@"Fri 8:45p", @"Sat 12:20a", @"Brisbane", @"Darwin", @"Virgin Australia", nil],
+
+                                 [NSArray arrayWithObjects:@"Sat 3:50p", @"Sat 4:50p", @"Nice", @"London", @"British Airways", nil],
+                                 [NSArray arrayWithObjects:@"Fri 2:55p", @"Fri 4:50p", @"Nice", @"Berlin", @"Lufthansa", nil],
+                                 [NSArray arrayWithObjects:@"Sat 2:45p", @"Sat 3:00p", @"Paris", @"London", @"British Airways", nil],
+                                 [NSArray arrayWithObjects:@"Sat 5:15p", @"Sat 9:15p", @"London", @"New York", @"British Airways", nil],
+                                 [NSArray arrayWithObjects:@"Mon 5:30p", @"Mon 8:00p", @"New York", @"Denver", @"United", nil],
+                                 [NSArray arrayWithObjects:@"Mon 9:00a", @"Mon 12:10p", @"New York", @"Los Angeles", @"American Airlines", nil],
+                                 [NSArray arrayWithObjects:@"Thu 12:00p", @"Thu 7:20p", @"Sydney", @"Shanghai", @"China Eastern Air", nil],
+                                 [NSArray arrayWithObjects:@"Thu 9:20p", @"Thu 10:10a", @"Sydney", @"Honolulu", @"Hawaiian Airlines", nil],
+                                 [NSArray arrayWithObjects:@"Thu 2:00p", @"Thu 9:20p", @"Honolulu", @"Los Angeles", @"Hawaiian Airlines", nil],
+                                 [NSArray arrayWithObjects:@"Thu 9:25a", @"Thu 2:40p", @"Sydney", @"Auckland", @"LAN Airlines", nil],
+
+                                 [NSArray arrayWithObjects:@"Thu 7:00p", @"Thu 3:50p", @"Auckland", @"Buenos Aires", @"Aerolineas Argentinas", nil],
+                                 [NSArray arrayWithObjects:@"Thu 7:00p", @"Thu 10:25p", @"Buenos Aires", @"Lima", @"Aerolineas Argentinas", nil],
+                                 [NSArray arrayWithObjects:@"Mon 2:35p", @"Mon 2:55p", @"Cotonou", @"Abidjan", @"Ethiopian Air", nil],
+                                 [NSArray arrayWithObjects:@"Thu 2:30p", @"Thu 10:55p", @"Tunis", @"Dubai", @"Emirates", nil],
+                                 [NSArray arrayWithObjects:@"Fri 7:40a", @"Fri 12:40p", @"Dubai", @"Accra", @"Emirates", nil],
+                                 [NSArray arrayWithObjects:@"Fri 1:55p", @"Fri 2:55p", @"Accra", @"Abidjan", @"Emirates", nil],
+                                 [NSArray arrayWithObjects:@"Sat 6:05p", @"Sun 6:00a", @"Dubai", @"Beijing", @"China Southern", nil],
+                                 [NSArray arrayWithObjects:@"Sun 12:35p", @"Sun 3:05p", @"Shanghai", @"Beijing", @"China Eastern Air", nil],
+                                 [NSArray arrayWithObjects:@"Tue 7:40a", @"Tue 8:35a", @"Geneva", @"Zurich", @"SWISS", nil],
+                                 [NSArray arrayWithObjects:@"Tue 9:25a", @"Tue 11:55a", @"Zurich", @"Marrakesh", @"SWISS", nil],
+
+                                 [NSArray arrayWithObjects:@"Fri 4:10p", @"Fri 8:55p", @"Paris", @"Bamako", @"Air France", nil],
+                                 [NSArray arrayWithObjects:@"Thu 10:10a", @"Thu 11:42a", @"Charlotte", @"Cleveland", @"United", nil],
+                                 [NSArray arrayWithObjects:@"Thu 12:20p", @"Thu 1:07p", @"Cleveland", @"Columbus", @"United", nil],
+                                 [NSArray arrayWithObjects:@"Tue 8:00p", @"Wed 7:20a", @"Dubai", @"Singapore", @"Ethiopian Air", nil],
+                                 [NSArray arrayWithObjects:@"Wed 11:30p", @"Thu 5:50a", @"Beijing", @"Singapore", @"Air China", nil],
+                                 [NSArray arrayWithObjects:@"Tue 11:30p", @"Wed 5:50a", @"Beijing", @"Singapore", @"Air China", nil],
+                                 [NSArray arrayWithObjects:@"Sun 8:50a", @"Sun 12:20p", @"Beijing", @"Hong Kong", @"China Southern", nil],
+                                 [NSArray arrayWithObjects:@"Sun 6:45p", @"Sun 10:30p", @"Kuala Lumpur", @"Hong Kong", @"Malaysia Airlines", nil],
+                                 [NSArray arrayWithObjects:@"Sat 5:50p", @"Sat 9:35p", @"Singapore", @"Hong Kong", @"Singapore Air", nil],
+                                 [NSArray arrayWithObjects:@"Mon 6:45a", @"Mon 7:45a", @"Singapore", @"Kuala Lumpur", @"Malaysia Airlines", nil],
+
+                                 [NSArray arrayWithObjects:@"Mon 2:35a", @"Mon 5:35a", @"Darwin", @"Singapore", @"Singapore Air", nil],
+                                 [NSArray arrayWithObjects:@"Mon 8:35a", @"Mon 9:30a", @"Singapore", @"Kuala Lumpur", @"Singapore Air", nil],
+                                 [NSArray arrayWithObjects:@"Sat 2:40a", @"Sat 6:35a", @"Dubai", @"London", @"British Airways", nil],
+                                 [NSArray arrayWithObjects:@"Sat 12:00p", @"Sat 9:50p", @"London", @"Rio de Janeiro", @"British Airways", nil],
+                                 [NSArray arrayWithObjects:@"Sat 9:30p", @"Sun 1:23a", @"Buenos Aires", @"Rio de Janeiro", @"Emirates", nil],
+                                 [NSArray arrayWithObjects:@"Sun 6:30a", @"Sun 9:30a", @"Buenos Aires", @"Rio de Janeiro", @"Aerolineas Argentinas", nil],
+                                 [NSArray arrayWithObjects:@"Fri 11:50p", @"Sat 6:45a", @"Rio de Janeiro", @"Miami", @"American Airlines", nil],
+                                 [NSArray arrayWithObjects:@"Mon 9:45a", @"Mon 11:25a", @"Miami", @"Guatemala", @"American Airlines", nil],
+                                 [NSArray arrayWithObjects:@"Tue 12:00p", @"Tue 3:05p", @"Miami", @"New York", @"Delta", nil],
+                                 [NSArray arrayWithObjects:@"Tue 4:00p", @"Tue 7:35p", @"New York", @"San Francisco", @"Delta", nil],
+
+                                 [NSArray arrayWithObjects:@"Wed 2:05p", @"Wed 3:30p", @"Zagreb", @"Berlin", @"Lufthansa", nil],
+                                 [NSArray arrayWithObjects:@"Wed 6:30p", @"Wed 7:55p", @"Berlin", @"Zurich", @"Lufthansa", nil],
+                                 [NSArray arrayWithObjects:@"Thu 3:35p", @"Thu 6:15p", @"London", @"Zurich", @"British Airways", nil],
+                                 [NSArray arrayWithObjects:@"Sat 12:05p", @"Sat 3:05p", @"London", @"Nice", @"British Airways", nil],
+                                 [NSArray arrayWithObjects:@"Sun 3:15p", @"Sun 4:40p", @"Nice", @"Tunis", @"Air France", nil],
+                                 [NSArray arrayWithObjects:@"Mon 8:15p", @"Mon 10:25p", @"London", @"Paris", @"Air France", nil],
+                                 [NSArray arrayWithObjects:@"Tue 4:10p", @"Tue 8:45p", @"Paris", @"Ouagadougou", @"Air France", nil],
+                                 [NSArray arrayWithObjects:@"Tue 6:33p", @"Tue 7:59p", @"Reno", @"Los Angeles", @"United", nil],
+                                 [NSArray arrayWithObjects:@"Tue 8:30p", @"Tue 9:45p", @"Los Angeles", @"San Francisco", @"United", nil],
+                                 [NSArray arrayWithObjects:@"Thu 7:10a", @"Thu 2:50p", @"San Francisco", @"Atlanta", @"Delta", nil],
+
+                                 [NSArray arrayWithObjects:@"Thu 5:15p", @"Thu 11:55p", @"Atlanta", @"Lima", @"Delta", nil],
+                                 [NSArray arrayWithObjects:@"Fri 1:20p", @"Sat 4:35p", @"Seatle", @"Beijing", @"Hainan Airlines", nil],
+                                 [NSArray arrayWithObjects:@"Fri 1:50p", @"Sat 5:55p", @"San Francisco", @"Beijing", @"Air China", nil],
+                                 [NSArray arrayWithObjects:@"Thu 9:25a", @"Thu 12:40p", @"London", @"Florence", @"Air France", nil],
+                                 [NSArray arrayWithObjects:@"Fri 5:25p", @"Fri 6:40p", @"Zurich", @"Florence", @"SWISS", nil],
+                                 [NSArray arrayWithObjects:@"Fri 7:20p", @"Fri 8:30p", @"Florence", @"Zurich", @"SWISS", nil],
+                                 [NSArray arrayWithObjects:@"Sat 9:40a", @"Sat 1:30p", @"Zurich", @"Istanbul", @"SWISS", nil],
+                                 [NSArray arrayWithObjects:@"Wed 8:00a", @"Wed 1:15p", @"Kiev", @"London", @"British Airways", nil],
+                                 [NSArray arrayWithObjects:@"Fri 9:05p", @"Sat 5:15p", @"London", @"Hong Kong", @"Air New Zealand", nil],
+                                 [NSArray arrayWithObjects:@"Sat 7:15p", @"Sun 11:10a", @"Hong Kong", @"Auckland", @"Air New Zealand", nil],
+
+                                 [NSArray arrayWithObjects:@"Sun 1:00p", @"Sun 2:00p", @"Auckland", @"Wellington", @"Air New Zealand", nil],
+                                 [NSArray arrayWithObjects:@"Sun 3:40p", @"Sun 5:20p", @"Wellington", @"Sydney", @"Virgin Australia", nil],
+                                 [NSArray arrayWithObjects:@"Tue 1:50p", @"Wed 5:55p", @"San Francisco", @"Beijing", @"Air China", nil],
+                                 [NSArray arrayWithObjects:@"Thu 11:55a", @"Thu 2:30p", @"Beijing", @"Ulaanbaatar", @"Air China", nil],
+                                 [NSArray arrayWithObjects:@"Thu 3:30p", @"Thu 5:35p", @"Ulaanbaatar", @"Beijing", @"Air China", nil],
+                                 [NSArray arrayWithObjects:@"Fri 4:00p", @"Fri 10:30p", @"Beijing", @"Kuala Lumpur", @"Air China", nil],
+                                 [NSArray arrayWithObjects:@"Fri 2:15p", @"Sat 1:30a", @"Casablanca", @"Dubai", @"Emirates", nil],
+                                 [NSArray arrayWithObjects:@"Sat 3:20a", @"Sat 2:30p", @"Dubai", @"Hong Kong", @"Emirates", nil],
+                                 [NSArray arrayWithObjects:@"Sat 7:45a", @"Sat 10:25a", @"Istanbul", @"Paris", @"Turkish Airlines", nil],
+                                 [NSArray arrayWithObjects:@"Wed 10:10a", @"Wed 2:25p", @"Paris", @"Athens", @"Air France", nil],
+
+//                                 [NSArray arrayWithObjects:@"", @"", @"", @"", @"", nil],
+//                                 [NSArray arrayWithObjects:@"", @"", @"", @"", @"", nil],
+//                                 [NSArray arrayWithObjects:@"", @"", @"", @"", @"", nil],
+//                                 [NSArray arrayWithObjects:@"", @"", @"", @"", @"", nil],
+//                                 [NSArray arrayWithObjects:@"", @"", @"", @"", @"", nil],
+//                                 [NSArray arrayWithObjects:@"", @"", @"", @"", @"", nil],
+//                                 [NSArray arrayWithObjects:@"", @"", @"", @"", @"", nil],
+//                                 [NSArray arrayWithObjects:@"", @"", @"", @"", @"", nil],
+//                                 [NSArray arrayWithObjects:@"", @"", @"", @"", @"", nil],
+//                                 [NSArray arrayWithObjects:@"", @"", @"", @"", @"", nil],
+                                 nil];
+
+    [insertFlightData enumerateObjectsUsingBlock:^(id object, NSUInteger index, BOOL *stop) {
+        insertFlightQuery.arguments = (NSArray *)object;
+        STAssertTrue([database executeQuery:insertFlightQuery withOptions:SQLDatabaseExecutingOptionCacheStatement thenEnumerateRowsUsingBlock:NULL], @"Execute query failed (database = %@).", database);
+        STAssertEquals(database.numberOfChanges, 1u, @"Insertion failed (query = %@).", insertFlightQuery);
+    }];
+
     STAssertTrue([database close], @"Close operation failed (database = %@).", database);
 }
 
 - (void)testStringEncoding
 {
-    NSString *databaseLocalPath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"encoding.sqlite"];
-    NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSError *error = nil;
-
-    [fileManager removeItemAtPath:databaseLocalPath error:&error];
-    if ( error != nil && error.code != NSFileNoSuchFileError )
-    {
-        STAssertNil(error, [error localizedDescription]);
-    }
-
-    SQLDatabase *database = [SQLDatabase databaseWithPath:databaseLocalPath];
+    NSString *storePath = [self generateValidTemporaryPathWithComponent:@"testStringEncoding.sqlite"];
+    STAssertNotNil(storePath, @"The path generated must be different than nil.");
+    SQLDatabase *database = [SQLDatabase databaseWithFilePath:storePath];
 
     STAssertTrue([database open], @"Open operation failed (database = %@).", database);
     STAssertTrue([database executeStatement:@"CREATE TABLE IF NOT EXISTS sentences(ID INTEGER PRIMARY KEY, language TEXT, content TEXT);"], @"Execute statement failed (database = %@).", database);
@@ -497,17 +610,9 @@
 
 - (void)testDataTypes
 {
-    NSString *databaseLocalPath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"data.sqlite"];
-    NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSError *error = nil;
-
-    [fileManager removeItemAtPath:databaseLocalPath error:&error];
-    if ( error != nil && error.code != NSFileNoSuchFileError )
-    {
-        STAssertNil(error, [error localizedDescription]);
-    }
-
-    SQLDatabase *database = [SQLDatabase databaseWithPath:databaseLocalPath];
+    NSString *storePath = [self generateValidTemporaryPathWithComponent:@"testDataTypes.sqlite"];
+    STAssertNotNil(storePath, @"The path generated must be different than nil.");
+    SQLDatabase *database = [SQLDatabase databaseWithFilePath:storePath];
 
     STAssertTrue([database open], @"Open operation failed (database = %@).", database);
     STAssertTrue([database executeStatement:@"CREATE TABLE IF NOT EXISTS data(ID INTEGER PRIMARY KEY, description TEXT);"], @"Execute statement failed (database = %@).", database);
