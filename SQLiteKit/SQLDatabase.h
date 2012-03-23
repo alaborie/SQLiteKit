@@ -31,6 +31,15 @@ enum
 };
 typedef NSUInteger SQLDatabaseExecutingOptions;
 
+enum
+{
+    SQLDatabaseErrorCInterface,
+    SQLDatabaseErrorCannotAllocateMemory,
+    SQLDatabaseErrorDatabaseAlreadyOpen,
+    SQLDatabaseErrorDatabaseNotOpen,
+};
+typedef NSUInteger SQLDatabaseErrors;
+
 @interface SQLDatabase : NSObject <NSCacheDelegate>
 {
 @private
@@ -65,7 +74,7 @@ typedef NSUInteger SQLDatabaseExecutingOptions;
 
 #pragma mark -
 
-- (BOOL)open __attribute__ ((pure));
+- (BOOL)open:(NSError **)error  __attribute__ ((pure));
 
 /**
  @return YES if the database was opened successfully. Returns NO if an error occured.
@@ -73,51 +82,45 @@ typedef NSUInteger SQLDatabaseExecutingOptions;
  @note In this method we are using sqlite3_open_v2(), which has been introduced in the version 3.5.0.
  @see http://www.sqlite.org/34to35.html
  */
-- (BOOL)openWithFlags:(int)flags;
+- (BOOL)openWithFlags:(int)flags error:(NSError **)error;
 
 /**
  @return YES if the database was closed successfully. Returns NO if an error occured.
  */
-- (BOOL)close;
+- (BOOL)close:(NSError **)error;
 
 #pragma mark -
 
 /**
  @param SQLStatement Must not be nil!
  */
-- (BOOL)executeStatement:(NSString *)SQLStatement __attribute__ ((nonnull(1)));
-
-/**
- @param SQLStatement Must not be nil!
- @note The arguments list must be nil terminated.
- */
-- (BOOL)executeStatementWithArguments:(NSString *)SQLStatement, ... __attribute__((sentinel));
+- (BOOL)executeStatement:(NSString *)SQLStatement error:(NSError **)error __attribute__ ((nonnull(1)));
 
 /**
  @param SQLStatement Must not be nil!
  */
-- (BOOL)executeStatement:(NSString *)SQLStatement withArguments:(NSArray *)arguments __attribute__ ((nonnull(1)));
+- (BOOL)executeStatement:(NSString *)SQLStatement arguments:(NSArray *)arguments error:(NSError **)error __attribute__ ((nonnull(1)));
 
 /**
  @param path Must not be nil;
  */
-- (BOOL)executeSQLFileAtPath:(NSString *)path __attribute__ ((nonnull(1)));
+- (BOOL)executeSQLFileAtPath:(NSString *)path error:(NSError **)error __attribute__ ((nonnull(1)));
 
 /**
  @param query Must not be nil!
  */
-- (BOOL)executeQuery:(SQLQuery *)query __attribute__ ((nonnull(1)));
+- (BOOL)executeQuery:(SQLQuery *)query error:(NSError **)error __attribute__ ((nonnull(1)));
 
 /**
  @param query Must not be nil!
  */
-- (BOOL)executeQuery:(SQLQuery *)query thenEnumerateRowsUsingBlock:(void (^)(SQLRow *row, NSInteger index, BOOL *stop))block __attribute__ ((nonnull(1)));
+- (BOOL)executeQuery:(SQLQuery *)query error:(NSError **)error thenEnumerateRowsUsingBlock:(void (^)(SQLRow *row, NSInteger index, BOOL *stop))block __attribute__ ((nonnull(1)));
 
 /**
  @param query Must not be nil!
  @param block If the query returns no row, the block will be called once with a row equals to nil, an index equals to NSNotFound and a stop value equals to NULL.
  */
-- (BOOL)executeQuery:(SQLQuery *)query withOptions:(SQLDatabaseExecutingOptions)options thenEnumerateRowsUsingBlock:(void (^)(SQLRow *row, NSInteger index, BOOL *stop))block __attribute__ ((nonnull(1)));
+- (BOOL)executeQuery:(SQLQuery *)query options:(SQLDatabaseExecutingOptions)options error:(NSError **)error thenEnumerateRowsUsingBlock:(void (^)(SQLRow *row, NSInteger index, BOOL *stop))block __attribute__ ((nonnull(1)));
 
 #pragma mark -
 

@@ -10,6 +10,8 @@
 
 #import "SQLGlobal.h"
 
+NSString * const kSQLiteKitErrorDomain = @"SQLiteKitErrorDomain";
+
 void __sqlitekit_log(id object, NSString *format, ...)
 {
     NSCParameterAssert(format);

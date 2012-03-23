@@ -155,7 +155,7 @@ void sqldatabase_rollback_hook(void *object)
 {
     if ( _connectionHandle != NULL )
     {
-        [self close];
+        [self close:NULL];
     }
     _statementsCache.delegate = nil;
 
@@ -186,23 +186,24 @@ void sqldatabase_rollback_hook(void *object)
     SQLPreparedStatement *preparedStatement = (SQLPreparedStatement *)object;
     NSAssert([preparedStatement isKindOfClass:[SQLPreparedStatement class]] == YES, @"Invalid kind of class.");
 
-    // Finalizes the prepared statement before removing it from the cache.
-    [preparedStatement finialize];
+    // Completes the prepared statement before removing it from the cache.
+    [preparedStatement complete];
 }
 
 #pragma mark -
 #pragma mark Public
 
-- (BOOL)open
+- (BOOL)open:(NSError **)error
 {
-    return [self openWithFlags:0];
+    return [self openWithFlags:0 error:error];
 }
 
-- (BOOL)openWithFlags:(int)flags
+- (BOOL)openWithFlags:(int)flags error:(NSError **)error
 {
     if ( self.connectionHandle != NULL )
     {
         sqlitekit_warning(@"The database is already opened.");
+        sqlitekit_create_error(error, kSQLiteKitErrorDomain, SQLDatabaseErrorDatabaseAlreadyOpen, @"The database is already opened.");
         return NO;
     }
 
@@ -236,28 +237,31 @@ void sqldatabase_rollback_hook(void *object)
     if ( self.connectionHandle == NULL )
     {
         sqlitekit_warning(@"Cannot allocate memory to hold the sqlite3 object.");
+        sqlitekit_create_error(error, kSQLiteKitErrorDomain, SQLDatabaseErrorCannotAllocateMemory, @"Cannot allocate memory to hold the sqlite3 object.");
     }
     else
     {
         sqlitekit_warning(@"%s.", sqlite3_errmsg(self.connectionHandle));
+        sqlitekit_create_error_cstring(error, kSQLiteKitErrorDomain, SQLDatabaseErrorCInterface, sqlite3_errmsg(self.connectionHandle));
         /// @note We have to explicitly close the database even if the open failed.
         /// @see http://www.sqlite.org/c3ref/open.html
-        [self close];
+        [self close:NULL];
     }
     return NO;
 }
 
-- (BOOL)close
+- (BOOL)close:(NSError **)error
 {
     if ( self.connectionHandle == NULL )
     {
         sqlitekit_warning(@"Cannot close a database that is not open.");
+        sqlitekit_create_error(error, kSQLiteKitErrorDomain, SQLDatabaseErrorDatabaseNotOpen, @"Cannot close a database that is not open.");
         return NO;
     }
     // We have to stop generating the database notifications.
     [self endGeneratingNotifications];
     // We have to remove all the prepared statements otherwise the close operation will fail.
-    /// @note The prepared statement will be finalized in the delegate method of NSCache.
+    /// @note The prepared statement will be completed in the delegate method of NSCache.
     self.statementsCache.delegate = self;
     [self.statementsCache removeAllObjects];
     self.statementsCache.delegate = nil;
@@ -273,35 +277,23 @@ void sqldatabase_rollback_hook(void *object)
     }
     sqlitekit_verbose(@"A problem occurred while closing the database.");
     sqlitekit_warning(@"%s.", sqlite3_errmsg(self.connectionHandle));
+    sqlitekit_create_error_cstring(error, kSQLiteKitErrorDomain, SQLDatabaseErrorCInterface, sqlite3_errmsg(self.connectionHandle));
     return NO;
 }
 
 #pragma mark -
 
-- (BOOL)executeStatement:(NSString *)SQLStatement
+- (BOOL)executeStatement:(NSString *)SQLStatement error:(NSError **)error
 {
     NSParameterAssert(SQLStatement);
 
     SQLQuery *query;
 
     query = [[[SQLQuery alloc] initWithStatement:SQLStatement] autorelease];
-    return [self executeQuery:query withOptions:0 thenEnumerateRowsUsingBlock:NULL];
+    return [self executeQuery:query options:0 error:error thenEnumerateRowsUsingBlock:NULL];
 }
 
-- (BOOL)executeStatementWithArguments:(NSString *)SQLStatement, ...
-{
-    NSParameterAssert(SQLStatement);
-
-    SQLQuery *query;
-    va_list argumentsList;
-
-    va_start(argumentsList, SQLStatement);
-    query = [[[SQLQuery alloc] initWithStatement:SQLStatement arguments:nil orArgumentsList:argumentsList] autorelease];
-    va_end(argumentsList);
-    return [self executeQuery:query withOptions:0 thenEnumerateRowsUsingBlock:NULL];
-}
-
-- (BOOL)executeStatement:(NSString *)SQLStatement withArguments:(NSArray *)arguments
+- (BOOL)executeStatement:(NSString *)SQLStatement arguments:(NSArray *)arguments error:(NSError **)error
 {
     NSParameterAssert(SQLStatement);
 
@@ -309,10 +301,10 @@ void sqldatabase_rollback_hook(void *object)
 
     query = [[[SQLQuery alloc] initWithStatement:SQLStatement] autorelease];
     query.arguments = arguments;
-    return [self executeQuery:query withOptions:0 thenEnumerateRowsUsingBlock:NULL];
+    return [self executeQuery:query options:0 error:error thenEnumerateRowsUsingBlock:NULL];
 }
 
-- (BOOL)executeSQLFileAtPath:(NSString *)path
+- (BOOL)executeSQLFileAtPath:(NSString *)path error:(NSError **)error
 {
     NSParameterAssert(path);
     SQLFile *file = [SQLFile fileWithFilePath:path];
@@ -322,7 +314,7 @@ void sqldatabase_rollback_hook(void *object)
         NSParameterAssert(request);
 
         sqlitekit_verbose(@"#%u %@", index, request);
-        if ( [self executeStatement:request] == NO )
+        if ( [self executeStatement:request error:error] == NO )
         {
             executionSucceed = NO;
             *stop = YES;
@@ -331,21 +323,22 @@ void sqldatabase_rollback_hook(void *object)
     return executionSucceed;
 }
 
-- (BOOL)executeQuery:(SQLQuery *)query
+- (BOOL)executeQuery:(SQLQuery *)query error:(NSError **)error
 {
-    return [self executeQuery:query withOptions:0 thenEnumerateRowsUsingBlock:NULL];
+    return [self executeQuery:query options:0 error:error thenEnumerateRowsUsingBlock:NULL];
 }
 
-- (BOOL)executeQuery:(SQLQuery *)query thenEnumerateRowsUsingBlock:(void (^)(SQLRow *row, NSInteger index, BOOL *stop))block
+- (BOOL)executeQuery:(SQLQuery *)query error:(NSError **)error thenEnumerateRowsUsingBlock:(void (^)(SQLRow *row, NSInteger index, BOOL *stop))block
 {
-    return [self executeQuery:query withOptions:0 thenEnumerateRowsUsingBlock:block];
+    return [self executeQuery:query options:0 error:error thenEnumerateRowsUsingBlock:block];
 }
 
-- (BOOL)executeQuery:(SQLQuery *)query withOptions:(SQLDatabaseExecutingOptions)options thenEnumerateRowsUsingBlock:(void (^)(SQLRow *row, NSInteger index, BOOL *stop))block
+- (BOOL)executeQuery:(SQLQuery *)query options:(SQLDatabaseExecutingOptions)options error:(NSError **)error thenEnumerateRowsUsingBlock:(void (^)(SQLRow *row, NSInteger index, BOOL *stop))block
 {
     if ( self.connectionHandle == NULL )
     {
         sqlitekit_warning(@"Cannot execute a query with a database that is not open.");
+        sqlitekit_create_error(error, kSQLiteKitErrorDomain, SQLDatabaseErrorDatabaseNotOpen, @"Cannot execute a query with a database that is not open.");
         return NO;
     }
 
@@ -354,7 +347,7 @@ void sqldatabase_rollback_hook(void *object)
 
     // PREPARE STATEMENT
     SQLPreparedStatement *statement = [self.statementsCache objectForKey:query.SQLStatement];
-    BOOL shouldFinalizeStatement = YES;
+    BOOL shouldCompleteStatement = YES;
 
     if ( statement == nil )
     {
@@ -362,11 +355,14 @@ void sqldatabase_rollback_hook(void *object)
         statement = [SQLPreparedStatement statementWithDatabase:self query:query];
         if ( statement == nil )
         {
+            sqlitekit_verbose(@"Cannot create a prepared statement from the given query.");
+            sqlitekit_warning(@"%s.", sqlite3_errmsg(self.connectionHandle));
+            sqlitekit_create_error_cstring(error, kSQLiteKitErrorDomain, SQLDatabaseErrorCInterface, sqlite3_errmsg(self.connectionHandle));
             return NO;
         }
         if ( options & SQLDatabaseExecutingOptionCacheStatement )
         {
-            shouldFinalizeStatement = NO;
+            shouldCompleteStatement = NO;
             sqlitekit_verbose(@"Add the prepared statement in cache (query = %@).", query);
             [self.statementsCache setObject:statement forKey:query.SQLStatement];
         }
@@ -374,7 +370,7 @@ void sqldatabase_rollback_hook(void *object)
     else
     {
         sqlitekit_verbose(@"Prepared statement retrieved from the cache (query = %@).", query);
-        shouldFinalizeStatement = NO;
+        shouldCompleteStatement = NO;
         [statement clearBindings];
         [statement bindArguments:query.arguments];
     }
@@ -423,8 +419,16 @@ void sqldatabase_rollback_hook(void *object)
         }
     }
 
-    // FINALIZE
-    return ( shouldFinalizeStatement == YES ) ? [statement finialize] : [statement reset];
+    // COMPLETE
+    BOOL executionSucceed = ( shouldCompleteStatement == YES ) ? [statement complete] : [statement reset];
+
+    if ( executionSucceed == NO )
+    {
+        sqlitekit_verbose(@"Cannot %@ the prepared statement.", ( shouldCompleteStatement == YES ) ? @"finalized" : @"reset");
+        sqlitekit_warning(@"%s.", sqlite3_errmsg(self.connectionHandle));
+        sqlitekit_create_error_cstring(error, kSQLiteKitErrorDomain, SQLDatabaseErrorCInterface, sqlite3_errmsg(self.connectionHandle));
+    }
+    return executionSucceed;
 }
 
 #pragma mark -

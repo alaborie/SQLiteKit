@@ -8,6 +8,11 @@
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#import <Foundation/NSString.h>
+#import <Foundation/NSError.h>
+
+extern NSString * const kSQLiteKitErrorDomain;
+
 void __sqlitekit_log(id object, NSString *format, ...);
 void __sqlitekit_warning(id object, NSString *format, ...);
 void __sqlitekit_error(id object, NSString *format, ...);
@@ -26,3 +31,19 @@ void __sqlitekit_error(id object, NSString *format, ...);
 #define sqlitekit_error(format, ...)    __sqlitekit_error(self, format, ##__VA_ARGS__)
 #define sqlitekit_cerror(object, format, ...)    __sqlitekit_error(object, format, ##__VA_ARGS__)
 
+#define sqlitekit_create_error(error, errorDomain, errorCode, errorDescription)\
+    if ( error != nil )\
+    {\
+        NSDictionary *userInfo = [NSDictionary dictionaryWithObject:errorDescription forKey:NSLocalizedDescriptionKey];\
+\
+        *error = [NSError errorWithDomain:errorDomain code:errorCode userInfo:userInfo];\
+    }
+
+#define sqlitekit_create_error_cstring(error, errorDomain, errorCode, errorDescription)\
+    if ( error != nil )\
+    {\
+        NSString *description = [NSString stringWithCString:errorDescription encoding:NSASCIIStringEncoding];\
+        NSDictionary *userInfo = [NSDictionary dictionaryWithObject:description forKey:NSLocalizedDescriptionKey];\
+\
+        *error = [NSError errorWithDomain:errorDomain code:errorCode userInfo:userInfo];\
+    }

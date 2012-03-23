@@ -40,8 +40,10 @@
 
 /**
  @return YES if the statement was finalized successfully. Returns NO if an error occured.
+
+ @note This method should be called finalize but a method with the same name already exists in NSObject and has another purpose.
  */
-- (BOOL)finialize;
+- (BOOL)complete;
 
 #pragma mark -
 

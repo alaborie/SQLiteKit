@@ -19,10 +19,49 @@
 
 - (void)testLifeCycle
 {
-    SQLDatabase *database = [[SQLDatabase alloc] init];
+    SQLDatabase *database = nil;
+    NSError *error = nil;
 
-    [database open];
-    [database close];
+    database = [SQLDatabase database];
+    STAssertTrue([database open:&error], @"Open operation failed (database = %@, error = %@).", database, error);
+    STAssertTrue([database close:&error], @"Close operation failed (database = %@, error = %@).", database, error);
+
+    NSURL *storeURL = [NSURL fileURLWithPath:[self generateValidTemporaryPathWithComponent:@"testLifeCycle"]];
+
+    database = [SQLDatabase databaseWithFileURL:storeURL];
+    STAssertTrue([database open:&error], @"Open operation failed (database = %@, error = %@).", database, error);
+    STAssertTrue([database close:&error], @"Close operation failed (database = %@, error = %@).", database, error);
+
+    NSString *storePath = [self generateValidTemporaryPathWithComponent:@"testLifeCycle"];
+
+    database = [SQLDatabase databaseWithFilePath:storePath];
+    STAssertTrue([database open:&error], @"Open operation failed (database = %@, error = %@).", database, error);
+    STAssertTrue([database close:&error], @"Close operation failed (database = %@, error = %@).", database, error);
+
+    database = [[SQLDatabase alloc] init];
+    STAssertTrue([database open:&error], @"Open operation failed (database = %@, error = %@).", database, error);
+    STAssertTrue([database close:&error], @"Close operation failed (database = %@, error = %@).", database, error);
+    [database release];
+
+    database = [[SQLDatabase alloc] init];
+    STAssertTrue([database open:&error], @"Open operation failed (database = %@, error = %@).", database, error);
+    STAssertTrue([database close:&error], @"Close operation failed (database = %@, error = %@).", database, error);
+    [database release];
+
+    storeURL = [NSURL fileURLWithPath:[self generateValidTemporaryPathWithComponent:@"testLifeCycle"]];
+    database = [[SQLDatabase alloc] initWithFileURL:storeURL];
+    STAssertTrue([database open:&error], @"Open operation failed (database = %@, error = %@).", database, error);
+    STAssertTrue([database close:&error], @"Close operation failed (database = %@, error = %@).", database, error);
+    [database release];
+
+    storePath = [self generateValidTemporaryPathWithComponent:@"testLifeCycle"];
+    database = [[SQLDatabase alloc] initWithFilePath:storePath];
+    STAssertTrue([database open:&error], @"Open operation failed (database = %@, error = %@).", database, error);
+    STAssertFalse([database open:NULL], @"Open must failed (database = %@).", database, error);
+    STAssertTrue([database close:&error], @"Close operation failed (database = %@, error = %@).", database, error);
+    STAssertFalse([database close:NULL], @"Close must failed (database = %@).", database);
+    STAssertTrue([database openWithFlags:SQLITE_OPEN_READWRITE error:&error], @"Open operation failed (database = %@, error = %@).", database, error);
+    STAssertTrue([database close:&error], @"Close operation failed (database = %@, error = %@).", database, error);
     [database release];
 }
 
@@ -31,171 +70,193 @@
     NSString *storePath = [self generateValidTemporaryPathWithComponent:@"testLifeCycleAdvanced.sqlite"];
     STAssertNotNil(storePath, @"The path generated must be different than nil.");
     SQLDatabase *database = [[SQLDatabase alloc] initWithFilePath:storePath];
-    /// @todo Check the return values to make sure that the operations have succeed.
+    __block NSError *error = nil;
 
-    STAssertTrue([database openWithFlags:(SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_SHAREDCACHE | SQLITE_OPEN_FULLMUTEX)], @"Open operation failed (database = %@).", database);
-    STAssertTrue([database executeStatement:@"CREATE TABLE IF NOT EXISTS user (ID INTEGER PRIMARY KEY AUTOINCREMENT, full_name TEXT);"], @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"John Steinbeck", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Alexandre Dumas", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Ernest Hemingway", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Jack Kerouac", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Victor Hugo", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Boris Vian", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Romain Gary", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Hermann Hesse", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Paulo Coelho", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Jean Jacques Rousseau", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Joseph Conrad", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Czeslaw Milosz", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"George Bernard Shaw", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Wallace Stevens", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Rumi", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"W.G. Sebald", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Robert Hayden", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Henry Miller", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Robert Heinlein", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Lorine Niedecker", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"George Eliot", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"David Mamet", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Derek Walcott", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Isak Dinesen", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Maryse Conde", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Joyce Cary", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Frank O'Hara", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Gabriel Garcia Marquez", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Carson McCullers", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Flann O'Brien", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Julio Cortazar", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Saul Bellow", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Jonathan Swift", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Ezra Pound", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Philip K. Dick", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Percy Shelley", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"James Agee", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Stanley Elkin", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Walter Benjamin", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Harold Pinter", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"John Berryman", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"James Baldwin", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Tu Fu", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Jorge Luis Borges", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Malcolm Lowry", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Willa Cather", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Edgar Allan Poe", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Henrik Ibsen", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"W.H. Auden", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Thomas Pynchon", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Emily Brontë/Charlotte Brontë", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Flannery O'Connor", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Leo Tolstoy", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Tennessee Williams", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Nathaniel Hawthorne", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"T.S. Eliot", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Sophocles", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Johann Wolfgang von Goethe", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Toni Morrison", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Charles Olson", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Eugene O'Neill", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Gustave Flaubert", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Ivan Turgenev", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Charles Baudelaire", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Robert Lowell", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Mark Twain", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Robert Creeley", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Iris Murdoch", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Arthur Rimbaud", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Mary Shelley", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Virgil", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Emily Dickinson", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Walt Whitman", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"D.H. Lawrence", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"William Carlos Williams", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Samuel Coleridge", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Henry James", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"John Keats", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"William Wordsworth", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Ovid", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"William Blake", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Dr. Johnson", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Lord Byron", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"George Orwell", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Stendhal", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Euripides", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Miguel Cervantes", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Laurence Sterne", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Herman Melville", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"William Butler Yeats", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Homer", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Charles Dickens", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"John Ashbery", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Virginia Woolf", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Geoffrey Chaucer", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Dante", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Fyodor Doestoyevsky", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Marcel Proust", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Anton Chekhov", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Vladimir Nabokov", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Samuel Beckett", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"John Milton", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Gertrude Stein", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"James Joyce", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"William Shakespeare", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"Franz Kafka", nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO user(full_name) VALUES(?);", @"William Faulkner", nil]), @"Execute statement failed (database = %@).", database);
+    STAssertTrue([database openWithFlags:(SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_SHAREDCACHE | SQLITE_OPEN_FULLMUTEX) error:&error], @"Open operation failed (database = %@, error = %@).", database, error);
+    STAssertTrue([database executeStatement:@"CREATE TABLE IF NOT EXISTS user(id INTEGER PRIMARY KEY AUTOINCREMENT, fullname TEXT);" error:&error], @"Execute statement failed (database = %@, error = %@).", database, error);
+
+    SQLQuery *insertUserQuery = [SQLQuery queryWithStatement:@"INSERT INTO user(fullname) VALUES(?);"];
+    NSArray *insertUserData = [NSArray arrayWithObjects:
+                               [NSArray arrayWithObject:@"John Steinbeck"],
+                               [NSArray arrayWithObject:@"Alexandre Dumas"],
+                               [NSArray arrayWithObject:@"Ernest Hemingway"],
+                               [NSArray arrayWithObject:@"Jack Kerouac"],
+                               [NSArray arrayWithObject:@"Victor Hugo"],
+                               [NSArray arrayWithObject:@"Boris Vian"],
+                               [NSArray arrayWithObject:@"Romain Gary"],
+                               [NSArray arrayWithObject:@"Hermann Hesse"],
+                               [NSArray arrayWithObject:@"Paulo Coelho"],
+                               [NSArray arrayWithObject:@"Jean Jacques Rousseau"],
+                               [NSArray arrayWithObject:@"Joseph Conrad"],
+                               [NSArray arrayWithObject:@"Czeslaw Milosz"],
+                               [NSArray arrayWithObject:@"George Bernard Shaw"],
+                               [NSArray arrayWithObject:@"Wallace Stevens"],
+                               [NSArray arrayWithObject:@"Rumi"],
+                               [NSArray arrayWithObject:@"W.G. Sebald"],
+                               [NSArray arrayWithObject:@"Robert Hayden"],
+                               [NSArray arrayWithObject:@"Henry Miller"],
+                               [NSArray arrayWithObject:@"Robert Heinlein"],
+                               [NSArray arrayWithObject:@"Lorine Niedecker"],
+                               [NSArray arrayWithObject:@"George Eliot"],
+                               [NSArray arrayWithObject:@"David Mamet"],
+                               [NSArray arrayWithObject:@"Derek Walcott"],
+                               [NSArray arrayWithObject:@"Isak Dinesen"],
+                               [NSArray arrayWithObject:@"Maryse Conde"],
+                               [NSArray arrayWithObject:@"Joyce Cary"],
+                               [NSArray arrayWithObject:@"Frank O'Hara"],
+                               [NSArray arrayWithObject:@"Gabriel Garcia Marquez"],
+                               [NSArray arrayWithObject:@"Carson McCullers"],
+                               [NSArray arrayWithObject:@"Flann O'Brien"],
+                               [NSArray arrayWithObject:@"Julio Cortazar"],
+                               [NSArray arrayWithObject:@"Saul Bellow"],
+                               [NSArray arrayWithObject:@"Jonathan Swift"],
+                               [NSArray arrayWithObject:@"Ezra Pound"],
+                               [NSArray arrayWithObject:@"Philip K. Dick"],
+                               [NSArray arrayWithObject:@"Percy Shelley"],
+                               [NSArray arrayWithObject:@"James Agee"],
+                               [NSArray arrayWithObject:@"Stanley Elkin"],
+                               [NSArray arrayWithObject:@"Walter Benjamin"],
+                               [NSArray arrayWithObject:@"Harold Pinter"],
+                               [NSArray arrayWithObject:@"John Berryman"],
+                               [NSArray arrayWithObject:@"James Baldwin"],
+                               [NSArray arrayWithObject:@"Tu Fu"],
+                               [NSArray arrayWithObject:@"Jorge Luis Borges"],
+                               [NSArray arrayWithObject:@"Malcolm Lowry"],
+                               [NSArray arrayWithObject:@"Willa Cather"],
+                               [NSArray arrayWithObject:@"Edgar Allan Poe"],
+                               [NSArray arrayWithObject:@"Henrik Ibsen"],
+                               [NSArray arrayWithObject:@"W.H. Auden"],
+                               [NSArray arrayWithObject:@"Thomas Pynchon"],
+                               [NSArray arrayWithObject:@"Emily Brontë/Charlotte Brontë"],
+                               [NSArray arrayWithObject:@"Flannery O'Connor"],
+                               [NSArray arrayWithObject:@"Leo Tolstoy"],
+                               [NSArray arrayWithObject:@"Tennessee Williams"],
+                               [NSArray arrayWithObject:@"Nathaniel Hawthorne"],
+                               [NSArray arrayWithObject:@"T.S. Eliot"],
+                               [NSArray arrayWithObject:@"Sophocles"],
+                               [NSArray arrayWithObject:@"Johann Wolfgang von Goethe"],
+                               [NSArray arrayWithObject:@"Toni Morrison"],
+                               [NSArray arrayWithObject:@"Charles Olson"],
+                               [NSArray arrayWithObject:@"Eugene O'Neill"],
+                               [NSArray arrayWithObject:@"Gustave Flaubert"],
+                               [NSArray arrayWithObject:@"Ivan Turgenev"],
+                               [NSArray arrayWithObject:@"Charles Baudelaire"],
+                               [NSArray arrayWithObject:@"Robert Lowell"],
+                               [NSArray arrayWithObject:@"Mark Twain"],
+                               [NSArray arrayWithObject:@"Robert Creeley"],
+                               [NSArray arrayWithObject:@"Iris Murdoch"],
+                               [NSArray arrayWithObject:@"Arthur Rimbaud"],
+                               [NSArray arrayWithObject:@"Mary Shelley"],
+                               [NSArray arrayWithObject:@"Virgil"],
+                               [NSArray arrayWithObject:@"Walt Whitman"],
+                               [NSArray arrayWithObject:@"D.H. Lawrence"],
+                               [NSArray arrayWithObject:@"William Carlos Williams"],
+                               [NSArray arrayWithObject:@"Samuel Coleridge"],
+                               [NSArray arrayWithObject:@"Henry James"],
+                               [NSArray arrayWithObject:@"John Keats"],
+                               [NSArray arrayWithObject:@"William Wordsworth"],
+                               [NSArray arrayWithObject:@"Ovid"],
+                               [NSArray arrayWithObject:@"William Blake"],
+                               [NSArray arrayWithObject:@"Dr. Johnson"],
+                               [NSArray arrayWithObject:@"Lord Byron"],
+                               [NSArray arrayWithObject:@"George Orwell"],
+                               [NSArray arrayWithObject:@"Stendhal"],
+                               [NSArray arrayWithObject:@"Euripides"],
+                               [NSArray arrayWithObject:@"Miguel Cervantes"],
+                               [NSArray arrayWithObject:@"Laurence Sterne"],
+                               [NSArray arrayWithObject:@"Herman Melville"],
+                               [NSArray arrayWithObject:@"William Butler Yeats"],
+                               [NSArray arrayWithObject:@"Homer"],
+                               [NSArray arrayWithObject:@"Charles Dickens"],
+                               [NSArray arrayWithObject:@"John Ashbery"],
+                               [NSArray arrayWithObject:@"Virginia Woolf"],
+                               [NSArray arrayWithObject:@"Geoffrey Chaucer"],
+                               [NSArray arrayWithObject:@"Dante"],
+                               [NSArray arrayWithObject:@"Fyodor Doestoyevsky"],
+                               [NSArray arrayWithObject:@"Marcel Proust"],
+                               [NSArray arrayWithObject:@"Anton Chekhov"],
+                               [NSArray arrayWithObject:@"Vladimir Nabokov"],
+                               [NSArray arrayWithObject:@"Samuel Beckett"],
+                               [NSArray arrayWithObject:@"John Milton"],
+                               [NSArray arrayWithObject:@"Gertrude Stein"],
+                               [NSArray arrayWithObject:@"James Joyce"],
+                               [NSArray arrayWithObject:@"William Shakespeare"],
+                               [NSArray arrayWithObject:@"Franz Kafka"],
+                               [NSArray arrayWithObject:@"William Faulkner"],
+                               nil];
+
+    NSInteger pivot = insertUserData.count / 2;
+    NSRange firtPart = NSMakeRange(0, pivot);
+    NSRange secondPart = NSMakeRange(pivot, insertUserData.count - pivot);
+    NSDate *startingDate;
+
+    startingDate = [NSDate date];
+    [insertUserData enumerateObjectsAtIndexes:[NSIndexSet indexSetWithIndexesInRange:firtPart] options:0 usingBlock:^(id object, NSUInteger index, BOOL *stop) {
+        insertUserQuery.arguments = (NSArray *)object;
+        STAssertTrue([database executeQuery:insertUserQuery options:0 error:&error thenEnumerateRowsUsingBlock:NULL], @"Execute query failed (database = %@, error = %@).", database, error);
+        STAssertEquals(database.numberOfChanges, 1u, @"Insertion failed (query = %@).", insertUserQuery);
+    }];
+    NSLog(@"Duration in seconds to insert %d WITHOUT cache: %fs.", pivot, [[NSDate date] timeIntervalSinceDate:startingDate]);
+
+    startingDate = [NSDate date];
+    [insertUserData enumerateObjectsAtIndexes:[NSIndexSet indexSetWithIndexesInRange:secondPart] options:0 usingBlock:^(id object, NSUInteger index, BOOL *stop) {
+        insertUserQuery.arguments = (NSArray *)object;
+        STAssertTrue([database executeQuery:insertUserQuery options:SQLDatabaseExecutingOptionCacheStatement error:&error thenEnumerateRowsUsingBlock:NULL], @"Execute query failed (database = %@, error = %@).", database, error);
+        STAssertEquals(database.numberOfChanges, 1u, @"Insertion failed (query = %@).", insertUserQuery);
+    }];
+    NSLog(@"Duration in seconds to insert %d WITH cache: %fs.", pivot, [[NSDate date] timeIntervalSinceDate:startingDate]);
 
     SQLQuery *queryAllUsers = [SQLQuery queryWithStatement:@"SELECT * FROM user;"];
 
-    STAssertTrue([database executeQuery:queryAllUsers thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
-        NSLog(@"#%u ----------------------", index);
-        NSLog(@"%@", row);
-    }], @"Execute query failed (database = %@, query = %@).", database, queryAllUsers);
+    NSLog(@"Show all users:");
+    STAssertTrue([database executeQuery:queryAllUsers error:&error thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
+        NSLog(@"#%3u %@", index, row);
+    }], @"Execute query failed (database = %@, query = %@, errror = %@).", database, queryAllUsers, error);
 
     SQLQuery *queryCountUsers = [SQLQuery queryWithStatement:@"SELECT count(ID) AS `number of users` FROM user;"];
 
-    STAssertTrue([database executeQuery:queryCountUsers thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
-        NSLog(@"#%u ----------------------", index);
-        NSLog(@"%@", row);
-    }], @"Execute query failed (database = %@, query = %@).", database, queryCountUsers);
+    NSLog(@"Number of users:");
+    STAssertTrue([database executeQuery:queryCountUsers error:&error thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
+        NSLog(@"#%u %@", index, row);
+    }], @"Execute query failed (database = %@, query = %@, error = %@).", database, queryCountUsers, error);
 
-    SQLQuery *queryBorisVian = [SQLQuery queryWithStatementAndArguments:@"SELECT * FROM user WHERE full_name = ?;", @"Boris Vian", nil];
+    SQLQuery *queryBorisVian = [SQLQuery queryWithStatementAndArguments:@"SELECT * FROM user WHERE fullname = ?;", @"Boris Vian", nil];
 
-    STAssertTrue([database executeQuery:queryBorisVian thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
-        NSLog(@"#%u ----------------------", index);
-        NSLog(@"array = %@", [row objects]);
-        NSLog(@"dictionary = %@", [row objectsDict]);
-    }], @"Execute query failed (database = %@, query = %@).", database, queryBorisVian);
+    NSLog(@"Sow the user called 'Boris Vian':");
+    STAssertTrue([database executeQuery:queryBorisVian error:&error thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
+        NSLog(@"#%u array = [%@], dictionary = %@", index, [[row objects] componentsJoinedByString:@", "], [row objectsDict]);
+    }], @"Execute query failed (database = %@, query = %@, error = %@).", database, queryBorisVian, error);
 
-    SQLQuery *queryLike = [SQLQuery queryWithStatement:@"SELECT * FROM user WHERE full_name LIKE 'J%';"];
+    SQLQuery *queryLike = [SQLQuery queryWithStatement:@"SELECT * FROM user WHERE fullname LIKE 'J%';"];
 
-    STAssertTrue([database executeQuery:queryLike thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
-        NSLog(@"#%u ----------------------", index);
-        NSLog(@"array = %@", [row objects]);
-        NSLog(@"dictionary = %@", [row objectsDict]);
-    }], @"Execute query failed (database = %@, query = %@).", database, queryLike);
+    NSLog(@"Show the users with a name starting by J:");
+    STAssertTrue([database executeQuery:queryLike error:&error thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
+        NSLog(@"#%u array = [%@], dictionary = %@", index, [[row objects] componentsJoinedByString:@", "], [row objectsDict]);
+    }], @"Execute query failed (database = %@, query = %@, error = %@).", database, queryLike, error);
 
-    SQLQuery *queryNoResult = [SQLQuery queryWithStatement:@"SELECT * FROM user WHERE full_name = 'Alain Damasio';"];
+    SQLQuery *queryNoResult = [SQLQuery queryWithStatement:@"SELECT * FROM user WHERE fullname = 'Alain Damasio';"];
 
-    STAssertTrue([database executeQuery:queryNoResult thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
-        NSAssert(row == nil, @"This request should have return no result.");
-        NSAssert(index == NSNotFound, @"This request should have return no result.");
-    }], @"Execute query failed (database = %@, query = %@).", database, queryNoResult);
+    NSLog(@"Show the user called 'Alain Damasio:");
+    STAssertTrue([database executeQuery:queryNoResult error:&error thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
+        STAssertNil(row, @"If a request returns no result, the row parameter should be equals to nil.");
+        STAssertEquals(index, NSNotFound, @"If a request returns no result, the index parameter should be equals to NSNotFound.");
+        STAssertNotNil((void *)stop, @"If a request returns no result, the stop pointer should not be NULL.");
+    }], @"Execute query failed (database = %@, query = %@, error = %@).", database, queryNoResult, error);
 
-    SQLQuery *queryCached = [SQLQuery queryWithStatement:@"SELECT * FROM user where full_name LIKE ?;" arguments:[NSArray arrayWithObject:@"W%"]];
+    SQLQuery *queryCached = [SQLQuery queryWithStatement:@"SELECT * FROM user where fullname LIKE ?;" arguments:[NSArray arrayWithObject:@"W%"]];
 
-    STAssertTrue([database executeQuery:queryCached withOptions:SQLDatabaseExecutingOptionCacheStatement thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
-        NSLog(@"#%u ----------------------", index);
-        NSLog(@"array = %@", [row objects]);
-        NSLog(@"dictionary = %@", [row objectsDict]);
-    }], @"Execute query failed (database = %@, query = %@).", database, queryLike);
+    NSLog(@"Show the users with a name starting by W:");
+    STAssertTrue([database executeQuery:queryCached options:SQLDatabaseExecutingOptionCacheStatement error:&error thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
+        NSLog(@"#%u array = [%@], dictionary = %@", index, [[row objects] componentsJoinedByString:@", "], [row objectsDict]);
+    }], @"Execute query failed (database = %@, query = %@, error = %@).", database, queryLike, error);
     queryCached.arguments = [NSArray arrayWithObject:@"S%"];
-    STAssertTrue([database executeQuery:queryCached withOptions:SQLDatabaseExecutingOptionCacheStatement thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
-        NSLog(@"#%u ----------------------", index);
-        NSLog(@"array = %@", [row objects]);
-        NSLog(@"dictionary = %@", [row objectsDict]);
-    }], @"Execute query failed (database = %@, query = %@).", database, queryLike);
+    NSLog(@"Show the users with a name starting by S:");
+    STAssertTrue([database executeQuery:queryCached options:SQLDatabaseExecutingOptionCacheStatement error:&error thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
+        NSLog(@"#%u array = [%@], dictionary = %@", index, [[row objects] componentsJoinedByString:@", "], [row objectsDict]);
+    }], @"Execute query failed (database = %@, query = %@, error = %@).", database, queryLike, error);
 
     [database printRuntimeStatusWithResetFlag:NO];
-    STAssertTrue([database close], @"Close operation failed (database = %@).", database);
+    STAssertTrue([database close:&error], @"Close operation failed (database = %@, error = %@).", database, error);
     [database release];
 }
 
@@ -206,33 +267,38 @@
     NSString *storePath = [self generateValidTemporaryPathWithComponent:@"testExecuteFile.sqlite"];
     STAssertNotNil(storePath, @"The path generated must be different than nil.");
     SQLDatabase *database = [SQLDatabase databaseWithFilePath:storePath];
+    NSError *error = nil;
 
-    STAssertTrue([database open], @"Open operation failed (database = %@).", database);
-    STAssertTrue([database executeSQLFileAtPath:dumpFilePath], @"Execute SQL file failed (database = %@, filePath = %@).", database, dumpFilePath);
+    STAssertTrue([database open:&error], @"Open operation failed (database = %@, error = %@).", database, error);
+    STAssertTrue([database executeSQLFileAtPath:dumpFilePath error:&error], @"Execute SQL file failed (database = %@, filePath = %@, error = %@).", database, dumpFilePath, error);
 
     SQLQuery *numberOfActorsQuery = [SQLQuery queryWithStatement:@"SELECT count(*) FROM actors;"];
     __block NSUInteger numberOfActors = 0;
 
-    [database executeQuery:numberOfActorsQuery thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
-       if ( index != NSNotFound )
-       {
-           numberOfActors = (NSUInteger)[row intForColumnAtIndex:0];
-       }
-    }];
+    NSLog(@"Number of actors:");
+    STAssertTrue([database executeQuery:numberOfActorsQuery error:&error thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
+        if ( index != NSNotFound )
+        {
+            numberOfActors = (NSUInteger)[row intForColumnAtIndex:0];
+            NSLog(@"%u", numberOfActors);
+        }
+    }], @"Execute statement failed (database = %@, error = %@).", database, error);
     STAssertEquals(numberOfActors, 9u, @"Invalid number of actors (value = %u, expected = 9).", numberOfActors);
 
     SQLQuery *numberOfActorsInPulpFictionQuery = [SQLQuery queryWithStatementAndArguments:@"SELECT count(*) FROM act, actors, movies WHERE act.actor_id = actors.id AND act.movie_id = movies.id AND movies.title = ?;", @"Pulp Fiction", nil];
     __block NSUInteger numberOfActorsInPulpFiction = 0;
 
-    [database executeQuery:numberOfActorsInPulpFictionQuery withOptions:SQLDatabaseExecutingOptionCacheStatement thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
-       if ( index != NSNotFound )
-       {
-           numberOfActorsInPulpFiction = (NSUInteger)[row intForColumnAtIndex:0];
-       }
-    }];
+    NSLog(@"Number of actors playing in 'Pulp Fiction':");
+    STAssertTrue([database executeQuery:numberOfActorsInPulpFictionQuery options:SQLDatabaseExecutingOptionCacheStatement error:&error thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
+        if ( index != NSNotFound )
+        {
+            numberOfActorsInPulpFiction = (NSUInteger)[row intForColumnAtIndex:0];
+            NSLog(@"%u", numberOfActorsInPulpFiction);
+        }
+    }], @"Execute statement failed (database = %@, error = %@).", database, error);
     STAssertEquals(numberOfActorsInPulpFiction, 2u, @"Invalid number of actors playing in 'Pulp Fiction' (value = %u, expected = 2).", numberOfActorsInPulpFiction);
 
-    STAssertTrue([database close], @"Close operation failed (database = %@).", database);
+    STAssertTrue([database close:&error], @"Close operation failed (database = %@, error = %@).", database, error);
 }
 
 - (void)testNotifications
@@ -240,13 +306,14 @@
     NSString *storePath = [self generateValidTemporaryPathWithComponent:@"testNotifications.sqlite"];
     STAssertNotNil(storePath, @"The path generated must be different than nil.");
     SQLDatabase *database = [SQLDatabase databaseWithFileURL:[NSURL fileURLWithPath:storePath]];
+    __block NSError *error = nil;
 
-    STAssertTrue([database open], @"Open operation failed (database = %@).", database);
+    STAssertTrue([database open:&error], @"Open operation failed (database = %@, error = %@).", database, error);
 
     NSNotificationCenter *defaultCenter = [NSNotificationCenter defaultCenter];
     id commitObserver = nil;
     __block NSInteger commitNotificationCount = 0;
-    NSInteger commitNotificationExpectedCount = 13;
+    NSInteger commitNotificationExpectedCount = 13; // 9 insert + 3 delete + 1 update
 
     id rollbackObserver = nil;
     __block NSInteger rollbackNotificationCount = 0;
@@ -256,64 +323,106 @@
     __block NSInteger notificationCount = 0;
     NSInteger notificationExpectedCount = 9;
 
+    // Adds an observer for each notification.
     commitObserver = [defaultCenter addObserverForName:kSQLDatabaseCommitNotification object:database queue:nil usingBlock:^(NSNotification *note) {
-        NSLog(@"Received a commit notification (notification = %@)", note);
+        NSLog(@" - Received a commit notification (notification = %@)", note);
         commitNotificationCount++;
     }];
     rollbackObserver = [defaultCenter addObserverForName:kSQLDatabaseRollbackNotification object:database queue:nil usingBlock:^(NSNotification *note) {
-       NSLog(@"Received a rollback notification (notification = %@)", note);
+        NSLog(@" - Received a rollback notification (notification = %@)", note);
         rollbackNotificationCount++;
     }];
     [database beginGeneratingNotificationsIntoCenter:defaultCenter];
-    notificationObserver = [defaultCenter addObserverForName:[kSQLDatabaseInsertNotification stringByAppendingString:@"main.country"] object:nil queue:nil usingBlock:^(NSNotification *note) {
-        NSLog(@"Received an insertion notification (notification = %@)", note);
+    notificationObserver = [defaultCenter addObserverForName:[kSQLDatabaseInsertNotification stringByAppendingString:@"main.countries"] object:nil queue:nil usingBlock:^(NSNotification *note) {
+        NSLog(@" - Received an insertion notification (notification = %@)", note);
         notificationCount++;
     }];
-    STAssertTrue([database executeStatement:@"CREATE TABLE IF NOT EXISTS country(ID INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, area INTEGER);"], @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO country(name, area) VALUES(?, ?);", @"Russia", [NSNumber numberWithInteger:17098242], nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO country(name, area) VALUES(?, ?);", @"Canada", [NSNumber numberWithInteger:9984670], nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO country(name, area) VALUES(?, ?);", @"China", [NSNumber numberWithInteger:9596961], nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO country(name, area) VALUES(?, ?);", @"United States", [NSNumber numberWithInteger:9522055], nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO country(name, area) VALUES(?, ?);", @"Brazil", [NSNumber numberWithInteger:851487], nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO country(name, area) VALUES(?, ?);", @"Australia", [NSNumber numberWithInteger:7692024], nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO country(name, area) VALUES(?, ?);", @"India", [NSNumber numberWithInteger:3166414], nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO country(name, area) VALUES(?, ?);", @"Argentina", [NSNumber numberWithInteger:2780400], nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO country(name, area) VALUES(?, ?);", @"Kazakhstan", [NSNumber numberWithInteger:2724900], nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(notificationCount == notificationExpectedCount, @"Invalid number of notifications sent (sent = %u, expected = %u)", notificationCount, notificationExpectedCount);
+
+    STAssertTrue([database executeStatement:@"CREATE TABLE IF NOT EXISTS countries(ID INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, area INTEGER);" error:&error], @"Execute statement failed (database = %@, error = %@).", database);
+
+    SQLQuery *insertCountryQuery = [SQLQuery queryWithStatement:@"INSERT INTO countries(name, area) VALUES(?, ?);"];
+    NSArray *insertCountryData = [NSArray arrayWithObjects:
+                                  [NSArray arrayWithObjects:@"Russia", [NSNumber numberWithInteger:17098242], nil],
+                                  [NSArray arrayWithObjects:@"Canada", [NSNumber numberWithInteger:9984670], nil],
+                                  [NSArray arrayWithObjects:@"China", [NSNumber numberWithInteger:9596961], nil],
+                                  [NSArray arrayWithObjects:@"United States", [NSNumber numberWithInteger:9522055], nil],
+                                  [NSArray arrayWithObjects:@"Brazil", [NSNumber numberWithInteger:851487], nil],
+                                  [NSArray arrayWithObjects:@"Australia", [NSNumber numberWithInteger:7692024], nil],
+                                  [NSArray arrayWithObjects:@"India", [NSNumber numberWithInteger:3166414], nil],
+                                  [NSArray arrayWithObjects:@"Argentina", [NSNumber numberWithInteger:2780400], nil],
+                                  [NSArray arrayWithObjects:@"Kazakhstan", [NSNumber numberWithInteger:2724900], nil],
+                                  nil];
+
+    NSLog(@"Insert 9 rows in the table countries countries:");
+    [insertCountryData enumerateObjectsUsingBlock:^(id object, NSUInteger index, BOOL *stop) {
+        insertCountryQuery.arguments = (NSArray *)object;
+        STAssertTrue([database executeQuery:insertCountryQuery options:SQLDatabaseExecutingOptionCacheStatement error:&error thenEnumerateRowsUsingBlock:NULL], @"Execute query failed (database = %@, error = %@).", database, error);
+        STAssertEquals(database.numberOfChanges, 1u, @"Insertion failed (query = %@).", insertCountryQuery);
+    }];
+    STAssertEquals(notificationCount, notificationExpectedCount, @"Invalid number of notifications sent (sent = %u, expected = %u)", notificationCount, notificationExpectedCount);
+    // Removes the observer that listens the updates of the table countries.
     [defaultCenter removeObserver:notificationObserver];
-    notificationObserver = [defaultCenter addObserverForName:[kSQLDatabaseInsertNotification stringByAppendingString:@"main.country"] object:nil queue:nil usingBlock:^(NSNotification *note) {
+
+    // Adds a observer that listens the updates of the tables countries.
+    notificationObserver = [defaultCenter addObserverForName:[kSQLDatabaseInsertNotification stringByAppendingString:@"main.countries"] object:nil queue:nil usingBlock:^(NSNotification *note) {
         STAssertTrue(false, @"This method should not been called, the observer has been removed!");
     }];
+    // Remove it immediately.
     [defaultCenter removeObserver:notificationObserver];
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO country(name, area) VALUES(?, ?);", @"Algeria", [NSNumber numberWithInteger:2381741], nil]), @"Execute statement failed (database = %@).", database);
+    // Then insert a new row in the table countries.
+    insertCountryQuery.arguments = [NSArray arrayWithObjects:@"Algeria", [NSNumber numberWithInteger:2381741], nil];
+    [database executeQuery:insertCountryQuery error:&error];
+    STAssertEquals(database.numberOfChanges, 1u, @"Insertion failed (query = %@).", insertCountryQuery);
     [defaultCenter removeObserver:notificationObserver];
-    notificationObserver = [defaultCenter addObserverForName:[kSQLDatabaseDeleteNotification stringByAppendingString:@"main.country"] object:nil queue:nil usingBlock:^(NSNotification *note) {
-        NSLog(@"Received a deletion notification (notification = %@)", note);
+
+    // Adds another observer that listen the updates (only delete in this case) of the tables countries.
+    notificationObserver = [defaultCenter addObserverForName:[kSQLDatabaseDeleteNotification stringByAppendingString:@"main.countries"] object:nil queue:nil usingBlock:^(NSNotification *note) {
+        NSLog(@" - Received a deletion notification (notification = %@)", note);
         notificationCount++;
     }];
     notificationCount = 0;
     notificationExpectedCount = 3;
-    STAssertTrue([database executeStatement:@"DELETE FROM country WHERE name LIKE 'A%';"], @"Execute statement failed (database = %@).", database);
-    STAssertTrue(notificationCount == notificationExpectedCount, @"Invalid number of notifications sent (sent = %u, expected = %u)", notificationCount, notificationExpectedCount);
+    NSLog(@"Delete all the rows (3) in the table countries where the name start by A:");
+    STAssertTrue([database executeStatement:@"DELETE FROM countries WHERE name LIKE 'A%';" error:&error], @"Execute statement failed (database = %@, error = %@).", database, error);
+    STAssertEquals(notificationCount, notificationExpectedCount, @"Invalid number of notifications sent (sent = %u, expected = %u)", notificationCount, notificationExpectedCount);
     [defaultCenter removeObserver:notificationObserver];
-    notificationObserver = [defaultCenter addObserverForName:[kSQLDatabaseUpdateNotification stringByAppendingString:@"main.country"] object:nil queue:nil usingBlock:^(NSNotification *note) {
-        NSLog(@"Received an update notification (notification = %@)", note);
+
+    // Adds another observer that listen the updates (only update in this case) of the tables countries.
+    notificationObserver = [defaultCenter addObserverForName:[kSQLDatabaseUpdateNotification stringByAppendingString:@"main.countries"] object:nil queue:nil usingBlock:^(NSNotification *note) {
+        NSLog(@" - Received an update notification (notification = %@)", note);
         notificationCount++;
     }];
     notificationCount = 0;
     notificationExpectedCount = 1;
-    STAssertTrue([database executeStatement:@"UPDATE country SET area = 8514877 where name = 'Brazil';"], @"Execute statement failed (database = %@).", database);
+    NSLog(@"Update the area of Brazil from 851487 to 8514877:");
+    STAssertTrue([database executeStatement:@"UPDATE countries SET area = 8514877 where name = 'Brazil';" error:&error], @"Execute statement failed (database = %@, error = %@).", database, error);
+    STAssertEquals(database.numberOfChanges, 1u, @"Insertion failed.");
+    STAssertEquals(notificationCount, notificationExpectedCount, @"Invalid number of notifications sent (sent = %u, expected = %u)", notificationCount, notificationExpectedCount);
     [defaultCenter removeObserver:notificationObserver];
-    STAssertTrue(notificationCount == notificationExpectedCount, @"Invalid number of notifications sent (sent = %u, expected = %u)", notificationCount, notificationExpectedCount);
-    STAssertTrue([database executeStatement:@"BEGIN TRANSACTION;"], @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO country(name, area) VALUES(?, ?);", @"Democratic Republic of the Congo", [NSNumber numberWithInteger:2344858], nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO country(name, area) VALUES(?, ?);", @"Greenland", [NSNumber numberWithInteger:2166086], nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue([database executeStatement:@"ROLLBACK TRANSACTION;"], @"Execute statement failed (database = %@).", database);
-    [defaultCenter removeObserver:commitObserver];
+
+    // Creates a new transaction in order to know if a notification is sent when a transaction is cancelled.
+    STAssertTrue([database executeStatement:@"BEGIN TRANSACTION;" error:&error], @"Execute statement failed (database = %@, error = %@).", database, error);
+
+    NSArray *insertOtherCountriesData = [NSArray arrayWithObjects:
+                                         [NSArray arrayWithObjects:@"Democratic Republic of the Congo", [NSNumber numberWithInteger:2344858], nil],
+                                         [NSArray arrayWithObjects:@"Greenland", [NSNumber numberWithInteger:2166086], nil],
+                                         nil];
+
+    [insertOtherCountriesData enumerateObjectsUsingBlock:^(id object, NSUInteger index, BOOL *stop) {
+        insertCountryQuery.arguments = (NSArray *)object;
+        STAssertTrue([database executeQuery:insertCountryQuery options:SQLDatabaseExecutingOptionCacheStatement error:&error thenEnumerateRowsUsingBlock:NULL], @"Execute query failed (database = %@, error = %@).", database, error);
+        STAssertEquals(database.numberOfChanges, 1u, @"Insertion failed (query = %@).", insertCountryQuery);
+    }];
+
+    STAssertTrue([database executeStatement:@"ROLLBACK TRANSACTION;" error:&error], @"Execute statement failed (database = %@, error = %@).", database, error);
+    STAssertEquals(rollbackNotificationCount, rollbackNotificationExpectedCount, @"Invalid number of rollback notifications sent (sent = %u, expected = %u)", rollbackNotificationCount, rollbackNotificationExpectedCount);
     [defaultCenter removeObserver:rollbackObserver];
-    STAssertTrue(commitNotificationCount == commitNotificationExpectedCount, @"Invalid number of commit notifications sent (sent = %u, expected = %u)", commitNotificationCount, commitNotificationExpectedCount);
-    STAssertTrue(rollbackNotificationCount == rollbackNotificationExpectedCount, @"Invalid number of rollback notifications sent (sent = %u, expected = %u)", rollbackNotificationCount, rollbackNotificationExpectedCount);
-    [database close];
+
+    // Checks if all the commit notifications have been sent.
+    STAssertEquals(commitNotificationCount, commitNotificationExpectedCount, @"Invalid number of commit notifications sent (sent = %u, expected = %u)", commitNotificationCount, commitNotificationExpectedCount);
+    [defaultCenter removeObserver:commitObserver];
+
+    STAssertTrue([database close:&error], @"Close operation failed (database = %@, error = %@).", database, error);
 }
 
 - (void)testAllExecutionTypes
@@ -321,12 +430,13 @@
     NSString *storePath = [self generateValidTemporaryPathWithComponent:@"testAllExecutionTypes.sqlite"];
     STAssertNotNil(storePath, @"The path generated must be different than nil.");
     SQLDatabase *database = [SQLDatabase databaseWithFilePath:storePath];
+    __block NSError *error = nil;
 
-    STAssertTrue([database open], @"Open operation failed (database = %@).", database);
-    STAssertTrue([database executeStatement:@"CREATE TABLE IF NOT EXISTS airports(id INTEGER PRIMARY KEY, fullname TEXT, short TEXT, country TEXT);"], @"Execute statement failed (database = %@).", database);
+    STAssertTrue([database open:&error], @"Open operation failed (database = %@, error = %@).", database, error);
+    STAssertTrue([database executeStatement:@"CREATE TABLE IF NOT EXISTS airports(id INTEGER PRIMARY KEY, fullname TEXT, short TEXT, country TEXT);" error:&error], @"Execute statement failed (database = %@, error = %@).", database, error);
 
-    STAssertTrue([database lastInsertRowID] == nil, @"No insert operation occurred yet, this method should have returned a nil pointer.");
-    STAssertTrue([database lastInsertRowID] == nil, @"No insert operation occurred yet, this method should have returned a nil pointer.");
+    STAssertNil(database.lastInsertRowID, @"No insert operation occurred yet, this method should have returned a nil pointer.");
+    STAssertNil(database.lastInsertRowID, @"No insert operation occurred yet, this method should have returned a nil pointer.");
 
     SQLQuery *insertAirportQuery = [SQLQuery queryWithStatement:@"INSERT INTO airports(fullname, short, country) VALUES(?, ?, ?);"];
     NSArray *insertAirportData = [NSArray arrayWithObjects:
@@ -396,14 +506,18 @@
                                   [NSArray arrayWithObjects:@"Shanghai", @"SH", @"China", nil],
                                   [NSArray arrayWithObjects:@"Dubai", @"DBX", @"United Arab Emirates", nil],
                                   [NSArray arrayWithObjects:@"Rio de Janeiro", @"GIG", @"Brazil", nil],
+                                  [NSArray arrayWithObjects:@"Houston", @"IAH", @"USA", nil],
+                                  [NSArray arrayWithObjects:@"Lome", @"LFW", @"Togo", nil],
                                   nil];
 
     [insertAirportData enumerateObjectsUsingBlock:^(id object, NSUInteger index, BOOL *stop) {
         insertAirportQuery.arguments = (NSArray *)object;
-        STAssertTrue([database executeQuery:insertAirportQuery withOptions:SQLDatabaseExecutingOptionCacheStatement thenEnumerateRowsUsingBlock:NULL], @"Execute query failed (database = %@).", database);
+        STAssertTrue([database executeQuery:insertAirportQuery options:SQLDatabaseExecutingOptionCacheStatement error:&error thenEnumerateRowsUsingBlock:NULL], @"Execute query failed (database = %@, error = %@).", database, error);
+        STAssertEquals(database.numberOfChanges, 1u, @"Insertion failed (query = %@).", insertAirportQuery);
+        STAssertNotNil(database.lastInsertRowID, @"The last inserted row should have an ID different from nil.");
     }];
 
-    STAssertTrue([database executeStatement:@"CREATE TABLE IF NOT EXISTS companies(id INTEGER PRIMARY KEY, name TEXT);"], @"Execute statement failed (database = %@).", database);
+    STAssertTrue([database executeStatement:@"CREATE TABLE IF NOT EXISTS companies(id INTEGER PRIMARY KEY, name TEXT);" error:&error], @"Execute statement failed (database = %@, error = %@).", database, error);
 
     SQLQuery *insertCompanyQuery = [SQLQuery queryWithStatement:@"INSERT INTO companies(name) VALUES(?);"];
     NSArray *insertCompanyData = [NSArray arrayWithObjects:
@@ -437,12 +551,14 @@
 
     [insertCompanyData enumerateObjectsUsingBlock:^(id object, NSUInteger index, BOOL *stop) {
         insertCompanyQuery.arguments = (NSArray *)object;
-        STAssertTrue([database executeQuery:insertCompanyQuery withOptions:SQLDatabaseExecutingOptionCacheStatement thenEnumerateRowsUsingBlock:NULL], @"Execute query failed (database = %@).", database);
+        STAssertTrue([database executeQuery:insertCompanyQuery options:SQLDatabaseExecutingOptionCacheStatement error:&error thenEnumerateRowsUsingBlock:NULL], @"Execute query failed (database = %@, error = %@).", database, error);
+        STAssertEquals(database.numberOfChanges, 1u, @"Insertion failed (query = %@).", insertAirportQuery);
+        STAssertNotNil(database.lastInsertRowID, @"The last inserted row should have an ID different from nil.");
     }];
 
-    STAssertTrue([database executeStatement:@"CREATE TABLE IF NOT EXISTS flights(id INTEGER PRIMARY KEY, take_off TEXT, landing TEXT, from_id INTEGER, to_id INTERGER, company id INTEGER, FOREIGN KEY(from_id) REFERENCES airports(id), FOREIGN KEY(to_id) REFERENCES airports(id), FOREIGN KEY(company) REFERENCES companies(id));"], @"Execute statement failed (database = %@).", database);
+    STAssertTrue([database executeStatement:@"CREATE TABLE IF NOT EXISTS flights(id INTEGER PRIMARY KEY, take_off TEXT, landing TEXT, from_id INTEGER, to_id INTERGER, company_id INTEGER, FOREIGN KEY(from_id) REFERENCES airports(id), FOREIGN KEY(to_id) REFERENCES airports(id), FOREIGN KEY(company_id) REFERENCES companies(id));" error:&error], @"Execute statement failed (database = %@, error = %@).", database, error);
 
-    SQLQuery *insertFlightQuery = [SQLQuery queryWithStatement:@"INSERT INTO flights(take_off, landing, from_id, to_id, company) SELECT ?, ?, a1.id, a2.id, companies.id FROM airports AS a1, airports as a2, companies WHERE a1.fullname = ? AND a2.fullname = ? AND companies.name = ?;"];
+    SQLQuery *insertFlightQuery = [SQLQuery queryWithStatement:@"INSERT INTO flights(take_off, landing, from_id, to_id, company_id) SELECT ?, ?, a1.id, a2.id, companies.id FROM airports AS a1, airports as a2, companies WHERE a1.fullname = ? AND a2.fullname = ? AND companies.name = ?;"];
     NSArray *insertFlightData = [NSArray arrayWithObjects:
                                  [NSArray arrayWithObjects:@"Tue 6:50a", @"Tue 8:10a", @"San Francisco", @"Los Angeles", @"Alaska Airlines", nil],
                                  [NSArray arrayWithObjects:@"Tue 1:35p", @"Tue 2:55p", @"San Francisco", @"Los Angeles", @"Virgin America", nil],
@@ -543,25 +659,92 @@
                                  [NSArray arrayWithObjects:@"Sat 7:45a", @"Sat 10:25a", @"Istanbul", @"Paris", @"Turkish Airlines", nil],
                                  [NSArray arrayWithObjects:@"Wed 10:10a", @"Wed 2:25p", @"Paris", @"Athens", @"Air France", nil],
 
-//                                 [NSArray arrayWithObjects:@"", @"", @"", @"", @"", nil],
-//                                 [NSArray arrayWithObjects:@"", @"", @"", @"", @"", nil],
-//                                 [NSArray arrayWithObjects:@"", @"", @"", @"", @"", nil],
-//                                 [NSArray arrayWithObjects:@"", @"", @"", @"", @"", nil],
-//                                 [NSArray arrayWithObjects:@"", @"", @"", @"", @"", nil],
-//                                 [NSArray arrayWithObjects:@"", @"", @"", @"", @"", nil],
-//                                 [NSArray arrayWithObjects:@"", @"", @"", @"", @"", nil],
-//                                 [NSArray arrayWithObjects:@"", @"", @"", @"", @"", nil],
-//                                 [NSArray arrayWithObjects:@"", @"", @"", @"", @"", nil],
-//                                 [NSArray arrayWithObjects:@"", @"", @"", @"", @"", nil],
+                                 [NSArray arrayWithObjects:@"Sat 7:30p", @"Sat 8:45p", @"Athens", @"Istanbul", @"Turkish Airlines", nil],
+                                 [NSArray arrayWithObjects:@"Sun 8:10a", @"Sun 10:40a", @"Istanbul", @"Barcelona", @"Turkish Airlines", nil],
+                                 [NSArray arrayWithObjects:@"Sat 6:20a", @"Sat 8:05a", @"Charlotte", @"Houston", @"United", nil],
+                                 [NSArray arrayWithObjects:@"Sat 9:05a", @"Sat 9:48a", @"Houston", @"Austin", @"United", nil],
+                                 [NSArray arrayWithObjects:@"Sat 2:05p", @"Sat 3:15p", @"Houston", @"Dallas", @"American Airlines", nil],
+                                 [NSArray arrayWithObjects:@"Sat 5:45p", @"Sat 8:55p", @"Dallas", @"Guatemala", @"American Airlines", nil],
+                                 [NSArray arrayWithObjects:@"Sat 10:35p", @"Sun 10:30a", @"New York", @"London", @"British Airways", nil],
+                                 [NSArray arrayWithObjects:@"Sun 12:05p", @"Sun 9:55p", @"London", @"Rio de Janeiro", @"British Airways", nil],
+                                 [NSArray arrayWithObjects:@"Mon 8:05p", @"Tue 7:30a", @"Miami", @"Rio de Janeiro", @"United", nil],
+                                 [NSArray arrayWithObjects:@"Fri 3:35a", @"Fri 6:30a", @"Dubai", @"Istanbul", @"Turkish Airlines", nil],
+
+                                 [NSArray arrayWithObjects:@"Sun 10:55p", @"Mon 5:15a", @"Rio de Janeiro", @"Houston", @"United", nil],
+                                 [NSArray arrayWithObjects:@"Mon 11:40a", @"Mon 2:05p", @"Houston", @"San Francisco", @"United", nil],
+                                 [NSArray arrayWithObjects:@"Mon 10:39p", @"Wed 8:10a", @"San Francisco", @"Sydney", @"United", nil],
+                                 [NSArray arrayWithObjects:@"Wed 9:40a", @"Wed 2:50p", @"Sydney", @"Wellington", @"Air New Zealand", nil],
+                                 [NSArray arrayWithObjects:@"Sat 11:30p", @"Sun 5:55a", @"Ouagadougou", @"Paris", @"Air France", nil],
+                                 [NSArray arrayWithObjects:@"Sun 9:45a", @"Sun 11:45a", @"Paris", @"Zagreb", @"Air France", nil],
+                                 [NSArray arrayWithObjects:@"Tue 9:30a", @"Tue 11:15a", @"Ouagadougou", @"Lome", @"Ethiopian Air", nil],
+                                 [NSArray arrayWithObjects:@"Tue 1:20p", @"Tue 3:00p", @"Lome", @"Cotonou", @"Ethiopian Air", nil],
+                                 [NSArray arrayWithObjects:@"Sat 5:10p", @"Sun 5:55a", @"Chicago", @"London", @"Iberia", nil],
+                                 [NSArray arrayWithObjects:@"Sat 3:00p", @"Sat 5:25p", @"Rome", @"Madrid", @"Iberia", nil],
+
+                                 [NSArray arrayWithObjects:@"Sun 9:05a", @"Sun 11:05a", @"Madrid", @"Paris", @"Iberia", nil],
+                                 [NSArray arrayWithObjects:@"Tue 7:45p", @"Tue 9:55p", @"Rome", @"Paris", @"Air France", nil],
+                                 [NSArray arrayWithObjects:@"Tue 6:05p", @"Tue 9:25p", @"Rome", @"Istanbul", @"Turkish Airlines", nil],
+                                 [NSArray arrayWithObjects:@"Sat 7:25p", @"Sun 8:50a", @"Miami", @"London", @"Iberia", nil],
+                                 [NSArray arrayWithObjects:@"Sun 4:10p", @"Sun 9:05p", @"London", @"Helsinki", @"British Airways", nil],
+                                 [NSArray arrayWithObjects:@"Fri 10:25a", @"Fri 11:25a", @"Helsinki", @"Berlin", @"Lufthansa", nil],
+                                 [NSArray arrayWithObjects:@"Fri 7:25p", @"Sat 11:50a", @"Berlin", @"Beijing", @"Hainan Airlines", nil],
+                                 [NSArray arrayWithObjects:@"Sat 1:30p", @"Sat 5:45p", @"Beijing", @"Paris", @"Air China", nil],
+                                 [NSArray arrayWithObjects:@"Sun 1:30a", @"Sun 5:30a", @"Beijing", @"Paris", @"Air France", nil],
+                                 [NSArray arrayWithObjects:@"Sun 10:40a", @"Sun 5:05p", @"Paris", @"Lima", @"Air France", nil],
                                  nil];
 
     [insertFlightData enumerateObjectsUsingBlock:^(id object, NSUInteger index, BOOL *stop) {
         insertFlightQuery.arguments = (NSArray *)object;
-        STAssertTrue([database executeQuery:insertFlightQuery withOptions:SQLDatabaseExecutingOptionCacheStatement thenEnumerateRowsUsingBlock:NULL], @"Execute query failed (database = %@).", database);
+        STAssertTrue([database executeQuery:insertFlightQuery options:SQLDatabaseExecutingOptionCacheStatement error:&error thenEnumerateRowsUsingBlock:NULL], @"Execute query failed (database = %@, error = %@).", database, error);
         STAssertEquals(database.numberOfChanges, 1u, @"Insertion failed (query = %@).", insertFlightQuery);
+        STAssertNotNil(database.lastInsertRowID, @"The last inserted row should have an ID different from nil.");
     }];
 
-    STAssertTrue([database close], @"Close operation failed (database = %@).", database);
+    STAssertTrue([database executeStatement:@"INSERT INTO airports(country, short, fullname) VALUES('Egypt', 'CAI', 'Cairo');" error:&error], @"Execute query failed (database = %@), error = %@).", database, error);
+    STAssertEquals(database.numberOfChanges, 1u, @"Insertion failed (query = %@).", insertFlightQuery);
+
+    NSNumber *cairoAirportID = database.lastInsertRowID;
+    STAssertNotNil(cairoAirportID, @"The last inserted row should have an ID different from nil.");
+
+    STAssertTrue([database executeStatement:@"INSERT INTO companies(name) VALUES(?);" arguments:[NSArray arrayWithObject:@"Egypt Air"] error:&error], @"Execute query failed (database = %@), error = %@).", database, error);
+    STAssertEquals(database.numberOfChanges, 1u, @"Insertion failed (query = %@).", insertFlightQuery);
+
+    NSNumber *egyptAirID = database.lastInsertRowID;
+    STAssertNotNil(egyptAirID, @"The last inserted row should have an ID different from nil.");
+
+    SQLQuery *getParisIDQuery = [SQLQuery queryWithStatement:@"SELECT id FROM airports WHERE fullname = 'Paris' LIMIT 1;"];
+    __block NSNumber *parisAirportID = nil;
+
+    NSLog(@"Show the id of the airport called 'Paris':");
+    STAssertTrue([database executeQuery:getParisIDQuery error:&error thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
+        if ( index != NSNotFound )
+        {
+            parisAirportID = [row objectForColumnAtIndex:0];
+            NSLog(@"%@", parisAirportID);
+        }
+    }], @"Execute query failed (database = %@).", database);
+    STAssertNotNil(parisAirportID, @"Cannot found the ID of the paris airport in the database.");
+
+    NSArray *flightsCairoParisData = [NSArray arrayWithObjects:
+                                      [NSArray arrayWithObjects:@"Sat 3:10p", @"Sat 8:30p", parisAirportID, cairoAirportID, egyptAirID, nil],
+                                      [NSArray arrayWithObjects:@"Sat 9:45p", @"Sun 3:15a", cairoAirportID, parisAirportID, egyptAirID, nil],
+                                      nil];
+    SQLQuery *flightsCairoParisInsertQuery = [SQLQuery queryWithStatement:@"INSERT INTO flights(take_off, landing, from_id, to_id, company) VALUES(?, ?, ?, ?, ?);"];
+
+    [flightsCairoParisData enumerateObjectsUsingBlock:^(id object, NSUInteger index, BOOL *stop) {
+        flightsCairoParisInsertQuery.arguments = (NSArray *)object;
+        STAssertTrue([database executeQuery:insertFlightQuery error:&error], @"Execute query failed (database = %@, error = %@).", database, error);
+        STAssertEquals(database.numberOfChanges, 1u, @"Insertion failed (query = %@).", flightsCairoParisInsertQuery);
+        STAssertNotNil(database.lastInsertRowID, @"The last inserted row should have an ID different from nil.");
+    }];
+
+    NSString *dumpFilePath = [self pathForSQLResource:@"dump_travel_alter"];
+
+    STAssertTrue([database executeSQLFileAtPath:dumpFilePath error:&error], @"Execute SQL file failed (database = %@, filePath = %@, error = %@).", database, dumpFilePath, error);
+
+    // SELECT take_off, landing, airports_to.name AS destination, companies.name AS companies  FROM flights, airports as airport_from, airports as airport_to, companies WHERE airport_from.name = 'Paris' AND airport_from.id = flights.from_id AND flights.id = airports_to.id AND flights.id = companies.id;
+
+    STAssertTrue([database close:&error], @"Close operation failed (database = %@, error = %@).", database, error);
 }
 
 - (void)testStringEncoding
@@ -569,43 +752,46 @@
     NSString *storePath = [self generateValidTemporaryPathWithComponent:@"testStringEncoding.sqlite"];
     STAssertNotNil(storePath, @"The path generated must be different than nil.");
     SQLDatabase *database = [SQLDatabase databaseWithFilePath:storePath];
+    __block NSError *error = nil;
 
-    STAssertTrue([database open], @"Open operation failed (database = %@).", database);
-    STAssertTrue([database executeStatement:@"CREATE TABLE IF NOT EXISTS sentences(ID INTEGER PRIMARY KEY, language TEXT, content TEXT);"], @"Execute statement failed (database = %@).", database);
+    STAssertTrue([database open:&error], @"Open operation failed (database = %@, error = %@).", database, error);
+    STAssertTrue([database executeStatement:@"CREATE TABLE IF NOT EXISTS sentences(ID INTEGER PRIMARY KEY, language TEXT, content TEXT);" error:&error], @"Execute statement failed (database = %@, error = %@).", database, error);
 
-    NSArray *entries = [NSArray arrayWithObjects:
-                        [NSArray arrayWithObjects:@"Danish", @"[Quizdeltagerne spiste jordbær med fløde, mens cirkusklovnen Wolther spillede på xylofon.]", nil],
-                        [NSArray arrayWithObjects:@"German", @"[Zwölf Boxkämpfer jagten Eva quer über den Sylter Deich.]", nil],
-                        [NSArray arrayWithObjects:@"Greek", @"[Γαζέες καὶ μυρτιὲς δὲν θὰ βρῶ πιὰ στὸ χρυσαφὶ ξέφωτο.]", nil],
-                        [NSArray arrayWithObjects:@"English", @"[The quick brown fox jumps over the lazy dog.]", nil],
-                        [NSArray arrayWithObjects:@"Spanish", @"[El pingüino Wenceslao hizo kilómetros bajo exhaustiva lluvia y frío, añoraba a su querido cachorro.]", nil],
-                        [NSArray arrayWithObjects:@"French", @"[Le cœur déçu mais l'âme plutôt naïve, Louÿs rêva de crapaüter en canoë au delà des îles, près du mälström où brûlent les novæ.]", nil],
-                        [NSArray arrayWithObjects:@"Irish Gaelic", @"[D'fhuascail Íosa, Úrmhac na hÓighe Beannaithe, pór Éava agus Ádhaimh]", nil],
-                        [NSArray arrayWithObjects:@"Hungarian", @"[Árvíztűrő tükörfúrógép]", nil],
-                        [NSArray arrayWithObjects:@"Icelandic", @"[Kæmi ný öxi hér ykist þjófum nú bæði víl og ádrepa]", nil],
-                        [NSArray arrayWithObjects:@"Japanese (Hiragana)", @"[いろはにほへとちりぬるを わかよたれそつねならむ うゐのおくやまけふこえて あさきゆめみしゑひもせす]", nil],
-                        [NSArray arrayWithObjects:@"Japanese (Katakana)", @"[イロハニホヘト チリヌルヲ ワカヨタレソ ツネナラム ウヰノオクヤマ ケフコエテ アサキユメミシ ヱヒモセスン]", nil],
-                        [NSArray arrayWithObjects:@"Hebrew", @"[ג סקרן שט בים מאוכזב ולפתע מצא לו חברה איך הקליטה]", nil],
-                        [NSArray arrayWithObjects:@"Polish", @"[Pchnąć w tę łódź jeża lub ośm skrzyń fig]", nil],
-                        [NSArray arrayWithObjects:@"Russian", @"[В чащах юга жил бы цитрус? Да, но фальшивый экземпляр!]", nil],
-                        [NSArray arrayWithObjects:@"Thai", @"[ฉบับย่อกระโดดสีน้ำตาลมากกว่าสุนัขจิ้งจอกสุนัขขี้เกียจ]", nil],
-                        nil];
-    SQLQuery *insertQuery = [SQLQuery queryWithStatement:@"INSERT INTO sentences(language, content) VALUES(?, ?);"];
+    NSArray *sentenceData = [NSArray arrayWithObjects:
+                             [NSArray arrayWithObjects:@"Danish", @"[Quizdeltagerne spiste jordbær med fløde, mens cirkusklovnen Wolther spillede på xylofon.]", nil],
+                             [NSArray arrayWithObjects:@"German", @"[Zwölf Boxkämpfer jagten Eva quer über den Sylter Deich.]", nil],
+                             [NSArray arrayWithObjects:@"Greek", @"[Γαζέες καὶ μυρτιὲς δὲν θὰ βρῶ πιὰ στὸ χρυσαφὶ ξέφωτο.]", nil],
+                             [NSArray arrayWithObjects:@"English", @"[The quick brown fox jumps over the lazy dog.]", nil],
+                             [NSArray arrayWithObjects:@"Spanish", @"[El pingüino Wenceslao hizo kilómetros bajo exhaustiva lluvia y frío, añoraba a su querido cachorro.]", nil],
+                             [NSArray arrayWithObjects:@"French", @"[Le cœur déçu mais l'âme plutôt naïve, Louÿs rêva de crapaüter en canoë au delà des îles, près du mälström où brûlent les novæ.]", nil],
+                             [NSArray arrayWithObjects:@"Irish Gaelic", @"[D'fhuascail Íosa, Úrmhac na hÓighe Beannaithe, pór Éava agus Ádhaimh]", nil],
+                             [NSArray arrayWithObjects:@"Hungarian", @"[Árvíztűrő tükörfúrógép]", nil],
+                             [NSArray arrayWithObjects:@"Icelandic", @"[Kæmi ný öxi hér ykist þjófum nú bæði víl og ádrepa]", nil],
+                             [NSArray arrayWithObjects:@"Japanese (Hiragana)", @"[いろはにほへとちりぬるを わかよたれそつねならむ うゐのおくやまけふこえて あさきゆめみしゑひもせす]", nil],
+                             [NSArray arrayWithObjects:@"Japanese (Katakana)", @"[イロハニホヘト チリヌルヲ ワカヨタレソ ツネナラム ウヰノオクヤマ ケフコエテ アサキユメミシ ヱヒモセスン]", nil],
+                             [NSArray arrayWithObjects:@"Hebrew", @"[ג סקרן שט בים מאוכזב ולפתע מצא לו חברה איך הקליטה]", nil],
+                             [NSArray arrayWithObjects:@"Polish", @"[Pchnąć w tę łódź jeża lub ośm skrzyń fig]", nil],
+                             [NSArray arrayWithObjects:@"Russian", @"[В чащах юга жил бы цитрус? Да, но фальшивый экземпляр!]", nil],
+                             [NSArray arrayWithObjects:@"Thai", @"[ฉบับย่อกระโดดสีน้ำตาลมากกว่าสุนัขจิ้งจอกสุนัขขี้เกียจ]", nil],
+                             nil];
+    SQLQuery *insertSentenceQuery = [SQLQuery queryWithStatement:@"INSERT INTO sentences(language, content) VALUES(?, ?);"];
 
-    [entries enumerateObjectsUsingBlock:^(id object, NSUInteger index, BOOL *stop) {
-        insertQuery.arguments = (NSArray *)object;
-        STAssertTrue([database executeQuery:insertQuery withOptions:SQLDatabaseExecutingOptionCacheStatement thenEnumerateRowsUsingBlock:NULL], @"Execute statement failed (database = %@).", database);
+    [sentenceData enumerateObjectsUsingBlock:^(id object, NSUInteger index, BOOL *stop) {
+        insertSentenceQuery.arguments = (NSArray *)object;
+        STAssertTrue([database executeQuery:insertSentenceQuery options:SQLDatabaseExecutingOptionCacheStatement error:&error thenEnumerateRowsUsingBlock:NULL], @"Execute statement failed (database = %@, error = %@).", database, error);
+        STAssertEquals(database.numberOfChanges, 1u, @"Insertion failed (query = %@).", insertSentenceQuery);
+        STAssertNotNil(database.lastInsertRowID, @"The last inserted row should have an ID different from nil.");
     }];
 
     SQLQuery *selectQuery = [SQLQuery queryWithStatement:@"SELECT * FROM sentences;"];
 
-    [database executeQuery:selectQuery thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
+    STAssertTrue([database executeQuery:selectQuery error:&error thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
         NSString *sentence = [row objectForColumn:@"content"];
         STAssertTrue([sentence isKindOfClass:[NSString class]] == YES, @"Invalid kind of class.");
-        STAssertTrue([sentence characterAtIndex:0] == '[', @"Invalid first character.");
-        STAssertTrue([sentence characterAtIndex:(sentence.length - 1)], @"Invalid last character.");
-    }];
-    STAssertTrue([database close], @"Close operation failed (database = %@).", database);
+        STAssertEquals([sentence characterAtIndex:0], (unichar)'[', @"Invalid first character.");
+        STAssertEquals([sentence characterAtIndex:(sentence.length - 1)], (unichar)']', @"Invalid last character.");
+    }], @"Execute statement failed (database = %@, error = %@).", database, error);
+    STAssertTrue([database close:&error], @"Close operation failed (database = %@, error = %@).", database, error);
 }
 
 - (void)testDataTypes
@@ -613,14 +799,15 @@
     NSString *storePath = [self generateValidTemporaryPathWithComponent:@"testDataTypes.sqlite"];
     STAssertNotNil(storePath, @"The path generated must be different than nil.");
     SQLDatabase *database = [SQLDatabase databaseWithFilePath:storePath];
+    NSError *error = nil;
 
-    STAssertTrue([database open], @"Open operation failed (database = %@).", database);
-    STAssertTrue([database executeStatement:@"CREATE TABLE IF NOT EXISTS data(ID INTEGER PRIMARY KEY, description TEXT);"], @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO data(description) VALUES(?);", [NSURL URLWithString:@"http://www.apple.com"], nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO data(description) VALUES(?);", [NSData data], nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO data(description) VALUES(?);", [NSDate date], nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue(([database executeStatementWithArguments:@"INSERT INTO data(description) VALUES(?);", [NSIndexSet indexSetWithIndex:42], nil]), @"Execute statement failed (database = %@).", database);
-    STAssertTrue([database close], @"Close operation failed (database = %@).", database);
+    STAssertTrue([database open:&error], @"Open operation failed (database = %@, error = %@).", database, error);
+    STAssertTrue([database executeStatement:@"CREATE TABLE IF NOT EXISTS data(ID INTEGER PRIMARY KEY, description TEXT);" error:&error], @"Execute statement failed (database = %@, error = %@).", database, error);
+    STAssertTrue([database executeStatement:@"INSERT INTO data(description) VALUES(?);" arguments:[NSArray arrayWithObject:[NSURL URLWithString:@"http://www.apple.com"]] error:&error], @"Execute statement failed (database = %@, error = %@).", database, error);
+    STAssertTrue([database executeStatement:@"INSERT INTO data(description) VALUES(?);" arguments:[NSArray arrayWithObject:[NSData data]] error:&error], @"Execute statement failed (database = %@, error = %@).", database, error);
+    STAssertTrue([database executeStatement:@"INSERT INTO data(description) VALUES(?);" arguments:[NSArray arrayWithObject:[NSDate date]] error:&error], @"Execute statement failed (database = %@, error = %@).", database, error);
+    STAssertTrue([database executeStatement:@"INSERT INTO data(description) VALUES(?);" arguments:[NSArray arrayWithObject:[NSIndexSet indexSetWithIndex:42]] error:&error], @"Execute statement failed (database = %@, error = %@).", database, error);
+    STAssertTrue([database close:&error], @"Close operation failed (database = %@, error = %@).", database, error);
 }
 
 @end

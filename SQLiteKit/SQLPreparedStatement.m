@@ -63,7 +63,7 @@
 {
     if ( _compiledStatement != NULL )
     {
-        [self finialize];
+        [self complete];
     }
 
     [_database release];
@@ -87,7 +87,7 @@
     return NO;
 }
 
-- (BOOL)finialize
+- (BOOL)complete
 {
     NSAssert(self.compiledStatement != NULL, @"The compiled statement should not be NULL.");
     int resultFinalize = sqlite3_finalize(self.compiledStatement);

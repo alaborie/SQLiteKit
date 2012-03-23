@@ -38,6 +38,7 @@
 		FAA1F9AF148AD5330013D31B /* SQLDatabase.h in Headers */ = {isa = PBXBuildFile; fileRef = FAA1F9AD148AD5330013D31B /* SQLDatabase.h */; settings = {ATTRIBUTES = (); }; };
 		FAA1F9B0148AD5330013D31B /* SQLDatabase.m in Sources */ = {isa = PBXBuildFile; fileRef = FAA1F9AE148AD5330013D31B /* SQLDatabase.m */; };
 		FACBCB2714D8A27B00004567 /* SQLiteKit.h in Headers */ = {isa = PBXBuildFile; fileRef = FACBCB2614D8A27B00004567 /* SQLiteKit.h */; settings = {ATTRIBUTES = (); }; };
+		FADDB3D7151BC03B00848B6B /* dump_travel_alter.sql in Resources */ = {isa = PBXBuildFile; fileRef = FADDB3D6151BC03B00848B6B /* dump_travel_alter.sql */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -89,6 +90,7 @@
 		FAA1F9AD148AD5330013D31B /* SQLDatabase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SQLDatabase.h; sourceTree = "<group>"; };
 		FAA1F9AE148AD5330013D31B /* SQLDatabase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SQLDatabase.m; sourceTree = "<group>"; };
 		FACBCB2614D8A27B00004567 /* SQLiteKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SQLiteKit.h; sourceTree = "<group>"; };
+		FADDB3D6151BC03B00848B6B /* dump_travel_alter.sql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = dump_travel_alter.sql; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -174,6 +176,7 @@
 				FA8A6B04151A94A4008AC3B9 /* dump_short_no_separator.sql */,
 				FA168262151A80CF00A22FC4 /* dump_empty.sql */,
 				FA168268151A876400A22FC4 /* dump_travel.sql */,
+				FADDB3D6151BC03B00848B6B /* dump_travel_alter.sql */,
 				FA8A6B07151A98B2008AC3B9 /* dump_movie.sql */,
 			);
 			path = Resources;
@@ -294,6 +297,7 @@
 				FA168269151A876400A22FC4 /* dump_travel.sql in Resources */,
 				FA8A6B05151A94A4008AC3B9 /* dump_short_no_separator.sql in Resources */,
 				FA8A6B08151A98B2008AC3B9 /* dump_movie.sql in Resources */,
+				FADDB3D7151BC03B00848B6B /* dump_travel_alter.sql in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
