@@ -161,7 +161,7 @@ unsigned int getNextLine(FILE *stream, buffer_t streamBuffer, buffer_t lineBuffe
         {
             case '*':
             {
-                if ( previousChar == '/' && inhibitor == 0 )
+                if ( inhibitor == 0 && previousChar == '/' )
                 {
                     lineBuffer->length--;
                     inhibitor = currentChar;
@@ -171,7 +171,7 @@ unsigned int getNextLine(FILE *stream, buffer_t streamBuffer, buffer_t lineBuffe
             }
             case '/':
             {
-                if ( previousChar == '*' && inhibitor == '*' )
+                if ( inhibitor == '*' && previousChar == '*' )
                 {
                     inhibitor = 0;
                     shouldCopy = true;
@@ -182,7 +182,7 @@ unsigned int getNextLine(FILE *stream, buffer_t streamBuffer, buffer_t lineBuffe
             }
             case '-':
             {
-                if ( previousChar == '-' )
+                if ( inhibitor == 0 && previousChar == '-' )
                 {
                     lineBuffer->length--;
                     inhibitor = '\n';
