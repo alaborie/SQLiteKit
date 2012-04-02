@@ -167,12 +167,8 @@ void sqldatabase_rollback_hook(void *object)
 #pragma mark -
 #pragma mark NSObject
 
-+ (void)load
++ (void)initialize
 {
-    if ( strcmp(sqlite3_sourceid(), SQLITE_SOURCE_ID) != 0 )
-    {
-        sqlitekit_warning(@"SQLite header and source version mismatch (header = %s, source = %s).", sqlite3_sourceid(), SQLITE_SOURCE_ID);
-    }
 #ifdef SQLITEKIT_VERBOSE
     NSLog(@" > SQLite version %s [ ID %s ] ", sqlite3_libversion(), sqlite3_sourceid());
 #endif
