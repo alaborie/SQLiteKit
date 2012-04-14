@@ -12,6 +12,7 @@
 
 @class SQLQuery;
 @class SQLRow;
+@class SQLFunction;
 
 extern NSString * const kSQLDatabaseInsertNotification;
 extern NSString * const kSQLDatabaseUpdateNotification;
@@ -129,6 +130,11 @@ typedef NSUInteger SQLDatabaseErrors;
 - (NSUInteger)numberOfChanges;
 
 - (NSUInteger)totalNumberOfChanges;
+
+#pragma mark -
+
+- (BOOL)addFunction:(SQLFunction *)function withName:(NSString *)name encoding:(NSInteger)encoding context:(id)object error:(NSError **)error __attribute__ ((nonnull(1, 2)));
+- (BOOL)removeFunction:(SQLFunction *)function withName:(NSString *)name encoding:(NSInteger)encoding error:(NSError **)error __attribute__ ((nonnull(1, 2)));
 
 #pragma mark -
 

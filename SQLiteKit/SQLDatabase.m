@@ -12,13 +12,27 @@
 #import "SQLQuery.h"
 #import "SQLPreparedStatement.h"
 #import "SQLRow.h"
+#import "SQLFunction.h"
 #import "SQLFile.h"
+
+#import "SQLFunction+Private.h"
 
 NSString * const kSQLDatabaseInsertNotification = @"@insert.";
 NSString * const kSQLDatabaseUpdateNotification = @"@update.";
 NSString * const kSQLDatabaseDeleteNotification = @"@delete.";
 NSString * const kSQLDatabaseCommitNotification = @"@commit";
 NSString * const kSQLDatabaseRollbackNotification = @"@rollback";
+
+void sqldatabase_function_destroy(void *ptr);
+
+void sqldatabase_function_destroy(void *ptr)
+{
+    id object = (id)ptr;
+
+    [object release];
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 void sqldatabase_update_hook(void *object, int type, char const *database, char const *table, sqlite3_int64 rowID);
 int sqldatabase_commit_hook(void *object);
@@ -262,9 +276,7 @@ void sqldatabase_rollback_hook(void *object)
     [self.statementsCache removeAllObjects];
     self.statementsCache.delegate = nil;
 
-    int resultClose = sqlite3_close(self.connectionHandle);
-
-    if ( resultClose == SQLITE_OK )
+    if ( sqlite3_close(self.connectionHandle) == SQLITE_OK )
     {
         // NULL out the connection handle as soon as the close operation succeed, the pointer became obsolete.
         _connectionHandle = NULL;
@@ -409,6 +421,7 @@ void sqldatabase_rollback_hook(void *object)
             {
                 sqlitekit_verbose(@"A problem occurred while executing the prepared statement (query = %@).", query);
                 sqlitekit_warning(@"%s.", sqlite3_errmsg(self.connectionHandle));
+                sqlitekit_create_error_cstring(error, kSQLiteKitErrorDomain, SQLDatabaseErrorCInterface, sqlite3_errmsg(self.connectionHandle));
                 isExecuting = NO;
                 break;
             }
@@ -454,6 +467,55 @@ void sqldatabase_rollback_hook(void *object)
 - (NSUInteger)totalNumberOfChanges
 {
     return (NSUInteger)sqlite3_total_changes(self.connectionHandle);
+}
+
+#pragma mark -
+
+- (BOOL)addFunction:(SQLFunction *)function withName:(NSString *)name encoding:(NSInteger)encoding context:(id)object error:(NSError **)error
+{
+    if ( self.connectionHandle == NULL )
+    {
+        sqlitekit_warning(@"Cannot create a function with a database that is not open.");
+        sqlitekit_create_error(error, kSQLiteKitErrorDomain, SQLDatabaseErrorDatabaseNotOpen, @"Cannot create a function with a database that is not open.");
+        return NO;
+    }
+
+    NSParameterAssert(function);
+    NSParameterAssert(name);
+
+    [function retain];
+    function.context = object;
+    if ( sqlite3_create_function_v2(self.connectionHandle, [name UTF8String], function.numberOfArguments, encoding, function, function.function, function.step, function.final, &sqldatabase_function_destroy) == SQLITE_OK )
+    {
+        sqlitekit_verbose(@"Custom function '%@' has been created successfully.", name);
+        return YES;
+    }
+    sqlitekit_verbose(@"Cannot create the custom function (function = %@, name = %@, encoding = %d, context = %@).", function, name, encoding, object);
+    sqlitekit_warning(@"%s.", sqlite3_errmsg(self.connectionHandle));
+    sqlitekit_create_error_cstring(error, kSQLiteKitErrorDomain, SQLDatabaseErrorCInterface, sqlite3_errmsg(self.connectionHandle));
+    return NO;
+}
+
+- (BOOL)removeFunction:(SQLFunction *)function withName:(NSString *)name encoding:(NSInteger)encoding error:(NSError **)error
+{
+    if ( self.connectionHandle == NULL )
+    {
+        sqlitekit_warning(@"Cannot remove a function with a database that is not open.");
+        sqlitekit_create_error(error, kSQLiteKitErrorDomain, SQLDatabaseErrorDatabaseNotOpen, @"Cannot remove a function with a database that is not open.");
+        return NO;
+    }
+
+    NSParameterAssert(name);
+
+    if ( sqlite3_create_function_v2(self.connectionHandle, [name UTF8String], function.numberOfArguments, encoding, function, NULL, NULL, NULL, NULL) == SQLITE_OK )
+    {
+        sqlitekit_verbose(@"Custom function '%@' has been removed successfully.", name);
+        return YES;
+    }
+    sqlitekit_verbose(@"Cannot remove the custom function (name = %@, encoding = %d).", name, encoding);
+    sqlitekit_warning(@"%s.", sqlite3_errmsg(self.connectionHandle));
+    sqlitekit_create_error_cstring(error, kSQLiteKitErrorDomain, SQLDatabaseErrorCInterface, sqlite3_errmsg(self.connectionHandle));
+    return NO;
 }
 
 #pragma mark -
@@ -591,7 +653,6 @@ void sqldatabase_rollback_hook(void *object)
         }
         parameterIndex++;
     }
-
 }
 
 #pragma mark -

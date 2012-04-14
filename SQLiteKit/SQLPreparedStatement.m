@@ -40,10 +40,7 @@
     if ( self != nil )
     {
         _database = [database retain];
-
-        int resultPrepare = sqlite3_prepare_v2(database.connectionHandle, [query.SQLStatement UTF8String], query.SQLStatement.length, &_compiledStatement, NULL);
-
-        if ( resultPrepare != SQLITE_OK )
+        if ( sqlite3_prepare_v2(database.connectionHandle, [query.SQLStatement UTF8String], query.SQLStatement.length, &_compiledStatement, NULL) != SQLITE_OK )
         {
             sqlitekit_verbose(@"A problem occurred while compiling the prepared statement.");
             sqlitekit_warning(@"%s.", sqlite3_errmsg(database.connectionHandle));
@@ -194,7 +191,7 @@
             {
                 sqlitekit_warning(@"The encoded type for the specified NSNumber is invalid (type = %c).", encodedType[0]);
                 // Makes sure to have the same treatment than if it was a string.
-                return [self _bindObject:object atIndex:index];
+                return [self _bindObject:[object description] atIndex:index];
             }
         }
     }

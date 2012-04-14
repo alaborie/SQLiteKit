@@ -133,7 +133,7 @@
 
             if (bytes == NULL)
             {
-                sqlitekit_warning(@"Cannot allocate memory to hold the blob object.");
+                sqlitekit_warning(@"Cannot allocate memory to hold the blob object (row = %@, index = %u).", self, index);
                 return [NSNull null];
             }
             memcpy(bytes, sqlite3_column_blob(self.statement.compiledStatement, index), numberOfBytes);
@@ -145,7 +145,7 @@
         }
         default:
         {
-            sqlitekit_warning(@"Cannot determine the type of the column at the index %i.", index);
+            sqlitekit_warning(@"Cannot determine the type of the column (row = %@, index = %u).", self, index);
         }
     }
     return [NSNull null];

@@ -8,8 +8,27 @@
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#import "SQLDatabase.h"
-#import "SQLQuery.h"
-#import "SQLRow.h"
-#import "SQLFile.h"
-#import "SQLFunction.h"
+#import <sqlite3.h>
+
+@interface SQLFunction : NSObject
+{
+@private
+    NSUInteger _numberOfArguments;
+    id _context;
+
+@private
+    id (^_block)(SQLFunction *function, NSArray *arguments, id context);
+    void (^_operation)(SQLFunction *function, NSArray *arguments, id context);
+    id (^_complete)(SQLFunction *function, id context);
+}
+
+@property (nonatomic, readonly) NSUInteger numberOfArguments;
+@property (nonatomic, retain, readwrite) id context;
+
+#pragma mark -
+
++ (id)functionWithNumberOfArguments:(NSUInteger)numberOfArguments block:(id (^)(SQLFunction *function, NSArray *arguments, id context))block;
+
+- (id)initWithNumberOfArguments:(NSUInteger)numberOfArguments block:(id (^)(SQLFunction *function, NSArray *arguments, id context))block;
+
+@end
