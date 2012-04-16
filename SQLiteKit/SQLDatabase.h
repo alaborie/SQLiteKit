@@ -133,7 +133,14 @@ typedef NSUInteger SQLDatabaseErrors;
 
 #pragma mark -
 
+/**
+ @warning On iOS 4.3, the given function is not retained!
+ */
 - (BOOL)addFunction:(SQLFunction *)function withName:(NSString *)name encoding:(NSInteger)encoding context:(id)object error:(NSError **)error __attribute__ ((nonnull(1, 2)));
+
+/**
+ @warning On iOS 4.3, the given function is not released!
+ */
 - (BOOL)removeFunction:(SQLFunction *)function withName:(NSString *)name encoding:(NSInteger)encoding error:(NSError **)error __attribute__ ((nonnull(1, 2)));
 
 #pragma mark -

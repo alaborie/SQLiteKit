@@ -154,4 +154,24 @@
     STAssertEquals(numberOfRequests, 142u, @"The number of requests must be equal to 142.");
 }
 
+- (void)testMovieTriggerFile
+{
+    NSString *filePath = [self pathForSQLResource:@"dump_movie_trigger"];
+    SQLFile *file = [SQLFile fileWithFilePath:filePath];
+    __block NSUInteger numberOfRequests = 0;
+
+    for ( NSString *line in file )
+    {
+        NSLog(@"1) #%d %@", numberOfRequests, line);
+        numberOfRequests++;
+    }
+    STAssertEquals(numberOfRequests, 30u, @"The number of requests must be equal to 0.");
+    numberOfRequests = 0;
+    [file enumerateRequestsUsingBlock:^(NSString *request, NSUInteger index, BOOL *stop) {
+        sqlitekit_verbose(@"2) #%d %@", numberOfRequests, request);
+        numberOfRequests++;
+    }];
+    STAssertEquals(numberOfRequests, 30u, @"The number of requests must be equal to 0.");
+}
+
 @end

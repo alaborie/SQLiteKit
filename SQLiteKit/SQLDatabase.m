@@ -23,6 +23,9 @@ NSString * const kSQLDatabaseDeleteNotification = @"@delete.";
 NSString * const kSQLDatabaseCommitNotification = @"@commit";
 NSString * const kSQLDatabaseRollbackNotification = @"@rollback";
 
+////////////////////////////////////////////////////////////////////////////////
+#pragma mark -
+
 void sqldatabase_function_destroy(void *ptr);
 
 void sqldatabase_function_destroy(void *ptr)
@@ -33,22 +36,11 @@ void sqldatabase_function_destroy(void *ptr)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+#pragma mark -
 
 void sqldatabase_update_hook(void *object, int type, char const *database, char const *table, sqlite3_int64 rowID);
 int sqldatabase_commit_hook(void *object);
 void sqldatabase_rollback_hook(void *object);
-
-@interface SQLDatabase ()
-
-@property (nonatomic, readonly) NSCache *statementsCache;
-
-@property (atomic, retain, readwrite) NSNotificationCenter *notificationCenter;
-
-- (NSString *)_humanReadableStringWithBytes:(int)numberOfBytes;
-
-@end
-
-////////////////////////////////////////////////////////////////////////////////
 
 void sqldatabase_update_hook(void *object, int type, char const *databaseName, char const *tableName, sqlite3_int64 rowID)
 {
@@ -111,6 +103,17 @@ void sqldatabase_rollback_hook(void *object)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+#pragma mark -
+
+@interface SQLDatabase ()
+
+@property (nonatomic, readonly) NSCache *statementsCache;
+
+@property (atomic, retain, readwrite) NSNotificationCenter *notificationCenter;
+
+- (NSString *)_humanReadableStringWithBytes:(int)numberOfBytes;
+
+@end
 
 @implementation SQLDatabase
 
@@ -483,10 +486,15 @@ void sqldatabase_rollback_hook(void *object)
     NSParameterAssert(function);
     NSParameterAssert(name);
 
-    [function retain];
-    function.context = object;
-    if ( sqlite3_create_function_v2(self.connectionHandle, [name UTF8String], function.numberOfArguments, encoding, function, function.function, function.step, function.final, &sqldatabase_function_destroy) == SQLITE_OK )
+#if SQLITE_VERSION_NUMBER >= 3007003
+    if ( sqlite3_create_function_v2(self.connectionHandle, [name UTF8String], function.numberOfArguments, SQLITE_UTF8, function, function.function, function.step, function.final, &sqldatabase_function_destroy) == SQLITE_OK )
     {
+        [function retain];
+#else
+    if ( sqlite3_create_function(self.connectionHandle, [name UTF8String], function.numberOfArguments, SQLITE_UTF8, function, function.function, function.step, function.final) == SQLITE_OK )
+    {
+#endif
+        function.context = object;
         sqlitekit_verbose(@"Custom function '%@' has been created successfully.", name);
         return YES;
     }
@@ -507,7 +515,11 @@ void sqldatabase_rollback_hook(void *object)
 
     NSParameterAssert(name);
 
+#if SQLITE_VERSION_NUMBER >= 3007003
     if ( sqlite3_create_function_v2(self.connectionHandle, [name UTF8String], function.numberOfArguments, encoding, function, NULL, NULL, NULL, NULL) == SQLITE_OK )
+#else
+    if ( sqlite3_create_function(self.connectionHandle, [name UTF8String], function.numberOfArguments, encoding, function, function.function, function.step, function.final) == SQLITE_OK )
+#endif
     {
         sqlitekit_verbose(@"Custom function '%@' has been removed successfully.", name);
         return YES;

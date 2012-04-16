@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		FA168252151A545600A22FC4 /* SQLDatabaseTests.m in Sources */ = {isa = PBXBuildFile; fileRef = FA179AFE14CF60C9002FB17F /* SQLDatabaseTests.m */; };
 		FA168253151A545900A22FC4 /* SQLQueryTests.m in Sources */ = {isa = PBXBuildFile; fileRef = FA179B1514D1F60C002FB17F /* SQLQueryTests.m */; };
 		FA168254151A545D00A22FC4 /* SQLRowTests.m in Sources */ = {isa = PBXBuildFile; fileRef = FA93395514D705AA00151B4B /* SQLRowTests.m */; };
 		FA168260151A6E8600A22FC4 /* dump_short.sql in Resources */ = {isa = PBXBuildFile; fileRef = FA16825F151A6E8600A22FC4 /* dump_short.sql */; };
@@ -38,10 +37,12 @@
 		FA8A6B05151A94A4008AC3B9 /* dump_short_no_separator.sql in Resources */ = {isa = PBXBuildFile; fileRef = FA8A6B04151A94A4008AC3B9 /* dump_short_no_separator.sql */; };
 		FA8A6B08151A98B2008AC3B9 /* dump_movie.sql in Resources */ = {isa = PBXBuildFile; fileRef = FA8A6B07151A98B2008AC3B9 /* dump_movie.sql */; };
 		FA8A6B0B151A98FF008AC3B9 /* SenTestCase+SQLiteKitAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = FA8A6B0A151A98FF008AC3B9 /* SenTestCase+SQLiteKitAdditions.m */; };
+		FA96D962153CA9B800C6706A /* SQLDatabaseTests.m in Sources */ = {isa = PBXBuildFile; fileRef = FA179AFE14CF60C9002FB17F /* SQLDatabaseTests.m */; };
 		FAA1F9AF148AD5330013D31B /* SQLDatabase.h in Headers */ = {isa = PBXBuildFile; fileRef = FAA1F9AD148AD5330013D31B /* SQLDatabase.h */; settings = {ATTRIBUTES = (); }; };
 		FAA1F9B0148AD5330013D31B /* SQLDatabase.m in Sources */ = {isa = PBXBuildFile; fileRef = FAA1F9AE148AD5330013D31B /* SQLDatabase.m */; };
 		FACBCB2714D8A27B00004567 /* SQLiteKit.h in Headers */ = {isa = PBXBuildFile; fileRef = FACBCB2614D8A27B00004567 /* SQLiteKit.h */; settings = {ATTRIBUTES = (); }; };
 		FADDB3D7151BC03B00848B6B /* dump_travel_alter.sql in Resources */ = {isa = PBXBuildFile; fileRef = FADDB3D6151BC03B00848B6B /* dump_travel_alter.sql */; };
+		FAF99BC7153CA17D007C85F2 /* dump_movie_trigger.sql in Resources */ = {isa = PBXBuildFile; fileRef = FAF99BC6153CA17D007C85F2 /* dump_movie_trigger.sql */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -99,6 +100,7 @@
 		FAC634521538D18300103667 /* SQLFunction+Private.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SQLFunction+Private.h"; sourceTree = "<group>"; };
 		FACBCB2614D8A27B00004567 /* SQLiteKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SQLiteKit.h; sourceTree = "<group>"; };
 		FADDB3D6151BC03B00848B6B /* dump_travel_alter.sql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = dump_travel_alter.sql; sourceTree = "<group>"; };
+		FAF99BC6153CA17D007C85F2 /* dump_movie_trigger.sql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = dump_movie_trigger.sql; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -188,6 +190,7 @@
 				FA168268151A876400A22FC4 /* dump_travel.sql */,
 				FADDB3D6151BC03B00848B6B /* dump_travel_alter.sql */,
 				FA8A6B07151A98B2008AC3B9 /* dump_movie.sql */,
+				FAF99BC6153CA17D007C85F2 /* dump_movie_trigger.sql */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -312,6 +315,7 @@
 				FA8A6B05151A94A4008AC3B9 /* dump_short_no_separator.sql in Resources */,
 				FA8A6B08151A98B2008AC3B9 /* dump_movie.sql in Resources */,
 				FADDB3D7151BC03B00848B6B /* dump_travel_alter.sql in Resources */,
+				FAF99BC7153CA17D007C85F2 /* dump_movie_trigger.sql in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -339,11 +343,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				FA256AE315192D91005B3176 /* SQLFileTests.m in Sources */,
-				FA168252151A545600A22FC4 /* SQLDatabaseTests.m in Sources */,
 				FA168253151A545900A22FC4 /* SQLQueryTests.m in Sources */,
 				FA168254151A545D00A22FC4 /* SQLRowTests.m in Sources */,
 				FA8A6B0B151A98FF008AC3B9 /* SenTestCase+SQLiteKitAdditions.m in Sources */,
 				FA3B3BA61537953B00A6E744 /* SQLFunctionTests.m in Sources */,
+				FA96D962153CA9B800C6706A /* SQLDatabaseTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -454,7 +458,7 @@
 				DSTROOT = /tmp/SQLiteKit.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Resources/SQLiteKit.pch;
-				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -468,7 +472,7 @@
 				DSTROOT = /tmp/SQLiteKit.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Resources/SQLiteKit.pch;
-				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";

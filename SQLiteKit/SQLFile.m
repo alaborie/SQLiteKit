@@ -116,19 +116,36 @@ char *buffer_to_string(buffer_t buffer)
 ////////////////////////////////////////////////////////////////////////////////
 #pragma mark -
 
-unsigned int getNextLine(FILE *stream, buffer_t streamBuffer, buffer_t lineBuffer, unsigned int startingIndex);
+bool parser_is_separator_char(char c);
+bool parser_read_next_chunk(FILE *stream, buffer_t streamBuffer);
+unsigned int parser_get_next_request(FILE *stream, buffer_t streamBuffer, buffer_t lineBuffer, unsigned int startingIndex);
 
 ////////////////////////////////////////////////////////////////////////////////
 #pragma mark -
 
-unsigned int getNextLine(FILE *stream, buffer_t streamBuffer, buffer_t lineBuffer, unsigned int startingIndex)
+bool parser_is_separator_char(char c)
+{
+    return c == ' ' || c == '\t' || c == '\n';
+}
+
+bool parser_read_next_chunk(FILE *stream, buffer_t streamBuffer)
+{
+    streamBuffer->length = fread(streamBuffer->data, sizeof(*(streamBuffer->data)), streamBuffer->size, stream);
+    if ( streamBuffer->length == 0 )
+    {
+        return false;
+    }
+    return true;
+}
+
+unsigned int parser_get_next_request(FILE *stream, buffer_t streamBuffer, buffer_t lineBuffer, unsigned int startingIndex)
 {
     NSCParameterAssert(stream);
     NSCParameterAssert(streamBuffer);
     NSCParameterAssert(lineBuffer);
 
-    bool endOfLine = false;
     unsigned int index = startingIndex;
+    unsigned int semicolonExpected = 1;
 
     char currentChar = 0;
     char previousChar = 0;
@@ -136,15 +153,17 @@ unsigned int getNextLine(FILE *stream, buffer_t streamBuffer, buffer_t lineBuffe
     char inhibitor = 0;
     bool shouldInhibitNextChar = false;
     bool shouldCopy = true;
+    bool hasValidBeginPrefix = false;
+    bool shouldCheckForBeginPrefix = false;
 
     while ( true )
     {
         // Head, primary checks before processing.
         previousChar = currentChar;
+        // Can we read another char?
         if ( index >= streamBuffer->length )
         {
-            streamBuffer->length = fread(streamBuffer->data, sizeof(*(streamBuffer->data)), streamBuffer->size, stream);
-            if ( streamBuffer->length == 0 )
+            if ( parser_read_next_chunk(stream, streamBuffer) == false )
             {
                 return 0;
             }
@@ -201,11 +220,19 @@ unsigned int getNextLine(FILE *stream, buffer_t streamBuffer, buffer_t lineBuffe
             case '\t':
             case '\r':
             {
+                if ( hasValidBeginPrefix == true )
+                {
+                    semicolonExpected = 2;
+                }
                 index++;
                 continue;
             }
             case ' ':
             {
+                if ( hasValidBeginPrefix == true )
+                {
+                    semicolonExpected = 2;
+                }
                 if ( lineBuffer->length == 0 || lineBuffer->data[lineBuffer->length - 1] == ' ' )
                 {
                     index++;
@@ -235,12 +262,21 @@ unsigned int getNextLine(FILE *stream, buffer_t streamBuffer, buffer_t lineBuffe
             {
                 if ( inhibitor == 0 )
                 {
-                    if ( lineBuffer->length > 0 && lineBuffer->data[lineBuffer->length - 1] == ' ' )
+                    semicolonExpected--;
+                    if ( semicolonExpected == 0 )
                     {
-                        lineBuffer->length--;
+                        if ( lineBuffer->length > 0 && lineBuffer->data[lineBuffer->length - 1] == ' ' )
+                        {
+                            lineBuffer->length--;
+                        }
                     }
-                    endOfLine = true;
                 }
+                break;
+            }
+            case 'n':
+            case 'N':
+            {
+                shouldCheckForBeginPrefix = true;
                 break;
             }
         }
@@ -250,7 +286,19 @@ unsigned int getNextLine(FILE *stream, buffer_t streamBuffer, buffer_t lineBuffe
         {
             buffer_append_char(lineBuffer, currentChar);
         }
-        if ( endOfLine == true )
+        hasValidBeginPrefix = false;
+        if ( shouldCheckForBeginPrefix == true )
+        {
+            shouldCheckForBeginPrefix = false;
+            if ( inhibitor == 0 && lineBuffer->length > 5 )
+            {
+                BOOL hasWordPrefix = ( strncasecmp(&lineBuffer->data[lineBuffer->length - 5], "begin", 5) == 0 );
+                BOOL hasSeparatorBeforePrefix = parser_is_separator_char(lineBuffer->data[lineBuffer->length - 6]);
+
+                hasValidBeginPrefix = hasWordPrefix && hasSeparatorBeforePrefix;
+            }
+        }
+        if ( semicolonExpected == 0 )
         {
             break;
         }
@@ -374,7 +422,7 @@ unsigned int getNextLine(FILE *stream, buffer_t streamBuffer, buffer_t lineBuffe
     state->itemsPtr = objectsBuffer;
     while ( (self.streamBuffer->length > 0 || feof(self.stream) == 0) && numberOfNewObject < length )
     {
-        self.streamBufferStartingIndex = getNextLine(self.stream, self.streamBuffer, self.lineBuffer, self.streamBufferStartingIndex);
+        self.streamBufferStartingIndex = parser_get_next_request(self.stream, self.streamBuffer, self.lineBuffer, self.streamBufferStartingIndex);
         if ( self.lineBuffer->length  > 0 )
         {
             objectsBuffer[numberOfNewObject] = [[[NSString alloc] initWithBytes:self.lineBuffer->data length:self.lineBuffer->length encoding:NSUTF8StringEncoding] autorelease];
