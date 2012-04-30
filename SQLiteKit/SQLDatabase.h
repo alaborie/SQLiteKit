@@ -8,8 +8,6 @@
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#import <sqlite3.h>
-
 @class SQLQuery;
 @class SQLRow;
 @class SQLFunction;
@@ -49,6 +47,10 @@ typedef NSUInteger SQLDatabaseErrors;
 
 @private
     NSCache *_statementsCache;
+
+@private
+    dispatch_once_t _functionsSetPredicate;
+    NSCountedSet *_functionsCountedSet;
 
 @private
     NSNotificationCenter *_notificationCenter;
@@ -134,12 +136,12 @@ typedef NSUInteger SQLDatabaseErrors;
 #pragma mark -
 
 /**
- @warning On iOS 4.3, the given function is not retained!
+ @note Upon success, the object function will be retained. It will be released automatically, if the function is removed or if the database is closed.
  */
 - (BOOL)addFunction:(SQLFunction *)function withName:(NSString *)name encoding:(NSInteger)encoding context:(id)object error:(NSError **)error __attribute__ ((nonnull(1, 2)));
 
 /**
- @warning On iOS 4.3, the given function is not released!
+ @note Upon success, the object function will be released. Make sure you are giving the right parameters! Otherwise, you might released the wrong function, which might cause a dealloced object to be used in the future.
  */
 - (BOOL)removeFunction:(SQLFunction *)function withName:(NSString *)name encoding:(NSInteger)encoding error:(NSError **)error __attribute__ ((nonnull(1, 2)));
 

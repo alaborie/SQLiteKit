@@ -26,18 +26,6 @@ NSString * const kSQLDatabaseRollbackNotification = @"@rollback";
 ////////////////////////////////////////////////////////////////////////////////
 #pragma mark -
 
-void sqldatabase_function_destroy(void *ptr);
-
-void sqldatabase_function_destroy(void *ptr)
-{
-    id object = (id)ptr;
-
-    [object release];
-}
-
-////////////////////////////////////////////////////////////////////////////////
-#pragma mark -
-
 void sqldatabase_update_hook(void *object, int type, char const *database, char const *table, sqlite3_int64 rowID);
 int sqldatabase_commit_hook(void *object);
 void sqldatabase_rollback_hook(void *object);
@@ -109,6 +97,8 @@ void sqldatabase_rollback_hook(void *object)
 
 @property (nonatomic, readonly) NSCache *statementsCache;
 
+@property (nonatomic, readonly) NSCountedSet *functionsCountedSet;
+
 @property (atomic, retain, readwrite) NSNotificationCenter *notificationCenter;
 
 - (NSString *)_humanReadableStringWithBytes:(int)numberOfBytes;
@@ -121,6 +111,16 @@ void sqldatabase_rollback_hook(void *object)
 @synthesize localPath = _localPath;
 
 @synthesize statementsCache = _statementsCache;
+
+@synthesize functionsCountedSet = _functionsCountedSet;
+
+- (NSCountedSet *)functionsCountedSet
+{
+    dispatch_once(&_functionsSetPredicate, ^{
+        _functionsCountedSet = [[NSCountedSet alloc] init];
+    });
+    return _functionsCountedSet;
+}
 
 @synthesize notificationCenter = _notificationCenter;
 
@@ -178,6 +178,7 @@ void sqldatabase_rollback_hook(void *object)
 
     [_localPath release];
     [_statementsCache release];
+    [_functionsCountedSet release];
     [super dealloc];
 }
 
@@ -186,6 +187,10 @@ void sqldatabase_rollback_hook(void *object)
 
 + (void)initialize
 {
+    if ( strcmp(sqlite3_sourceid(), SQLITE_SOURCE_ID) != 0 )
+    {
+        sqlitekit_error(@"SQLite header and source version mismatch, this might cause a crash caused by a symbol not found (header = %s, source = %s).", sqlite3_sourceid(), SQLITE_SOURCE_ID);
+    }
 #ifdef SQLITEKIT_VERBOSE
     NSLog(@" > SQLite version %s [ ID %s ] ", sqlite3_libversion(), sqlite3_sourceid());
 #endif
@@ -228,19 +233,11 @@ void sqldatabase_rollback_hook(void *object)
         filename = ":memory:";
         sqlitekit_verbose(@"The database does not have a path, will be created in-memory.");
     }
-#if SQLITE_VERSION_NUMBER >= 3005000
     if ( flags == 0 )
     {
         flags = (SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE); // Default flags.
     }
     openResult = sqlite3_open_v2(filename, &_connectionHandle, flags, NULL);
-#else
-    if ( flags != 0 )
-    {
-        sqlitekit_warning(@"Cannot use the given flags because the version used of the SQLite library does not allow this. In order to use the flags, you should use a version equal or greater to 3.5.0.");
-    }
-    openResult = sqlite3_open(filename, &_databaseHandle);
-#endif
     if ( openResult == SQLITE_OK )
     {
         sqlitekit_verbose(@"The database was opened successfully (flags = %i).", flags);
@@ -281,6 +278,9 @@ void sqldatabase_rollback_hook(void *object)
 
     if ( sqlite3_close(self.connectionHandle) == SQLITE_OK )
     {
+        // Releases all the objects retained during the functions creation. We don't use 'self', because this might cause the set to be create on the fly.
+        [_functionsCountedSet removeAllObjects];
+
         // NULL out the connection handle as soon as the close operation succeed, the pointer became obsolete.
         _connectionHandle = NULL;
         sqlitekit_verbose(@"The database was closed successfully.");
@@ -486,14 +486,10 @@ void sqldatabase_rollback_hook(void *object)
     NSParameterAssert(function);
     NSParameterAssert(name);
 
-#if SQLITE_VERSION_NUMBER >= 3007003
-    if ( sqlite3_create_function_v2(self.connectionHandle, [name UTF8String], function.numberOfArguments, SQLITE_UTF8, function, function.function, function.step, function.final, &sqldatabase_function_destroy) == SQLITE_OK )
+    /// @note Need more work to be able to use the v2 function (dlopen, dlsym, etc.). iOS 4.3 does not support the v2 function.
+    if ( sqlite3_create_function(self.connectionHandle, [name UTF8String], function.numberOfArguments, encoding, function, function.function, function.step, function.final) == SQLITE_OK )
     {
-        [function retain];
-#else
-    if ( sqlite3_create_function(self.connectionHandle, [name UTF8String], function.numberOfArguments, SQLITE_UTF8, function, function.function, function.step, function.final) == SQLITE_OK )
-    {
-#endif
+        [self.functionsCountedSet addObject:function];
         function.context = object;
         sqlitekit_verbose(@"Custom function '%@' has been created successfully.", name);
         return YES;
@@ -515,12 +511,9 @@ void sqldatabase_rollback_hook(void *object)
 
     NSParameterAssert(name);
 
-#if SQLITE_VERSION_NUMBER >= 3007003
-    if ( sqlite3_create_function_v2(self.connectionHandle, [name UTF8String], function.numberOfArguments, encoding, function, NULL, NULL, NULL, NULL) == SQLITE_OK )
-#else
-    if ( sqlite3_create_function(self.connectionHandle, [name UTF8String], function.numberOfArguments, encoding, function, function.function, function.step, function.final) == SQLITE_OK )
-#endif
+    if ( sqlite3_create_function(self.connectionHandle, [name UTF8String], function.numberOfArguments, encoding, function, NULL, NULL, NULL) == SQLITE_OK )
     {
+        [self.functionsCountedSet removeObject:function];
         sqlitekit_verbose(@"Custom function '%@' has been removed successfully.", name);
         return YES;
     }

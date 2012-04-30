@@ -16,10 +16,8 @@
 		FA168269151A876400A22FC4 /* dump_travel.sql in Resources */ = {isa = PBXBuildFile; fileRef = FA168268151A876400A22FC4 /* dump_travel.sql */; };
 		FA179AD914CF4199002FB17F /* SQLGlobal.h in Headers */ = {isa = PBXBuildFile; fileRef = FA179AD714CF4199002FB17F /* SQLGlobal.h */; };
 		FA179ADA14CF4199002FB17F /* SQLGlobal.m in Sources */ = {isa = PBXBuildFile; fileRef = FA179AD814CF4199002FB17F /* SQLGlobal.m */; };
-		FA179ADD14CF4F56002FB17F /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = FA179ADC14CF4F56002FB17F /* libsqlite3.dylib */; };
 		FA179AE514CF5FAF002FB17F /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA179AE414CF5FAF002FB17F /* SenTestingKit.framework */; };
 		FA179AE814CF5FAF002FB17F /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA30A947148AD33900A269C8 /* Foundation.framework */; };
-		FA179B0214CF6839002FB17F /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = FA179ADC14CF4F56002FB17F /* libsqlite3.dylib */; };
 		FA179B0314CF69B9002FB17F /* libSQLiteKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FA30A944148AD33900A269C8 /* libSQLiteKit.a */; };
 		FA179B0A14D07629002FB17F /* SQLPreparedStatement.h in Headers */ = {isa = PBXBuildFile; fileRef = FA179B0814D07629002FB17F /* SQLPreparedStatement.h */; };
 		FA179B0B14D07629002FB17F /* SQLPreparedStatement.m in Sources */ = {isa = PBXBuildFile; fileRef = FA179B0914D07629002FB17F /* SQLPreparedStatement.m */; };
@@ -40,6 +38,7 @@
 		FA96D962153CA9B800C6706A /* SQLDatabaseTests.m in Sources */ = {isa = PBXBuildFile; fileRef = FA179AFE14CF60C9002FB17F /* SQLDatabaseTests.m */; };
 		FAA1F9AF148AD5330013D31B /* SQLDatabase.h in Headers */ = {isa = PBXBuildFile; fileRef = FAA1F9AD148AD5330013D31B /* SQLDatabase.h */; settings = {ATTRIBUTES = (); }; };
 		FAA1F9B0148AD5330013D31B /* SQLDatabase.m in Sources */ = {isa = PBXBuildFile; fileRef = FAA1F9AE148AD5330013D31B /* SQLDatabase.m */; };
+		FAC1C036153E25C5007E374B /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = FA179ADC14CF4F56002FB17F /* libsqlite3.dylib */; };
 		FACBCB2714D8A27B00004567 /* SQLiteKit.h in Headers */ = {isa = PBXBuildFile; fileRef = FACBCB2614D8A27B00004567 /* SQLiteKit.h */; settings = {ATTRIBUTES = (); }; };
 		FADDB3D7151BC03B00848B6B /* dump_travel_alter.sql in Resources */ = {isa = PBXBuildFile; fileRef = FADDB3D6151BC03B00848B6B /* dump_travel_alter.sql */; };
 		FAF99BC7153CA17D007C85F2 /* dump_movie_trigger.sql in Resources */ = {isa = PBXBuildFile; fileRef = FAF99BC6153CA17D007C85F2 /* dump_movie_trigger.sql */; };
@@ -63,7 +62,7 @@
 		FA168268151A876400A22FC4 /* dump_travel.sql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = dump_travel.sql; sourceTree = "<group>"; };
 		FA179AD714CF4199002FB17F /* SQLGlobal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SQLGlobal.h; sourceTree = "<group>"; };
 		FA179AD814CF4199002FB17F /* SQLGlobal.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SQLGlobal.m; sourceTree = "<group>"; };
-		FA179ADC14CF4F56002FB17F /* libsqlite3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.dylib; path = usr/lib/libsqlite3.dylib; sourceTree = SDKROOT; };
+		FA179ADC14CF4F56002FB17F /* libsqlite3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.dylib; path = /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.1.sdk/usr/lib/libsqlite3.dylib; sourceTree = "<absolute>"; };
 		FA179AE314CF5FAF002FB17F /* SQKLiteTests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SQKLiteTests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FA179AE414CF5FAF002FB17F /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = Library/Frameworks/SenTestingKit.framework; sourceTree = DEVELOPER_DIR; };
 		FA179AF614CF6052002FB17F /* SQKLiteTests.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SQKLiteTests.pch; sourceTree = "<group>"; };
@@ -110,8 +109,8 @@
 			files = (
 				FA179AE814CF5FAF002FB17F /* Foundation.framework in Frameworks */,
 				FA179AE514CF5FAF002FB17F /* SenTestingKit.framework in Frameworks */,
-				FA179B0214CF6839002FB17F /* libsqlite3.dylib in Frameworks */,
 				FA179B0314CF69B9002FB17F /* libSQLiteKit.a in Frameworks */,
+				FAC1C036153E25C5007E374B /* libsqlite3.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -120,7 +119,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				FA30A948148AD33900A269C8 /* Foundation.framework in Frameworks */,
-				FA179ADD14CF4F56002FB17F /* libsqlite3.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -388,6 +386,7 @@
 				INFOPLIST_FILE = Resources/SQKLiteTests.plist;
 				OTHER_CFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
 				WARNING_CFLAGS = "";
 				WRAPPER_EXTENSION = octest;
 			};
@@ -405,6 +404,7 @@
 				INFOPLIST_FILE = Resources/SQKLiteTests.plist;
 				OTHER_CFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
 				WARNING_CFLAGS = "";
 				WRAPPER_EXTENSION = octest;
 			};
@@ -431,6 +431,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
 				OTHER_CFLAGS = "";
 				SDKROOT = iphoneos;
+				VALID_ARCHS = armv7;
 			};
 			name = Debug;
 		};
@@ -449,6 +450,7 @@
 				OTHER_CFLAGS = "";
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
+				VALID_ARCHS = armv7;
 			};
 			name = Release;
 		};
@@ -461,7 +463,10 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "-ObjC";
+				PRIVATE_HEADERS_FOLDER_PATH = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PUBLIC_HEADERS_FOLDER_PATH = "";
+				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 			};
 			name = Debug;
@@ -475,7 +480,10 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "-ObjC";
+				PRIVATE_HEADERS_FOLDER_PATH = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PUBLIC_HEADERS_FOLDER_PATH = "";
+				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 			};
 			name = Release;
