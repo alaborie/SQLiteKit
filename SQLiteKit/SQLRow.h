@@ -78,7 +78,7 @@
 /**
  Returns a dictionary that contains all the non-NULL objects of the row. The key is the name of the column, the value is the value in the SQL database for this row.
 
- @return A dictionary that contains all the non-NULL objects of the row or nil if there is no column.
+ @return A dictionary that contains all the non-NULL objects of the row or nil if there is no column. If all the values in the row are equal to NULL, an empty dictionary is returned.
  @see objects
  @see objectsDict
  */
