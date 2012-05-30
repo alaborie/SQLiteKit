@@ -148,7 +148,8 @@
             sqlitekit_warning(@"Cannot determine the type of the column (row = %@, index = %u).", self, index);
         }
     }
-    return [NSNull null];
+    /// @note This code will be executed only if the type of the column cannot be determined. Hopefully, it will never happen.
+    return nil;
 }
 
 - (NSArray *)objects
@@ -178,6 +179,26 @@
 
     [self.columnNameDict enumerateKeysAndObjectsUsingBlock:^(id key, id object, BOOL *stop) {
         [objectsDict setObject:[self objectForColumnAtIndex:[object unsignedIntegerValue]] forKey:key];
+    }];
+    return objectsDict;
+}
+
+- (NSDictionary *)objectsDictWithoutNull
+{
+    if ( self.columnCount == 0 )
+    {
+        return nil;
+    }
+
+    NSMutableDictionary *objectsDict = [NSMutableDictionary dictionaryWithCapacity:self.columnCount];
+
+    [self.columnNameDict enumerateKeysAndObjectsUsingBlock:^(id key, id object, BOOL *stop) {
+        id objectForColumn = [self objectForColumnAtIndex:[object unsignedIntegerValue]];
+
+        if ( objectForColumn != nil && [objectForColumn isEqual:[NSNull null]] == NO )
+        {
+            [objectsDict setObject:objectForColumn forKey:key];
+        }
     }];
     return objectsDict;
 }

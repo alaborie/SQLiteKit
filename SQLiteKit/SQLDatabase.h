@@ -39,6 +39,9 @@ enum
 };
 typedef NSUInteger SQLDatabaseErrors;
 
+/**
+ @brief An object that represents a SQL database.
+ */
 @interface SQLDatabase : NSObject <NSCacheDelegate>
 {
 @private
@@ -56,9 +59,20 @@ typedef NSUInteger SQLDatabaseErrors;
     NSNotificationCenter *_notificationCenter;
 }
 
+/**
+ An handle on the SQL database provided by the C library.
+ @warning This property should be used outside the class only if some functionalities provided by the C library are not implemented yet. This property might disappear in the future.
+ */
 @property (nonatomic, readonly) sqlite3 *connectionHandle;
+
+/**
+ A string that contains the path of the database given during its initialization. May be nil.
+ */
 @property (nonatomic, readonly) NSString *localPath;
 
+/**
+ A notification center used to dispatch the notifications related to the events happening in the database.
+ */
 @property (atomic, retain, readonly) NSNotificationCenter *notificationCenter;
 
 #pragma mark -
