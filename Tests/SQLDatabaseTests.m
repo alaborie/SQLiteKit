@@ -201,7 +201,7 @@
     startingDate = [NSDate date];
     [insertUserData enumerateObjectsAtIndexes:[NSIndexSet indexSetWithIndexesInRange:secondPart] options:0 usingBlock:^(id object, NSUInteger index, BOOL *stop) {
         insertUserQuery.arguments = (NSArray *)object;
-        STAssertTrue([database executeQuery:insertUserQuery options:SQLDatabaseExecutingOptionCacheStatement error:&error thenEnumerateRowsUsingBlock:NULL], @"Execute query failed (database = %@, error = %@).", database, error);
+        STAssertTrue([database executeQuery:insertUserQuery options:SQLExecuteCacheStatement error:&error thenEnumerateRowsUsingBlock:NULL], @"Execute query failed (database = %@, error = %@).", database, error);
         STAssertEquals(database.numberOfChanges, 1u, @"Insertion failed (query = %@).", insertUserQuery);
     }];
     NSLog(@"Duration in seconds to insert %d WITH cache: %fs.", pivot, [[NSDate date] timeIntervalSinceDate:startingDate]);
@@ -236,22 +236,26 @@
 
     SQLQuery *queryNoResult = [SQLQuery queryWithStatement:@"SELECT * FROM user WHERE fullname = 'Alain Damasio';"];
 
+    __block BOOL blockHasBeenCalled = NO;
+
     NSLog(@"Show the user called 'Alain Damasio:");
-    STAssertTrue([database executeQuery:queryNoResult error:&error thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
+    STAssertTrue([database executeQuery:queryNoResult options:SQLExecuteCallBlockIfNoResult error:&error thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
+        blockHasBeenCalled = YES;
         STAssertNil(row, @"If a request returns no result, the row parameter should be equals to nil.");
         STAssertEquals(index, NSNotFound, @"If a request returns no result, the index parameter should be equals to NSNotFound.");
         STAssertNotNil((void *)stop, @"If a request returns no result, the stop pointer should not be NULL.");
     }], @"Execute query failed (database = %@, query = %@, error = %@).", database, queryNoResult, error);
+    STAssertTrue(blockHasBeenCalled == YES, @"A block should have been called even if the request returns no result.");
 
     SQLQuery *queryCached = [SQLQuery queryWithStatement:@"SELECT * FROM user where fullname LIKE ?;" arguments:[NSArray arrayWithObject:@"W%"]];
 
     NSLog(@"Show the users with a name starting by W:");
-    STAssertTrue([database executeQuery:queryCached options:SQLDatabaseExecutingOptionCacheStatement error:&error thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
+    STAssertTrue([database executeQuery:queryCached options:SQLExecuteCacheStatement error:&error thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
         NSLog(@"#%u array = [%@], dictionary = %@", index, [[row objects] componentsJoinedByString:@", "], [row objectsDict]);
     }], @"Execute query failed (database = %@, query = %@, error = %@).", database, queryLike, error);
     queryCached.arguments = [NSArray arrayWithObject:@"S%"];
     NSLog(@"Show the users with a name starting by S:");
-    STAssertTrue([database executeQuery:queryCached options:SQLDatabaseExecutingOptionCacheStatement error:&error thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
+    STAssertTrue([database executeQuery:queryCached options:SQLExecuteCacheStatement error:&error thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
         NSLog(@"#%u array = [%@], dictionary = %@", index, [[row objects] componentsJoinedByString:@", "], [row objectsDict]);
     }], @"Execute query failed (database = %@, query = %@, error = %@).", database, queryLike, error);
 
@@ -277,11 +281,8 @@
 
     NSLog(@"Number of actors:");
     STAssertTrue([database executeQuery:numberOfActorsQuery error:&error thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
-        if ( index != NSNotFound )
-        {
-            numberOfActors = (NSUInteger)[row intForColumnAtIndex:0];
-            NSLog(@"%u", numberOfActors);
-        }
+        numberOfActors = (NSUInteger)[row intForColumnAtIndex:0];
+        NSLog(@"%u", numberOfActors);
     }], @"Execute statement failed (database = %@, error = %@).", database, error);
     STAssertEquals(numberOfActors, 9u, @"Invalid number of actors (value = %u, expected = 9).", numberOfActors);
 
@@ -289,12 +290,9 @@
     __block NSUInteger numberOfActorsInPulpFiction = 0;
 
     NSLog(@"Number of actors playing in 'Pulp Fiction':");
-    STAssertTrue([database executeQuery:numberOfActorsInPulpFictionQuery options:SQLDatabaseExecutingOptionCacheStatement error:&error thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
-        if ( index != NSNotFound )
-        {
-            numberOfActorsInPulpFiction = (NSUInteger)[row intForColumnAtIndex:0];
-            NSLog(@"%u", numberOfActorsInPulpFiction);
-        }
+    STAssertTrue([database executeQuery:numberOfActorsInPulpFictionQuery options:SQLExecuteCacheStatement error:&error thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
+        numberOfActorsInPulpFiction = (NSUInteger)[row intForColumnAtIndex:0];
+        NSLog(@"%u", numberOfActorsInPulpFiction);
     }], @"Execute statement failed (database = %@, error = %@).", database, error);
     STAssertEquals(numberOfActorsInPulpFiction, 2u, @"Invalid number of actors playing in 'Pulp Fiction' (value = %u, expected = 2).", numberOfActorsInPulpFiction);
 
@@ -356,7 +354,7 @@
     NSLog(@"Insert 9 rows in the table countries countries:");
     [insertCountryData enumerateObjectsUsingBlock:^(id object, NSUInteger index, BOOL *stop) {
         insertCountryQuery.arguments = (NSArray *)object;
-        STAssertTrue([database executeQuery:insertCountryQuery options:SQLDatabaseExecutingOptionCacheStatement error:&error thenEnumerateRowsUsingBlock:NULL], @"Execute query failed (database = %@, error = %@).", database, error);
+        STAssertTrue([database executeQuery:insertCountryQuery options:SQLExecuteCacheStatement error:&error thenEnumerateRowsUsingBlock:NULL], @"Execute query failed (database = %@, error = %@).", database, error);
         STAssertEquals(database.numberOfChanges, 1u, @"Insertion failed (query = %@).", insertCountryQuery);
     }];
     STAssertEquals(notificationCount, notificationExpectedCount, @"Invalid number of notifications sent (sent = %u, expected = %u)", notificationCount, notificationExpectedCount);
@@ -410,7 +408,7 @@
 
     [insertOtherCountriesData enumerateObjectsUsingBlock:^(id object, NSUInteger index, BOOL *stop) {
         insertCountryQuery.arguments = (NSArray *)object;
-        STAssertTrue([database executeQuery:insertCountryQuery options:SQLDatabaseExecutingOptionCacheStatement error:&error thenEnumerateRowsUsingBlock:NULL], @"Execute query failed (database = %@, error = %@).", database, error);
+        STAssertTrue([database executeQuery:insertCountryQuery options:SQLExecuteCacheStatement error:&error thenEnumerateRowsUsingBlock:NULL], @"Execute query failed (database = %@, error = %@).", database, error);
         STAssertEquals(database.numberOfChanges, 1u, @"Insertion failed (query = %@).", insertCountryQuery);
     }];
 
@@ -512,7 +510,7 @@
 
     [insertAirportData enumerateObjectsUsingBlock:^(id object, NSUInteger index, BOOL *stop) {
         insertAirportQuery.arguments = (NSArray *)object;
-        STAssertTrue([database executeQuery:insertAirportQuery options:SQLDatabaseExecutingOptionCacheStatement error:&error thenEnumerateRowsUsingBlock:NULL], @"Execute query failed (database = %@, error = %@).", database, error);
+        STAssertTrue([database executeQuery:insertAirportQuery options:SQLExecuteCacheStatement error:&error thenEnumerateRowsUsingBlock:NULL], @"Execute query failed (database = %@, error = %@).", database, error);
         STAssertEquals(database.numberOfChanges, 1u, @"Insertion failed (query = %@).", insertAirportQuery);
         STAssertNotNil(database.lastInsertRowID, @"The last inserted row should have an ID different from nil.");
     }];
@@ -551,7 +549,7 @@
 
     [insertCompanyData enumerateObjectsUsingBlock:^(id object, NSUInteger index, BOOL *stop) {
         insertCompanyQuery.arguments = (NSArray *)object;
-        STAssertTrue([database executeQuery:insertCompanyQuery options:SQLDatabaseExecutingOptionCacheStatement error:&error thenEnumerateRowsUsingBlock:NULL], @"Execute query failed (database = %@, error = %@).", database, error);
+        STAssertTrue([database executeQuery:insertCompanyQuery options:SQLExecuteCacheStatement error:&error thenEnumerateRowsUsingBlock:NULL], @"Execute query failed (database = %@, error = %@).", database, error);
         STAssertEquals(database.numberOfChanges, 1u, @"Insertion failed (query = %@).", insertAirportQuery);
         STAssertNotNil(database.lastInsertRowID, @"The last inserted row should have an ID different from nil.");
     }];
@@ -695,7 +693,7 @@
 
     [insertFlightData enumerateObjectsUsingBlock:^(id object, NSUInteger index, BOOL *stop) {
         insertFlightQuery.arguments = (NSArray *)object;
-        STAssertTrue([database executeQuery:insertFlightQuery options:SQLDatabaseExecutingOptionCacheStatement error:&error thenEnumerateRowsUsingBlock:NULL], @"Execute query failed (database = %@, error = %@).", database, error);
+        STAssertTrue([database executeQuery:insertFlightQuery options:SQLExecuteCacheStatement error:&error thenEnumerateRowsUsingBlock:NULL], @"Execute query failed (database = %@, error = %@).", database, error);
         STAssertEquals(database.numberOfChanges, 1u, @"Insertion failed (query = %@).", insertFlightQuery);
         STAssertNotNil(database.lastInsertRowID, @"The last inserted row should have an ID different from nil.");
     }];
@@ -717,11 +715,8 @@
 
     NSLog(@"Show the id of the airport called 'Paris':");
     STAssertTrue([database executeQuery:getParisIDQuery error:&error thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
-        if ( index != NSNotFound )
-        {
-            parisAirportID = [row objectForColumnAtIndex:0];
-            NSLog(@"%@", parisAirportID);
-        }
+        parisAirportID = [row objectForColumnAtIndex:0];
+        NSLog(@"%@", parisAirportID);
     }], @"Execute query failed (database = %@).", database);
     STAssertNotNil(parisAirportID, @"Cannot found the ID of the paris airport in the database.");
 
@@ -778,7 +773,7 @@
 
     [sentenceData enumerateObjectsUsingBlock:^(id object, NSUInteger index, BOOL *stop) {
         insertSentenceQuery.arguments = (NSArray *)object;
-        STAssertTrue([database executeQuery:insertSentenceQuery options:SQLDatabaseExecutingOptionCacheStatement error:&error thenEnumerateRowsUsingBlock:NULL], @"Execute statement failed (database = %@, error = %@).", database, error);
+        STAssertTrue([database executeQuery:insertSentenceQuery options:SQLExecuteCacheStatement error:&error thenEnumerateRowsUsingBlock:NULL], @"Execute statement failed (database = %@, error = %@).", database, error);
         STAssertEquals(database.numberOfChanges, 1u, @"Insertion failed (query = %@).", insertSentenceQuery);
         STAssertNotNil(database.lastInsertRowID, @"The last inserted row should have an ID different from nil.");
     }];
@@ -807,6 +802,36 @@
     STAssertTrue([database executeStatement:@"INSERT INTO data(description) VALUES(?);" arguments:[NSArray arrayWithObject:[NSData data]] error:&error], @"Execute statement failed (database = %@, error = %@).", database, error);
     STAssertTrue([database executeStatement:@"INSERT INTO data(description) VALUES(?);" arguments:[NSArray arrayWithObject:[NSDate date]] error:&error], @"Execute statement failed (database = %@, error = %@).", database, error);
     STAssertTrue([database executeStatement:@"INSERT INTO data(description) VALUES(?);" arguments:[NSArray arrayWithObject:[NSIndexSet indexSetWithIndex:42]] error:&error], @"Execute statement failed (database = %@, error = %@).", database, error);
+    STAssertTrue([database close:&error], @"Close operation failed (database = %@, error = %@).", database, error);
+}
+
+- (void)testExecuteOptions
+{
+    NSString *storePath = [self generateValidTemporaryPathWithComponent:@"testGetObjects.sqlite"];
+    STAssertNotNil(storePath, @"The path generated must be different than nil.");
+    SQLDatabase *database = [SQLDatabase databaseWithFilePath:storePath];
+    NSError *error = nil;
+
+    STAssertTrue([database open:&error], @"Open operation failed (database = %@, error = %@).", database, error);
+    STAssertTrue([database executeStatement:@"CREATE TABLE IF NOT EXISTS  users(username TEXT NOT NULL, realname TEXT);" error:&error], @"Execute statement failed (database = %@, error = %@).", database, error);
+    STAssertTrue([database executeStatement:@"INSERT INTO users(username, realname) values('hello', 'hector');" error:&error], @"Execute statement failed (database = %@, error = %@).", database, error);
+    STAssertTrue([database executeStatement:@"INSERT INTO users(username, realname) values('goodbye', NULL);" error:&error], @"Execute statement failed (database = %@, error = %@).", database, error);
+
+    SQLQuery *getUserGoodbye = [SQLQuery queryWithStatement:@"SELECT * FROM users WHERE realname = 'goodbye';"];
+    __block NSUInteger numberOfBlockExecuted = 0;
+
+    STAssertTrue([database executeQuery:getUserGoodbye options:SQLExecuteCallBlockIfNoResult error:&error thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
+        numberOfBlockExecuted++;
+        STAssertNil(row, @"If a request returns no result, the row parameter should be equals to nil.");
+        STAssertEquals(index, NSNotFound, @"If a request returns no result, the index parameter should be equals to NSNotFound.");
+        STAssertNotNil((void *)stop, @"If a request returns no result, the stop pointer should not be NULL.");
+    }], @"Execute query failed (database = %@, query = %@, error = %@).", database, getUserGoodbye, error);
+    STAssertTrue([database executeQuery:getUserGoodbye error:&error thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
+        numberOfBlockExecuted++;
+        STAssertTrue(false, @"This block should not have been called. By default, the block of a query that returns no result should not called.");
+    }], @"Execute query failed (database = %@, query = %@, error = %@).", database, getUserGoodbye, error);
+    STAssertEquals(numberOfBlockExecuted, 1u, @"The number of blocks executed is invalid (value = %u, expected = '1')", numberOfBlockExecuted);
+
     STAssertTrue([database close:&error], @"Close operation failed (database = %@, error = %@).", database, error);
 }
 

@@ -344,7 +344,7 @@ void sqldatabase_rollback_hook(void *object)
     return [self executeQuery:query options:0 error:error thenEnumerateRowsUsingBlock:block];
 }
 
-- (BOOL)executeQuery:(SQLQuery *)query options:(SQLDatabaseExecutingOptions)options error:(NSError **)error thenEnumerateRowsUsingBlock:(void (^)(SQLRow *row, NSInteger index, BOOL *stop))block
+- (BOOL)executeQuery:(SQLQuery *)query options:(SQLExecuteOptions)options error:(NSError **)error thenEnumerateRowsUsingBlock:(void (^)(SQLRow *row, NSInteger index, BOOL *stop))block
 {
     if ( self.connectionHandle == NULL )
     {
@@ -371,7 +371,7 @@ void sqldatabase_rollback_hook(void *object)
             sqlitekit_create_error_cstring(error, kSQLiteKitErrorDomain, SQLDatabaseErrorCInterface, sqlite3_errmsg(self.connectionHandle));
             return NO;
         }
-        if ( options & SQLDatabaseExecutingOptionCacheStatement )
+        if ( options & SQLExecuteCacheStatement )
         {
             shouldCompleteStatement = NO;
             sqlitekit_verbose(@"Add the prepared statement in cache (query = %@).", query);
@@ -398,7 +398,7 @@ void sqldatabase_rollback_hook(void *object)
         {
             case SQLITE_DONE:
             {
-                if ( index == 0 && block != NULL )
+                if ( index == 0 && options & SQLExecuteCallBlockIfNoResult && block != NULL )
                 {
                     /// @note The flag stop is not used but we still have to provide a valid pointer, otherwise it might crash if the pointer is dereferenced.
                     block(nil, NSNotFound, &stop);

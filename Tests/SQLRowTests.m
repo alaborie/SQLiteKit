@@ -35,22 +35,19 @@
     __block NSDictionary *objectsDictWithoutNull = nil;
 
     [database executeQuery:getUserHello error:&error thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
-        if ( index != NSNotFound )
-        {
-            STAssertEquals(row.columnCount, 2u, @"#%u The number of columns is invalid (value = %u, expected = 2).", index, row.columnCount);
-            objects = [row objects];
-            STAssertEquals(row.columnCount, objects.count, @"#%u The number of objects in the array is invalid (value = %u, expected = %u).", index, objects.count, row.columnCount);
-            STAssertTrue([[objects objectAtIndex:0] isEqualToString:@"hello"], @"#%u The first object in the array is invalid (value = '%@', expected = 'hello').", index, [objects objectAtIndex:0]);
-            STAssertTrue([[objects objectAtIndex:1] isEqualToString:@"hector"], @"#%u The second object in the array is invalid (value = '%@', expected = 'hector').", index, [objects objectAtIndex:1]);
-            objectsDict = [row objectsDict];
-            STAssertEquals(row.columnCount, objectsDict.count, @"#%u The number of objects in the dictionary is invalid (value = %u, expected = %u).", index, objectsDict.count, row.columnCount);
-            STAssertTrue([[objectsDict objectForKey:@"username"] isEqualToString:@"hello"], @"#%u The object in the dictionary for the key 'username' is invalid (value = '%@', expected = 'hello').", index, [objectsDict objectForKey:@"username"]);
-            STAssertTrue([[objectsDict objectForKey:@"realname"] isEqualToString:@"hector"], @"#%u The object in the dictionary for the key 'realname' is invalid (value = '%@', expected = 'hector').", index, [objectsDict objectForKey:@"realname"]);
-            objectsDictWithoutNull = [row objectsDictWithoutNull];
-            STAssertEquals(row.columnCount, objectsDictWithoutNull.count, @"#%u The number of objects in the dictionary is invalid (value = %u, expected = %u).", index, objectsDictWithoutNull.count, row.columnCount);
-            STAssertTrue([[objectsDictWithoutNull objectForKey:@"username"] isEqualToString:@"hello"], @"#%u The object in the dictionary for the key 'username' is invalid (value = '%@', expected = 'hello').", index, [objectsDictWithoutNull objectForKey:@"username"]);
-            STAssertTrue([[objectsDictWithoutNull objectForKey:@"realname"] isEqualToString:@"hector"], @"#%u The object in the dictionary for the key 'realname' is invalid (value = '%@', expected = 'hector').", index, [objectsDictWithoutNull objectForKey:@"realname"]);
-        }
+        STAssertEquals(row.columnCount, 2u, @"#%u The number of columns is invalid (value = %u, expected = 2).", index, row.columnCount);
+        objects = [row objects];
+        STAssertEquals(row.columnCount, objects.count, @"#%u The number of objects in the array is invalid (value = %u, expected = %u).", index, objects.count, row.columnCount);
+        STAssertTrue([[objects objectAtIndex:0] isEqualToString:@"hello"], @"#%u The first object in the array is invalid (value = '%@', expected = 'hello').", index, [objects objectAtIndex:0]);
+        STAssertTrue([[objects objectAtIndex:1] isEqualToString:@"hector"], @"#%u The second object in the array is invalid (value = '%@', expected = 'hector').", index, [objects objectAtIndex:1]);
+        objectsDict = [row objectsDict];
+        STAssertEquals(row.columnCount, objectsDict.count, @"#%u The number of objects in the dictionary is invalid (value = %u, expected = %u).", index, objectsDict.count, row.columnCount);
+        STAssertTrue([[objectsDict objectForKey:@"username"] isEqualToString:@"hello"], @"#%u The object in the dictionary for the key 'username' is invalid (value = '%@', expected = 'hello').", index, [objectsDict objectForKey:@"username"]);
+        STAssertTrue([[objectsDict objectForKey:@"realname"] isEqualToString:@"hector"], @"#%u The object in the dictionary for the key 'realname' is invalid (value = '%@', expected = 'hector').", index, [objectsDict objectForKey:@"realname"]);
+        objectsDictWithoutNull = [row objectsDictWithoutNull];
+        STAssertEquals(row.columnCount, objectsDictWithoutNull.count, @"#%u The number of objects in the dictionary is invalid (value = %u, expected = %u).", index, objectsDictWithoutNull.count, row.columnCount);
+        STAssertTrue([[objectsDictWithoutNull objectForKey:@"username"] isEqualToString:@"hello"], @"#%u The object in the dictionary for the key 'username' is invalid (value = '%@', expected = 'hello').", index, [objectsDictWithoutNull objectForKey:@"username"]);
+        STAssertTrue([[objectsDictWithoutNull objectForKey:@"realname"] isEqualToString:@"hector"], @"#%u The object in the dictionary for the key 'realname' is invalid (value = '%@', expected = 'hector').", index, [objectsDictWithoutNull objectForKey:@"realname"]);
     }];
     STAssertNotNil(objects, @"Cannot get the result of the request in an array.");
     STAssertNotNil(objectsDict, @"Cannot get the result of the request in an dictionary.");
@@ -62,21 +59,18 @@
     SQLQuery *getUserGoodbye = [SQLQuery queryWithStatement:@"SELECT * FROM users WHERE username = 'goodbye';"];
 
     [database executeQuery:getUserGoodbye error:&error thenEnumerateRowsUsingBlock:^(SQLRow *row, NSInteger index, BOOL *stop) {
-        if ( index != NSNotFound )
-        {
-            STAssertEquals(row.columnCount, 2u, @"#%u The number of columns is invalid (value = %u, expected = 2).", index, row.columnCount);
-            objects = [row objects];
-            STAssertEquals(row.columnCount, objects.count, @"#%u The number of objects in the array is invalid (value = %u, expected = %u).", index, objects.count, row.columnCount);
-            STAssertTrue([[objects objectAtIndex:0] isEqualToString:@"goodbye"], @"#%u The first object in the array is invalid (value = '%@', expected = 'hello').", index, [objects objectAtIndex:0]);
-            STAssertTrue([[objects objectAtIndex:1] isEqual:[NSNull null]], @"#%u The second object in the array is invalid (value = '%@', expected = 'hector').", index, [objects objectAtIndex:1]);
-            objectsDict = [row objectsDict];
-            STAssertEquals(row.columnCount, objectsDict.count, @"#%u The number of objects in the dictionary is invalid (value = %u, expected = %u).", index, objectsDict.count, row.columnCount);
-            STAssertTrue([[objectsDict objectForKey:@"username"] isEqualToString:@"goodbye"], @"#%u The object in the dictionary for the key 'username' is invalid (value = '%@', expected = 'hello').", index, [objectsDict objectForKey:@"username"]);
-            STAssertTrue([[objectsDict objectForKey:@"realname"] isEqual:[NSNull null]], @"#%u The object in the dictionary for the key 'realname' is invalid (value = '%@', expected = 'hector').", index, [objectsDict objectForKey:@"realname"]);
-            objectsDictWithoutNull = [row objectsDictWithoutNull];
-            STAssertEquals(row.columnCount - 1, objectsDictWithoutNull.count, @"#%u The number of objects in the dictionary is invalid (value = %u, expected = %u).", index, objectsDictWithoutNull.count, row.columnCount - 1);
-            STAssertTrue([[objectsDictWithoutNull objectForKey:@"username"] isEqualToString:@"goodbye"], @"#%u The object in the dictionary for the key 'username' is invalid (value = '%@', expected = 'hello').", index, [objectsDictWithoutNull objectForKey:@"username"]);
-        }
+        STAssertEquals(row.columnCount, 2u, @"#%u The number of columns is invalid (value = %u, expected = 2).", index, row.columnCount);
+        objects = [row objects];
+        STAssertEquals(row.columnCount, objects.count, @"#%u The number of objects in the array is invalid (value = %u, expected = %u).", index, objects.count, row.columnCount);
+        STAssertTrue([[objects objectAtIndex:0] isEqualToString:@"goodbye"], @"#%u The first object in the array is invalid (value = '%@', expected = 'hello').", index, [objects objectAtIndex:0]);
+        STAssertTrue([[objects objectAtIndex:1] isEqual:[NSNull null]], @"#%u The second object in the array is invalid (value = '%@', expected = 'hector').", index, [objects objectAtIndex:1]);
+        objectsDict = [row objectsDict];
+        STAssertEquals(row.columnCount, objectsDict.count, @"#%u The number of objects in the dictionary is invalid (value = %u, expected = %u).", index, objectsDict.count, row.columnCount);
+        STAssertTrue([[objectsDict objectForKey:@"username"] isEqualToString:@"goodbye"], @"#%u The object in the dictionary for the key 'username' is invalid (value = '%@', expected = 'hello').", index, [objectsDict objectForKey:@"username"]);
+        STAssertTrue([[objectsDict objectForKey:@"realname"] isEqual:[NSNull null]], @"#%u The object in the dictionary for the key 'realname' is invalid (value = '%@', expected = 'hector').", index, [objectsDict objectForKey:@"realname"]);
+        objectsDictWithoutNull = [row objectsDictWithoutNull];
+        STAssertEquals(row.columnCount - 1, objectsDictWithoutNull.count, @"#%u The number of objects in the dictionary is invalid (value = %u, expected = %u).", index, objectsDictWithoutNull.count, row.columnCount - 1);
+        STAssertTrue([[objectsDictWithoutNull objectForKey:@"username"] isEqualToString:@"goodbye"], @"#%u The object in the dictionary for the key 'username' is invalid (value = '%@', expected = 'hello').", index, [objectsDictWithoutNull objectForKey:@"username"]);
     }];
     STAssertNotNil(objects, @"Cannot get the result of the request in an array.");
     STAssertNotNil(objectsDict, @"Cannot get the result of the request in an dictionary.");

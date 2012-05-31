@@ -26,9 +26,14 @@ enum
      @note Using this option properly can result in a significant performance improvement.
      @see http://www.sqlite.org/cintro.html [3.0 Binding Parameters and Reusing Prepared Statements]
      */
-    SQLDatabaseExecutingOptionCacheStatement     =   1 << 1,
+    SQLExecuteCacheStatement        =   1 << 1,
+
+    /**
+     An option that allows to call the enumeration block if the request returns no row. In this case row is equal to nil and the index to NSNotFound. The pointer given for the stop variable is a valid pointer.
+     */
+    SQLExecuteCallBlockIfNoResult   = 1 << 2,
 };
-typedef NSUInteger SQLDatabaseExecutingOptions;
+typedef NSUInteger SQLExecuteOptions;
 
 enum
 {
@@ -137,7 +142,7 @@ typedef NSUInteger SQLDatabaseErrors;
  @param query Must not be nil!
  @param block If the query returns no row, the block will be called once with a row equals to nil, an index equals to NSNotFound and a stop value equals to NULL.
  */
-- (BOOL)executeQuery:(SQLQuery *)query options:(SQLDatabaseExecutingOptions)options error:(NSError **)error thenEnumerateRowsUsingBlock:(void (^)(SQLRow *row, NSInteger index, BOOL *stop))block __attribute__ ((nonnull(1)));
+- (BOOL)executeQuery:(SQLQuery *)query options:(SQLExecuteOptions)options error:(NSError **)error thenEnumerateRowsUsingBlock:(void (^)(SQLRow *row, NSInteger index, BOOL *stop))block __attribute__ ((nonnull(1)));
 
 #pragma mark -
 
