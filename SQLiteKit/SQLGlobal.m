@@ -12,32 +12,32 @@
 
 NSString * const kSQLiteKitErrorDomain = @"SQLiteKitErrorDomain";
 
-void __sqlitekit_log(id object, NSString *format, ...)
+void __sqlitekit_log(NSString *format, ...)
 {
     NSCParameterAssert(format);
     va_list arguments;
 
     va_start(arguments, format);
-    NSLogv([@"[SQLiteKit]" stringByAppendingFormat:@" (%p) %@", object, format], arguments);
+    NSLogv([@"[SQLiteKit]" stringByAppendingFormat:@" %@", format], arguments);
     va_end(arguments);
 }
 
-void __sqlitekit_warning(id object, NSString *format, ...)
+void __sqlitekit_warning(NSString *format, ...)
 {
     NSCParameterAssert(format);
     va_list arguments;
 
     va_start(arguments, format);
-    NSLogv([@"[SQLiteKit]" stringByAppendingFormat:@" (%p) Warning: %@", object, format], arguments);
+    NSLogv([@"[SQLiteKit]" stringByAppendingFormat:@" Warning: %@", format], arguments);
     va_end(arguments);
 }
 
-void __sqlitekit_error(id object, NSString *format, ...)
+void __sqlitekit_error(NSString *format, ...)
 {
     NSCParameterAssert(format);
     va_list arguments;
 
     va_start(arguments, format);
-    NSLogv([@"[SQLiteKit]" stringByAppendingFormat:@" (%p) Error: %@", object, format], arguments);
+    NSLogv([@"[SQLiteKit]" stringByAppendingFormat:@" Error: %@", format], arguments);
     va_end(arguments);
 }

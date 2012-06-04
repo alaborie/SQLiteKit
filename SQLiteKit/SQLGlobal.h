@@ -10,26 +10,27 @@
 
 #import <Foundation/NSString.h>
 #import <Foundation/NSError.h>
+#import <Foundation/NSException.h>
 
 extern NSString * const kSQLiteKitErrorDomain;
 
-void __sqlitekit_log(id object, NSString *format, ...);
-void __sqlitekit_warning(id object, NSString *format, ...);
-void __sqlitekit_error(id object, NSString *format, ...);
+void __sqlitekit_log(NSString *format, ...) __attribute__ ((nonnull(1)));
+void __sqlitekit_warning(NSString *format, ...) __attribute__ ((nonnull(1)));
+void __sqlitekit_error(NSString *format, ...) __attribute__ ((nonnull(1)));
 
 #ifdef SQLITEKIT_VERBOSE
-# define sqlitekit_verbose(format, ...)  __sqlitekit_log(self, format, ##__VA_ARGS__)
-# define sqlitekit_cverbose(object, format, ...)  __sqlitekit_log(object, format, ##__VA_ARGS__)
+# define sqlitekit_verbose(format, ...)             __sqlitekit_log(self, format, ##__VA_ARGS__)
+# define sqlitekit_cverbose(object, format, ...)    __sqlitekit_log([NSString stringWithFormat:@"(object = %p) %@", self, format], ##__VA_ARGS__)
 #else
 # define sqlitekit_verbose(format, ...)
 # define sqlitekit_cverbose(object, format, ...)
 #endif
-#define sqlitekit_log(format, ...)      __sqlitekit_log(self, format, ##__VA_ARGS__)
-#define sqlitekit_clog(object, format, ...)      __sqlitekit_log(object, format, ##__VA_ARGS__)
-#define sqlitekit_warning(format, ...)  __sqlitekit_warning(self, format, ##__VA_ARGS__)
-#define sqlitekit_cwarning(object, format, ...)  __sqlitekit_warning(object, format, ##__VA_ARGS__)
-#define sqlitekit_error(format, ...)    __sqlitekit_error(self, format, ##__VA_ARGS__)
-#define sqlitekit_cerror(object, format, ...)    __sqlitekit_error(object, format, ##__VA_ARGS__)
+#define sqlitekit_log(format, ...)                  __sqlitekit_log([NSString stringWithFormat:@"(object = %p) %@", self, format], ##__VA_ARGS__)
+#define sqlitekit_clog(object, format, ...)         __sqlitekit_log(format, ##__VA_ARGS__)
+#define sqlitekit_warning(format, ...)              __sqlitekit_warning([NSString stringWithFormat:@"(%@:%d, object = %p) %@", [[NSString stringWithUTF8String:__FILE__] lastPathComponent], __LINE__, self, format], ##__VA_ARGS__)
+#define sqlitekit_cwarning(object, format, ...)     __sqlitekit_warning([NSString stringWithFormat:@"(%@:%d) %@", [[NSString stringWithUTF8String:__FILE__] lastPathComponent], __LINE__, format], ##__VA_ARGS__)
+#define sqlitekit_error(format, ...)                __sqlitekit_error([NSString stringWithFormat:@"(%@:%d, object = %p) %@", [[NSString stringWithUTF8String:__FILE__] lastPathComponent], __LINE__, self, format], ##__VA_ARGS__)
+#define sqlitekit_cerror(object, format, ...)       __sqlitekit_error([NSString stringWithFormat:@"(%@:%d) %@", [[NSString stringWithUTF8String:__FILE__] lastPathComponent], __LINE__, format], ##__VA_ARGS__)
 
 #define sqlitekit_create_error(error, errorDomain, errorCode, errorDescription)\
     if ( error != nil )\
