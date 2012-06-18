@@ -354,16 +354,6 @@ void sqldatabase_rollback_hook(void *object)
     }
 
     NSParameterAssert(query);
-
-    // Checks if we are using a troubleshooting query.
-    if ( options & SQLExecuteExplain )
-    {
-        query = [query explainQuery];
-    }
-    else if ( options & SQLExecuteExplainQueryPlan )
-    {
-        query = [query explainQueryPlan];
-    }
     sqlitekit_verbose(@"Execute new query (query = %@).", query);
 
     // PREPARE STATEMENT

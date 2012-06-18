@@ -26,26 +26,12 @@ enum
      @note Using this option properly can result in a significant performance improvement.
      @see http://www.sqlite.org/cintro.html [3.0 Binding Parameters and Reusing Prepared Statements]
      */
-    SQLExecuteCacheStatement        = 1 << 1,
+    SQLExecuteCacheStatement        =   1 << 1,
 
     /**
      An option that allows to call the enumeration block if the request returns no row. In this case row is equal to nil and the index to NSNotFound. The pointer given for the stop variable is a valid pointer.
      */
     SQLExecuteCallBlockIfNoResult   = 1 << 2,
-
-    /**
-     An option that can be used to know how SQLite executes this query.
-
-     @see http://www.sqlite.org/lang_explain.html
-     */
-    SQLExecuteExplain               = 1 << 3,
-
-    /**
-     An option that can be used to know how SQLite executes this query.
-
-     @see http://www.sqlite.org/lang_explain.html
-     */
-    SQLExecuteExplainQueryPlan      = 1 << 4,
 };
 typedef NSUInteger SQLExecuteOptions;
 
