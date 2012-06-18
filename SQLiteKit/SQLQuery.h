@@ -57,4 +57,23 @@
  */
 - (id)initWithStatement:(NSString *)SQLStatement arguments:(NSArray *)arguments orArgumentsList:(va_list)argumentsList __attribute__ ((nonnull(1)));
 
+#pragma mark -
+/// @name Explain
+
+/**
+ Returns a new query that is prefixed by the EXPLAIN keyword.
+
+ @return A new query that should be used for troubleshooting only.
+ @see http://www.sqlite.org/lang_explain.html
+ */
+- (id)explainQuery;
+
+/**
+ Returns a new query that is prefixed by the EXPLAIN QUERY PLAN keyword.
+
+ @return A new query that should be used for troubleshooting only.
+ @see http://www.sqlite.org/lang_explain.html
+ */
+- (id)explainQueryPlan;
+
 @end

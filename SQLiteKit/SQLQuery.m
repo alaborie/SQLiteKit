@@ -108,4 +108,17 @@
     return [NSString stringWithFormat:@"%@ [ %@ ]", self.SQLStatement, [self.arguments componentsJoinedByString:@", "]];
 }
 
+#pragma mark -
+#pragma mark Public
+
+- (id)explainQuery
+{
+    return [[self class] queryWithStatement:[@"EXPLAIN " stringByAppendingString:self.SQLStatement] arguments:self.arguments];
+}
+
+- (id)explainQueryPlan
+{
+    return [[self class] queryWithStatement:[@"EXPLAIN QUERY PLAN " stringByAppendingString:self.SQLStatement] arguments:self.arguments];
+}
+
 @end
