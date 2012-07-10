@@ -322,16 +322,16 @@
     NSInteger notificationExpectedCount = 9;
 
     // Adds an observer for each notification.
-    commitObserver = [defaultCenter addObserverForName:kSQLDatabaseCommitNotification object:database queue:nil usingBlock:^(NSNotification *note) {
+    commitObserver = [defaultCenter addObserverForName:kSQLTransactionCommitNotification object:database queue:nil usingBlock:^(NSNotification *note) {
         NSLog(@" - Received a commit notification (notification = %@)", note);
         commitNotificationCount++;
     }];
-    rollbackObserver = [defaultCenter addObserverForName:kSQLDatabaseRollbackNotification object:database queue:nil usingBlock:^(NSNotification *note) {
+    rollbackObserver = [defaultCenter addObserverForName:kSQLTransactionRollbackNotification object:database queue:nil usingBlock:^(NSNotification *note) {
         NSLog(@" - Received a rollback notification (notification = %@)", note);
         rollbackNotificationCount++;
     }];
     [database beginGeneratingNotificationsIntoCenter:defaultCenter];
-    notificationObserver = [defaultCenter addObserverForName:[kSQLDatabaseInsertNotification stringByAppendingString:@"main.countries"] object:nil queue:nil usingBlock:^(NSNotification *note) {
+    notificationObserver = [defaultCenter addObserverForName:kSQLTableInsertNotification object:nil queue:nil usingBlock:^(NSNotification *note) {
         NSLog(@" - Received an insertion notification (notification = %@)", note);
         notificationCount++;
     }];
@@ -362,7 +362,7 @@
     [defaultCenter removeObserver:notificationObserver];
 
     // Adds a observer that listens the updates of the tables countries.
-    notificationObserver = [defaultCenter addObserverForName:[kSQLDatabaseInsertNotification stringByAppendingString:@"main.countries"] object:nil queue:nil usingBlock:^(NSNotification *note) {
+    notificationObserver = [defaultCenter addObserverForName:kSQLTableInsertNotification object:nil queue:nil usingBlock:^(NSNotification *note) {
         STAssertTrue(false, @"This method should not been called, the observer has been removed!");
     }];
     // Remove it immediately.
@@ -374,7 +374,7 @@
     [defaultCenter removeObserver:notificationObserver];
 
     // Adds another observer that listen the updates (only delete in this case) of the tables countries.
-    notificationObserver = [defaultCenter addObserverForName:[kSQLDatabaseDeleteNotification stringByAppendingString:@"main.countries"] object:nil queue:nil usingBlock:^(NSNotification *note) {
+    notificationObserver = [defaultCenter addObserverForName:kSQLTableDeleteNotification object:nil queue:nil usingBlock:^(NSNotification *note) {
         NSLog(@" - Received a deletion notification (notification = %@)", note);
         notificationCount++;
     }];
@@ -386,7 +386,7 @@
     [defaultCenter removeObserver:notificationObserver];
 
     // Adds another observer that listen the updates (only update in this case) of the tables countries.
-    notificationObserver = [defaultCenter addObserverForName:[kSQLDatabaseUpdateNotification stringByAppendingString:@"main.countries"] object:nil queue:nil usingBlock:^(NSNotification *note) {
+    notificationObserver = [defaultCenter addObserverForName:kSQLTableUpdateNotification object:nil queue:nil usingBlock:^(NSNotification *note) {
         NSLog(@" - Received an update notification (notification = %@)", note);
         notificationCount++;
     }];

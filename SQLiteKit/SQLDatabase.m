@@ -17,11 +17,16 @@
 
 #import "SQLFunction+Private.h"
 
-NSString * const kSQLDatabaseInsertNotification = @"@insert.";
-NSString * const kSQLDatabaseUpdateNotification = @"@update.";
-NSString * const kSQLDatabaseDeleteNotification = @"@delete.";
-NSString * const kSQLDatabaseCommitNotification = @"@commit";
-NSString * const kSQLDatabaseRollbackNotification = @"@rollback";
+NSString * const kSQLTableInsertNotification = @"SQLTableInsertNotification";
+NSString * const kSQLTableUpdateNotification = @"SQLTableUpdateNotification";
+NSString * const kSQLTableDeleteNotification = @"SQLTableDeleteNotification";
+
+NSString * const kSQLRowIDKey = @"SQLRowIDKey";
+NSString * const kSQLDatabaseNameKey = @"SQLDatabaseNameKey";
+NSString * const kSQLTableNameKey = @"SQLTableNameKey";
+
+NSString * const kSQLTransactionCommitNotification = @"SQLTransactionCommitNotification";
+NSString * const kSQLTransactionRollbackNotification = @"SQLTransactionRollbackNotification";
 
 ////////////////////////////////////////////////////////////////////////////////
 #pragma mark -
@@ -40,30 +45,30 @@ void sqldatabase_update_hook(void *object, int type, char const *databaseName, c
     {
         case SQLITE_INSERT:
         {
-            notificationName = [kSQLDatabaseInsertNotification stringByAppendingFormat:@"%s.%s", databaseName, tableName];
+            notificationName = kSQLTableInsertNotification;
             break;
         }
         case SQLITE_UPDATE:
         {
-            notificationName = [kSQLDatabaseUpdateNotification stringByAppendingFormat:@"%s.%s", databaseName, tableName];
+            notificationName = kSQLTableUpdateNotification;
             break;
         }
         case SQLITE_DELETE:
         {
-            notificationName = [kSQLDatabaseDeleteNotification stringByAppendingFormat:@"%s.%s", databaseName, tableName];
+            notificationName = kSQLTableDeleteNotification;
             break;
         }
         default:
         {
-            sqlitekit_cwarning(database, @"Cannot determine the type of the update, call ignored (database = %s, table = %s).", databaseName, tableName);
+            sqlitekit_cwarning(database, @"Cannot determine the type of the update, call ignored (database = %s, table = %s, type = %d).", databaseName, tableName, type);
         }
     }
     if ( notificationName != nil )
     {
         NSDictionary *userInfoDict = [NSDictionary dictionaryWithObjectsAndKeys:
-                                      [NSNumber numberWithLongLong:rowID], @"rowID",
-                                      [NSString stringWithUTF8String:databaseName], @"databaseName",
-                                      [NSString stringWithUTF8String:tableName], @"tableName",
+                                      [NSNumber numberWithLongLong:rowID], kSQLRowIDKey,
+                                      [NSString stringWithUTF8String:databaseName], kSQLDatabaseNameKey,
+                                      [NSString stringWithUTF8String:tableName], kSQLTableNameKey,
                                       nil];
 
         sqlitekit_cverbose(database, @"Posts notification '%@'.", notificationName);
@@ -77,7 +82,7 @@ int sqldatabase_commit_hook(void *object)
     NSCAssert([database isKindOfClass:[SQLDatabase class]] == YES, @"Invalid kind of class.");
 
     sqlitekit_cverbose(database, @"Posts notification '%@'.", kSQLDatabaseCommitNotification);
-    [database.notificationCenter postNotificationName:kSQLDatabaseCommitNotification object:database];
+    [database.notificationCenter postNotificationName:kSQLTransactionCommitNotification object:database];
     return 0;
 }
 
@@ -87,7 +92,7 @@ void sqldatabase_rollback_hook(void *object)
     NSCAssert([database isKindOfClass:[SQLDatabase class]] == YES, @"Invalid kind of class.");
 
     sqlitekit_cverbose(database, @"Posts notification '%@'.", kSQLDatabaseRollbackNotification);
-    [database.notificationCenter postNotificationName:kSQLDatabaseRollbackNotification object:database];
+    [database.notificationCenter postNotificationName:kSQLTransactionRollbackNotification object:database];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -132,14 +137,14 @@ void sqldatabase_rollback_hook(void *object)
     return [[[self alloc] init] autorelease];
 }
 
-+ (id)databaseWithFileURL:(NSURL *)storeURL
++ (id)databaseWithFileURL:(NSURL *)fileURL
 {
-    return [[[self alloc] initWithFileURL:storeURL] autorelease];
+    return [[[self alloc] initWithFileURL:fileURL] autorelease];
 }
 
-+ (id)databaseWithFilePath:(NSString *)storePath
++ (id)databaseWithFilePath:(NSString *)filePath
 {
-    return [[[self alloc] initWithFilePath:storePath] autorelease];
+    return [[[self alloc] initWithFilePath:filePath] autorelease];
 }
 
 - (id)init
@@ -147,21 +152,21 @@ void sqldatabase_rollback_hook(void *object)
     return [self initWithFilePath:nil];
 }
 
-- (id)initWithFileURL:(NSURL *)storeURL
+- (id)initWithFileURL:(NSURL *)fileURL
 {
-    if ( storeURL.isFileURL == NO )
+    if ( fileURL.isFileURL == NO )
     {
         return nil;
     }
-    return [self initWithFilePath:storeURL.path];
+    return [self initWithFilePath:fileURL.path];
 }
 
-- (id)initWithFilePath:(NSString *)storePath
+- (id)initWithFilePath:(NSString *)filePath
 {
     self = [super init];
     if ( self != nil )
     {
-        _localPath = [storePath retain];
+        _localPath = [filePath retain];
         _statementsCache = [[NSCache alloc] init];
         sqlitekit_verbose(@"The database has been initialized (storePath = %@).", storePath);
     }
@@ -474,7 +479,7 @@ void sqldatabase_rollback_hook(void *object)
 
 #pragma mark -
 
-- (BOOL)addFunction:(SQLFunction *)function withName:(NSString *)name encoding:(NSInteger)encoding context:(id)object error:(NSError **)error
+- (BOOL)defineFunction:(SQLFunction *)function withName:(NSString *)name encoding:(NSInteger)encoding context:(id)object error:(NSError **)error
 {
     if ( self.connectionHandle == NULL )
     {
@@ -510,7 +515,6 @@ void sqldatabase_rollback_hook(void *object)
     }
 
     NSParameterAssert(name);
-
     if ( sqlite3_create_function(self.connectionHandle, [name UTF8String], function.numberOfArguments, encoding, function, NULL, NULL, NULL) == SQLITE_OK )
     {
         [self.functionsCountedSet removeObject:function];
@@ -528,7 +532,6 @@ void sqldatabase_rollback_hook(void *object)
 - (void)beginGeneratingNotificationsIntoCenter:(NSNotificationCenter *)notificationCenter
 {
     NSParameterAssert(notificationCenter);
-
     if ( self.notificationCenter != nil )
     {
         if ( [self.notificationCenter isEqual:notificationCenter] == YES )

@@ -32,11 +32,11 @@
     };
     capitalizedFunction = [SQLFunction functionWithNumberOfArguments:1 block:capitalizedBlock];
 
-    STAssertFalse([database addFunction:capitalizedFunction withName:@"noname" encoding:SQLITE_UTF8 context:nil error:&error], @"Add function should have failed (database = %@, error = %@).", database, error);
+    STAssertFalse([database defineFunction:capitalizedFunction withName:@"noname" encoding:SQLITE_UTF8 context:nil error:&error], @"Add function should have failed (database = %@, error = %@).", database, error);
     STAssertFalse([database removeFunction:capitalizedFunction withName:@"noname" encoding:SQLITE_UTF8 error:&error], @"Remove function should have failed (database = %@, error = %@).", database, error);
     STAssertTrue([database open:&error], @"Open operation failed (database = %@, error = %@).", database, error);
     STAssertTrue([database removeFunction:capitalizedFunction withName:@"noname" encoding:SQLITE_UTF8 error:&error], @"Remove function failed (database = %@, error = %@).", database, error);
-    STAssertTrue([database addFunction:capitalizedFunction withName:@"capitalized" encoding:SQLITE_UTF8 context:nil error:&error], @"Add function failed (database = %@, error = %@).", database, error);
+    STAssertTrue([database defineFunction:capitalizedFunction withName:@"capitalized" encoding:SQLITE_UTF8 context:nil error:&error], @"Add function failed (database = %@, error = %@).", database, error);
 
     SQLQuery *capitalizedQuery = [SQLQuery queryWithStatement:@"SELECT capitalized('hello world!') AS sentence;"];
 
@@ -77,7 +77,7 @@
     }];
 
     STAssertTrue([database open:&error], @"Open operation failed (database = %@, error = %@).", database, error);
-    STAssertTrue([database addFunction:sha1Function withName:@"sha1" encoding:SQLITE_UTF8 context:nil error:&error], @"Add function failed (database = %@, error = %@).", database, error);
+    STAssertTrue([database defineFunction:sha1Function withName:@"sha1" encoding:SQLITE_UTF8 context:nil error:&error], @"Add function failed (database = %@, error = %@).", database, error);
 
     SQLQuery *sha1Query = [SQLQuery queryWithStatement:@"SELECT sha1('hello world!') AS hash;"];
 
