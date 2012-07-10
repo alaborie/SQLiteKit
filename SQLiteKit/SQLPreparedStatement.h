@@ -13,6 +13,7 @@
 
 /**
  @brief An object that represents a prepared-statement.
+ @note This class must be used only inside the library!
  */
 @interface SQLPreparedStatement : NSObject
 {
@@ -61,6 +62,7 @@
  Resets the prepared-statement in order to be reused.
 
  @return A boolean value that indicates whether the prepared-statement has been reseted or not.
+ @note In order to be reused, a prepared-statement must be clear its bindings then be reseted.
  */
 - (BOOL)reset;
 
@@ -79,6 +81,7 @@
  Clears the arguments bound to the prepared-statement.
 
  @return A boolean value that indicates whether the arguments bound have been removed or not.
+ @note In order to be reused, a prepared-statement must be clear its bindings then be reseted.
  */
 - (BOOL)clearBindings;
 
