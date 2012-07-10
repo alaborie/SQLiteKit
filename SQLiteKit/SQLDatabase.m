@@ -362,13 +362,13 @@ void sqldatabase_rollback_hook(void *object)
     sqlitekit_verbose(@"Execute new query (query = %@).", query);
 
     // PREPARE STATEMENT
-    SQLPreparedStatement *statement = [self.statementsCache objectForKey:query.SQLStatement];
+    SQLPreparedStatement *statement = [[self.statementsCache objectForKey:query.SQLStatement] retain];
     BOOL shouldCompleteStatement = YES;
 
     if ( statement == nil )
     {
         // If no cached statement has been found for this query, we create a new one.
-        statement = [SQLPreparedStatement statementWithDatabase:self query:query];
+        statement = [[SQLPreparedStatement alloc] initWithDatabase:self query:query];
         if ( statement == nil )
         {
             sqlitekit_verbose(@"Cannot create a prepared statement from the given query.");
@@ -439,6 +439,7 @@ void sqldatabase_rollback_hook(void *object)
     // COMPLETE
     BOOL executionSucceed = ( shouldCompleteStatement == YES ) ? [statement complete] : [statement reset];
 
+    [statement release];
     if ( executionSucceed == NO )
     {
         sqlitekit_verbose(@"Cannot %@ the prepared statement.", ( shouldCompleteStatement == YES ) ? @"finalized" : @"reset");
@@ -476,88 +477,6 @@ void sqldatabase_rollback_hook(void *object)
 {
     return (NSUInteger)sqlite3_total_changes(self.connectionHandle);
 }
-
-#pragma mark -
-
-- (BOOL)defineFunction:(SQLFunction *)function withName:(NSString *)name encoding:(NSInteger)encoding context:(id)object error:(NSError **)error
-{
-    if ( self.connectionHandle == NULL )
-    {
-        sqlitekit_warning(@"Cannot create a function with a database that is not open.");
-        sqlitekit_create_error(error, kSQLiteKitErrorDomain, SQLDatabaseErrorDatabaseNotOpen, @"Cannot create a function with a database that is not open.");
-        return NO;
-    }
-
-    NSParameterAssert(function);
-    NSParameterAssert(name);
-
-    /// @note Need more work to be able to use the v2 function (dlopen, dlsym, etc.). iOS 4.3 does not support the v2 function.
-    if ( sqlite3_create_function(self.connectionHandle, [name UTF8String], function.numberOfArguments, encoding, function, function.function, function.step, function.final) == SQLITE_OK )
-    {
-        [self.functionsCountedSet addObject:function];
-        function.context = object;
-        sqlitekit_verbose(@"Custom function '%@' has been created successfully.", name);
-        return YES;
-    }
-    sqlitekit_verbose(@"Cannot create the custom function (function = %@, name = %@, encoding = %d, context = %@).", function, name, encoding, object);
-    sqlitekit_warning(@"%s.", sqlite3_errmsg(self.connectionHandle));
-    sqlitekit_create_error_cstring(error, kSQLiteKitErrorDomain, SQLDatabaseErrorCInterface, sqlite3_errmsg(self.connectionHandle));
-    return NO;
-}
-
-- (BOOL)removeFunction:(SQLFunction *)function withName:(NSString *)name encoding:(NSInteger)encoding error:(NSError **)error
-{
-    if ( self.connectionHandle == NULL )
-    {
-        sqlitekit_warning(@"Cannot remove a function with a database that is not open.");
-        sqlitekit_create_error(error, kSQLiteKitErrorDomain, SQLDatabaseErrorDatabaseNotOpen, @"Cannot remove a function with a database that is not open.");
-        return NO;
-    }
-
-    NSParameterAssert(name);
-    if ( sqlite3_create_function(self.connectionHandle, [name UTF8String], function.numberOfArguments, encoding, function, NULL, NULL, NULL) == SQLITE_OK )
-    {
-        [self.functionsCountedSet removeObject:function];
-        sqlitekit_verbose(@"Custom function '%@' has been removed successfully.", name);
-        return YES;
-    }
-    sqlitekit_verbose(@"Cannot remove the custom function (name = %@, encoding = %d).", name, encoding);
-    sqlitekit_warning(@"%s.", sqlite3_errmsg(self.connectionHandle));
-    sqlitekit_create_error_cstring(error, kSQLiteKitErrorDomain, SQLDatabaseErrorCInterface, sqlite3_errmsg(self.connectionHandle));
-    return NO;
-}
-
-#pragma mark -
-
-- (void)beginGeneratingNotificationsIntoCenter:(NSNotificationCenter *)notificationCenter
-{
-    NSParameterAssert(notificationCenter);
-    if ( self.notificationCenter != nil )
-    {
-        if ( [self.notificationCenter isEqual:notificationCenter] == YES )
-        {
-            return;
-        }
-        [self endGeneratingNotifications];
-    }
-    self.notificationCenter = notificationCenter;
-    sqlite3_update_hook(self.connectionHandle, &sqldatabase_update_hook, self);
-    sqlite3_commit_hook(self.connectionHandle, &sqldatabase_commit_hook, self);
-    sqlite3_rollback_hook(self.connectionHandle, &sqldatabase_rollback_hook, self);
-}
-
-- (void)endGeneratingNotifications
-{
-    if ( self.notificationCenter != nil )
-    {
-        sqlite3_update_hook(self.connectionHandle, NULL, NULL);
-        sqlite3_commit_hook(self.connectionHandle, NULL, NULL);
-        sqlite3_rollback_hook(self.connectionHandle, NULL, NULL);
-        self.notificationCenter = nil;
-    }
-}
-
-#pragma mark -
 
 - (void)printRuntimeStatusWithResetFlag:(BOOL)shouldReset
 {
@@ -660,6 +579,86 @@ void sqldatabase_rollback_hook(void *object)
             }
         }
         parameterIndex++;
+    }
+}
+
+#pragma mark -
+
+- (BOOL)defineFunction:(SQLFunction *)function withName:(NSString *)name encoding:(NSInteger)encoding context:(id)object error:(NSError **)error
+{
+    if ( self.connectionHandle == NULL )
+    {
+        sqlitekit_warning(@"Cannot create a function with a database that is not open.");
+        sqlitekit_create_error(error, kSQLiteKitErrorDomain, SQLDatabaseErrorDatabaseNotOpen, @"Cannot create a function with a database that is not open.");
+        return NO;
+    }
+
+    NSParameterAssert(function);
+    NSParameterAssert(name);
+
+    /// @note Need more work to be able to use the v2 function (dlopen, dlsym, etc.). iOS 4.3 does not support the v2 function.
+    if ( sqlite3_create_function(self.connectionHandle, [name UTF8String], function.numberOfArguments, encoding, function, function.function, function.step, function.final) == SQLITE_OK )
+    {
+        [self.functionsCountedSet addObject:function];
+        function.context = object;
+        sqlitekit_verbose(@"Custom function '%@' has been created successfully.", name);
+        return YES;
+    }
+    sqlitekit_verbose(@"Cannot create the custom function (function = %@, name = %@, encoding = %d, context = %@).", function, name, encoding, object);
+    sqlitekit_warning(@"%s.", sqlite3_errmsg(self.connectionHandle));
+    sqlitekit_create_error_cstring(error, kSQLiteKitErrorDomain, SQLDatabaseErrorCInterface, sqlite3_errmsg(self.connectionHandle));
+    return NO;
+}
+
+- (BOOL)removeFunction:(SQLFunction *)function withName:(NSString *)name encoding:(NSInteger)encoding error:(NSError **)error
+{
+    if ( self.connectionHandle == NULL )
+    {
+        sqlitekit_warning(@"Cannot remove a function with a database that is not open.");
+        sqlitekit_create_error(error, kSQLiteKitErrorDomain, SQLDatabaseErrorDatabaseNotOpen, @"Cannot remove a function with a database that is not open.");
+        return NO;
+    }
+
+    NSParameterAssert(name);
+    if ( sqlite3_create_function(self.connectionHandle, [name UTF8String], function.numberOfArguments, encoding, function, NULL, NULL, NULL) == SQLITE_OK )
+    {
+        [self.functionsCountedSet removeObject:function];
+        sqlitekit_verbose(@"Custom function '%@' has been removed successfully.", name);
+        return YES;
+    }
+    sqlitekit_verbose(@"Cannot remove the custom function (name = %@, encoding = %d).", name, encoding);
+    sqlitekit_warning(@"%s.", sqlite3_errmsg(self.connectionHandle));
+    sqlitekit_create_error_cstring(error, kSQLiteKitErrorDomain, SQLDatabaseErrorCInterface, sqlite3_errmsg(self.connectionHandle));
+    return NO;
+}
+
+#pragma mark -
+
+- (void)beginGeneratingNotificationsIntoCenter:(NSNotificationCenter *)notificationCenter
+{
+    NSParameterAssert(notificationCenter);
+    if ( self.notificationCenter != nil )
+    {
+        if ( [self.notificationCenter isEqual:notificationCenter] == YES )
+        {
+            return;
+        }
+        [self endGeneratingNotifications];
+    }
+    self.notificationCenter = notificationCenter;
+    sqlite3_update_hook(self.connectionHandle, &sqldatabase_update_hook, self);
+    sqlite3_commit_hook(self.connectionHandle, &sqldatabase_commit_hook, self);
+    sqlite3_rollback_hook(self.connectionHandle, &sqldatabase_rollback_hook, self);
+}
+
+- (void)endGeneratingNotifications
+{
+    if ( self.notificationCenter != nil )
+    {
+        sqlite3_update_hook(self.connectionHandle, NULL, NULL);
+        sqlite3_commit_hook(self.connectionHandle, NULL, NULL);
+        sqlite3_rollback_hook(self.connectionHandle, NULL, NULL);
+        self.notificationCenter = nil;
     }
 }
 

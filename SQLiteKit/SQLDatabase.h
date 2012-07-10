@@ -159,7 +159,7 @@ typedef NSUInteger SQLDatabaseErrors;
  Creates a new database located at the given URL.
 
  @param fileURL A file URL that indicates where the database is located. If nil, the database is located in memory.
- @return A new database or nil if an error occurred during its allocation or initialization.
+ @return A new database or nil if an error occurs during its allocation or initialization.
  */
 + (id)databaseWithFileURL:(NSURL *)fileURL;
 
@@ -167,7 +167,7 @@ typedef NSUInteger SQLDatabaseErrors;
  Creates a new database at the given path.
 
  @param filePath A path that indicates where the database is located. If nil, the database is located in memory. The URL must be a file URL!
- @return A new database or nil if an error occurred during its allocation or initialization.
+ @return A new database or nil if an error occurs during its allocation or initialization.
  */
 + (id)databaseWithFilePath:(NSString *)filePath;
 
@@ -175,7 +175,7 @@ typedef NSUInteger SQLDatabaseErrors;
  Initializes a new database located at the given URL.
 
  @param fileURL A file URL that indicates where the database is located. If nil, the database is located in memory. The URL must be a file URL!
- @return A new database or nil if the initialization failed.
+ @return An initialized database or nil if an error occured.
  */
 - (id)initWithFileURL:(NSURL *)fileURL;
 
@@ -183,7 +183,7 @@ typedef NSUInteger SQLDatabaseErrors;
  Initializes a new database located at the given path.
 
  @param filePath A path that indicates where the database is located. If nil, the database is located in memory. The URL must be a file URL!
- @return A new database or nil if the initialization failed.
+ @return An initialized database or nil if an error occured.
  @note Designated initializer.
  */
 - (id)initWithFilePath:(NSString *)filePath;
@@ -287,6 +287,7 @@ typedef NSUInteger SQLDatabaseErrors;
 - (BOOL)executeQuery:(SQLQuery *)query options:(SQLExecuteOptions)options error:(NSError **)error thenEnumerateRowsUsingBlock:(void (^)(SQLRow *row, NSInteger index, BOOL *stop))block __attribute__ ((nonnull(1)));
 
 #pragma mark -
+/// @name Status
 
 /**
  Returns a number containing a unique 64-bit signed integer that identifies the latest row successfully inserted.
@@ -312,7 +313,15 @@ typedef NSUInteger SQLDatabaseErrors;
  */
 - (NSUInteger)totalNumberOfChanges;
 
+/**
+ Prints the runtime status information about the performance of SQLite, and optionally to reset various highwater marks.
+
+ @param shouldReset A boolean that indicates if the highest record values must be reseted.
+ */
+- (void)printRuntimeStatusWithResetFlag:(BOOL)shouldReset;
+
 #pragma mark -
+/// @name SQL Function
 
 /**
  Defines a new SQL function with the given parameters.
@@ -342,6 +351,7 @@ typedef NSUInteger SQLDatabaseErrors;
 - (BOOL)removeFunction:(SQLFunction *)function withName:(NSString *)name encoding:(NSInteger)encoding error:(NSError **)error __attribute__ ((nonnull(1, 2)));
 
 #pragma mark -
+/// @name Notification
 
 /**
  Begins the generation of notifications related to the activities of the receiver.
@@ -361,14 +371,5 @@ typedef NSUInteger SQLDatabaseErrors;
  Ends the generation of notifications related to the receiver.
  */
 - (void)endGeneratingNotifications;
-
-#pragma mark -
-
-/**
- Prints the runtime status information about the performance of SQLite, and optionally to reset various highwater marks.
-
- @param shouldReset A boolean that indicates if the highest record values must be reseted.
- */
-- (void)printRuntimeStatusWithResetFlag:(BOOL)shouldReset;
 
 @end

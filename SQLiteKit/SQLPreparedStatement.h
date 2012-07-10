@@ -11,6 +11,9 @@
 @class SQLDatabase;
 @class SQLQuery;
 
+/**
+ @brief An object that represents a prepared-statement.
+ */
 @interface SQLPreparedStatement : NSObject
 {
 @private
@@ -18,27 +21,54 @@
     sqlite3_stmt *_compiledStatement;
 }
 
+/**
+ A database that is associated with the receiver.
+ */
 @property (nonatomic, readonly) SQLDatabase *database;
+
+/**
+ An handle on the SQL prepared-statement provided by the C library.
+
+ @warning This property should be used outside the class only if some functionalities provided by the C library are not implemented yet. This property might disappear in the future.
+ */
 @property (nonatomic, readonly) sqlite3_stmt *compiledStatement;
 
+#pragma mark -
+/// @name Creation & Initialization
+
+/**
+ Creates a new prepared-statement for the given database and query.
+
+ @param database A database object.
+ @param query A query object.
+ @return A new prepared statement or nil if an error occurred during its allocation or initialization.
+ */
 + (id)statementWithDatabase:(SQLDatabase *)database query:(SQLQuery *)query;
 
 /**
- @param database Must not be nil!
- @param query Must not be nil!
+ Initializes a prepared-statement for the given database and query.
+
+ @param database A database object.
+ @param query A query object.
+ @return An initialized prepared statement or nil if an error occured.
  */
 - (id)initWithDatabase:(SQLDatabase *)database query:(SQLQuery *)query;
 
 #pragma mark -
+/// @name Termination
 
 /**
- @return YES if the statement was reset successfully. Returns NO if an error occured.
+ Resets the prepared-statement in order to be reused.
+
+ @return A boolean value that indicates whether the prepared-statement has been reseted or not.
  */
 - (BOOL)reset;
 
 /**
- @return YES if the statement was finalized successfully. Returns NO if an error occured.
+ Finalizes the prepared-statement and releases all the memory associated.
 
+ @return A boolean value that indicates whether the prepared-statement has been finalized or not.
+ @note This method is called automatically when the prepared-statement is released.
  @note This method should be called finalize but a method with the same name already exists in NSObject and has another purpose.
  */
 - (BOOL)complete;
@@ -46,12 +76,16 @@
 #pragma mark -
 
 /**
- @return YES if the bindings were cleared successfully. Returns NO if an error occured.
+ Clears the arguments bound to the prepared-statement.
+
+ @return A boolean value that indicates whether the arguments bound have been removed or not.
  */
 - (BOOL)clearBindings;
 
 /**
- @return YES if the arguments were bound successfully. Returns NO if an error occurred.
+ Binds the given arguments to the prepared-argument.
+
+ @return A boolean value that indicates whether the arguments have been bound successfully or not.
  */
 - (BOOL)bindArguments:(NSArray *)arguments;
 

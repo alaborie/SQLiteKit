@@ -8,6 +8,9 @@
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/**
+ @brief An object that represents a SQL query.
+ */
 @interface SQLQuery : NSObject
 {
 @private
@@ -15,44 +18,76 @@
     NSArray *_arguments;
 }
 
+/**
+ A string that contains the SQL statement of the query.
+ */
 @property (nonatomic, readonly) NSString *SQLStatement;
-@property (nonatomic, retain, readwrite) NSArray *arguments;
 
 /**
- @param SQLStatement Must not be nil!
+ An array that contains all the arguments required by the query.
+ */
+@property (nonatomic, retain, readwrite) NSArray *arguments;
+
+#pragma mark -
+/// @name Creation & Initialization
+
+/**
+ Creates a new query with the specified SQL statement.
+
+ @param SQLStatement A string that contains the SQL statement associated to the query. Must not be nil!
+ @return A new query or nil if an error occurs during its allocation or initialization.
  */
 + (id)queryWithStatement:(NSString *)SQLStatement __attribute__ ((nonnull(1)));
 
 /**
- @param SQLStatement Must not be nil!
- @note The arguments list must be nil terminated.
+ Creates a new query with the specified SQL statement and its arguments.
+
+ @param SQLStatement A string that contains the SQL statement associated to the query. This string must be followed by all the arguments required by the query. The list must be nil terminated.
+ @return A new query or nil if an error occurs during its allocation or initialization.
  */
 + (id)queryWithStatementAndArguments:(NSString *)SQLStatement, ... __attribute__((sentinel));
 
 /**
- @param SQLStatement Must not be nil!
+ Creates a new query with the specified SQL statement and its arguments.
+
+ @param SQLStatement A string that contains the SQL statement associated to the query. Must not be nil!
+ @param arguments An array that contains all the arguments required by the query. May be nil.
+ @return A new query or nil if an error occurs during its allocation or initialization.
  */
 + (id)queryWithStatement:(NSString *)SQLStatement arguments:(NSArray *)arguments __attribute__ ((nonnull(1)));
 
 /**
- @param SQLStatement Must not be nil!
+ Initializes a query with the specified SQL statement.
+
+ @param SQLStatement A string that contains the SQL statement associated to the query. Must not be nil!
+ @return An initialized query or nil if an error occured.
  */
 - (id)initWithStatement:(NSString *)SQLStatement __attribute__ ((nonnull(1)));
 
 /**
- @param SQLStatement Must not be nil!
- @note The arguments list must be nil terminated.
+ Initializes a query with the specified SQL statement and its arguments.
+
+ @param SQLStatement A string that contains the SQL statement associated to the query. This string must be followed by all the arguments required by the query. The list must be nil terminated.
+ @return An initialized query or nil if an error occured.
  */
 - (id)initWithStatementAndArguments:(NSString *)SQLStatement, ... __attribute__((sentinel));
 
 /**
- @param SQLStatement Must not be nil!
+ Initializes a query with the specified SQL statement and its arguments.
+
+ @param SQLStatement A string that contains the SQL statement associated to the query. Must not be nil!
+ @param arguments An array that contains all the arguments required by the query. May be nil.
+ @return An initialized query or nil if an error occured.
  */
 - (id)initWithStatement:(NSString *)SQLStatement arguments:(NSArray *)arguments __attribute__ ((nonnull(1)));
 
 /**
- @param SQLStatement Must not be nil!
- @param argumentsList If not NULL, must have been previously initialized by va_start().
+ Initializes a query with the specified SQL statement and its arguments.
+
+ @param SQLStatement A string that contains the SQL statement associated to the query. Must not be nil!
+ @param arguments An array that may contains all the arguments required by the query. May be nil.
+ @param argumentsList An argument lists required by the query. May be NULL. If not NULL, must have been previously initialized by va_start()!
+ @return An initialized query or nil if an error occured.
  @note Designated initializer.
  */
 - (id)initWithStatement:(NSString *)SQLStatement arguments:(NSArray *)arguments orArgumentsList:(va_list)argumentsList __attribute__ ((nonnull(1)));
