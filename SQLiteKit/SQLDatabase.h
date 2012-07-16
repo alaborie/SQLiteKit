@@ -150,7 +150,7 @@ typedef NSUInteger SQLDatabaseErrors;
 /**
  Creates a new in-memory database.
 
- @return A new database or nil if an error occurred during its allocation or initialization.
+ @return A new database or nil if an error occurs during its allocation or initialization.
  @note A database living in memory will vanish when the database connection is closed!
  */
 + (id)database;
@@ -266,7 +266,10 @@ typedef NSUInteger SQLDatabaseErrors;
 
  @param query A query object. Must not be nil!
  @param error On input, a pointer to an error object. If an error occurs, this pointer is set to an actual error object containing the error information. You may specify nil for this parameter if you do not want the error information.
- @param block A block that will be called for each row in the result. It takes three arguments: a row object that contains the data of the row, an index that contains the position of the row inside the result, and a pointer to a BOOL that if set to YES will stop further processing of the result. May be nil.
+ @param block A block that will be called for each row in the result. May be nil. It takes three arguments:
+    - row A row object that contains the data of the current row.
+    - index An integer that contains the position of the row inside the result.
+    - stop A pointer to a BOOL that if set to YES will stop further processing of the result.
  @return A boolean value that indicates whether the execution has succeed or not.
  @see executeQuery:error:
  @see executeQuery:options:error:thenEnumerateRowsUsingBlock:
@@ -292,7 +295,7 @@ typedef NSUInteger SQLDatabaseErrors;
 /**
  Returns a number containing a unique 64-bit signed integer that identifies the latest row successfully inserted.
 
- @return A number or nil if the operation is impossible (for instance, If no successful insertion have ever occurred on this database).
+ @return A number or nil if the operation is impossible (for instance, If no successful insertion have ever occurs on this database).
  @see http://www.sqlite.org/c3ref/last_insert_rowid.html
  */
 - (NSNumber *)lastInsertRowID;

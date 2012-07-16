@@ -352,7 +352,6 @@ unsigned int parser_get_next_request(FILE *stream, buffer_t streamBuffer, buffer
 - (id)initWithFilePath:(NSString *)filePath
 {
     NSParameterAssert(filePath);
-
     self = [super init];
     if ( self != nil )
     {
@@ -449,7 +448,6 @@ unsigned int parser_get_next_request(FILE *stream, buffer_t streamBuffer, buffer
 - (void)enumerateRequestsUsingBlock:(void (^)(NSString *request, NSUInteger index, BOOL *stop))block
 {
     NSParameterAssert(block);
-
     NSFastEnumerationState state = { 0 };
     id objectBuffer[OBJECT_BUFFER_DEFAULT_SIZE];
     BOOL stop = NO;

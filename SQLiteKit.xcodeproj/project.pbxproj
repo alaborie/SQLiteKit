@@ -384,7 +384,6 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Resources/SQKLiteTests.pch;
 				INFOPLIST_FILE = Resources/SQKLiteTests.plist;
-				OTHER_CFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				WARNING_CFLAGS = "";
@@ -402,7 +401,6 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Resources/SQKLiteTests.pch;
 				INFOPLIST_FILE = Resources/SQKLiteTests.plist;
-				OTHER_CFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				WARNING_CFLAGS = "";

@@ -42,7 +42,7 @@
 
  @param database A database object.
  @param query A query object.
- @return A new prepared statement or nil if an error occurred during its allocation or initialization.
+ @return A new prepared statement or nil if an error occurs during its allocation or initialization.
  */
 + (id)statementWithDatabase:(SQLDatabase *)database query:(SQLQuery *)query;
 
@@ -51,7 +51,7 @@
 
  @param database A database object.
  @param query A query object.
- @return An initialized prepared statement or nil if an error occured.
+ @return An initialized prepared-statement or nil if an error occured.
  */
 - (id)initWithDatabase:(SQLDatabase *)database query:(SQLQuery *)query;
 

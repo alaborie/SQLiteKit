@@ -18,7 +18,7 @@ void __sqlitekit_log(NSString *format, ...)
     va_list arguments;
 
     va_start(arguments, format);
-    NSLogv([@"[SQLiteKit]" stringByAppendingFormat:@" %@", format], arguments);
+    NSLogv([@"(SQLiteKit)" stringByAppendingFormat:@" %@", format], arguments);
     va_end(arguments);
 }
 
@@ -28,7 +28,7 @@ void __sqlitekit_warning(NSString *format, ...)
     va_list arguments;
 
     va_start(arguments, format);
-    NSLogv([@"[SQLiteKit]" stringByAppendingFormat:@" Warning: %@", format], arguments);
+    NSLogv([@"(SQLiteKit)" stringByAppendingFormat:@" Warning: %@", format], arguments);
     va_end(arguments);
 }
 
@@ -38,6 +38,6 @@ void __sqlitekit_error(NSString *format, ...)
     va_list arguments;
 
     va_start(arguments, format);
-    NSLogv([@"[SQLiteKit]" stringByAppendingFormat:@" Error: %@", format], arguments);
+    NSLogv([@"(SQLiteKit)" stringByAppendingFormat:@" Error: %@", format], arguments);
     va_end(arguments);
 }

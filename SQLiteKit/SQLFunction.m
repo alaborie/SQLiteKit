@@ -210,6 +210,7 @@ void sqlfunction_set_result(sqlite3_context *context, id returnValue)
 
 - (id)initWithNumberOfArguments:(NSUInteger)numberOfArguments block:(id (^)(SQLFunction *function, NSArray *arguments, id context))block
 {
+    NSParameterAssert(block);
     self = [super init];
     if ( self != nil )
     {

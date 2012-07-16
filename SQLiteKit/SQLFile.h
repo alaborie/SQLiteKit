@@ -24,6 +24,10 @@ struct buffer
 };
 typedef struct buffer *buffer_t;
 
+/**
+ @brief An object that represent a file containing SQL statements.
+ @todo The implementation of the parser is ugly. Should be redone later.
+ */
 @interface SQLFile : NSObject <NSFastEnumeration>
 {
 @private
@@ -34,15 +38,43 @@ typedef struct buffer *buffer_t;
     NSUInteger _streamBufferStartingIndex;
 }
 
+/**
+ A string that contains the path of the receiver.
+ */
 @property (nonatomic, readonly) NSString *path;
 
-+ (id)fileWithFileURL:(NSURL *)fileURL;
-+ (id)fileWithFilePath:(NSString *)filePath;
-
-- (id)initWithFileURL:(NSURL *)fileURL;
+#pragma mark -
+/// @name Creation & Initialization
 
 /**
- @param filePath Must not be nil!
+ Creates a new file located at the specified URL.
+
+ @param fileURL The URL to located the file. This must be a file URL. Must not be nil!
+ @return A new file or nil if an error occurs during its allocation or initialization.
+ */
++ (id)fileWithFileURL:(NSURL *)fileURL __attribute__ ((nonnull(1)));
+
+/**
+ Creates a new file located at the specified path.
+
+ @param path The path to locate the file. Must not be nil!
+ @return A new file or nil if an error occurs during its allocation or initialization.
+ */
++ (id)fileWithFilePath:(NSString *)filePath __attribute__ ((nonnull(1)));
+
+/**
+ Initializes a file located at the specified URL.
+
+ @param fileURL The URL to located the file. This must be a file URL. Must not be nil!
+ @return A new file or nil if an error occurs.
+ */
+- (id)initWithFileURL:(NSURL *)fileURL __attribute__ ((nonnull(1)));
+
+/**
+ Initializes a file located at the specified path.
+
+ @param path The path to locate the file. Must not be nil!
+ @return A new file or nil if an error occurs.
  @note Designated initializer.
  */
 - (id)initWithFilePath:(NSString *)filePath __attribute__ ((nonnull(1)));
@@ -50,6 +82,14 @@ typedef struct buffer *buffer_t;
 #pragma mark -
 /// @name Enumeration
 
-- (void)enumerateRequestsUsingBlock:(void (^)(NSString *request, NSUInteger index, BOOL *stop))block;
+/**
+ Enumerates all the requests contains in the receiver.
+
+ @param block A block that will be called for each request. The parameters are:
+    - request A string that contains the request.
+    - index An integer that indicates the index of the request in the file.
+    - stop A pointer to a BOOL that if set to YES will stop further processing of the result.
+ */
+- (void)enumerateRequestsUsingBlock:(void (^)(NSString *request, NSUInteger index, BOOL *stop))block __attribute__ ((nonnull(1)));
 
 @end
