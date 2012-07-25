@@ -20,17 +20,17 @@ void __sqlitekit_error(NSString *format, ...) __attribute__ ((nonnull(1)));
 
 #ifdef SQLITEKIT_VERBOSE
 # define sqlitekit_verbose(format, ...)             __sqlitekit_log([NSString stringWithFormat:@"%@ [%@:%d, object = %p]", format, [[NSString stringWithUTF8String:__FILE__] lastPathComponent], __LINE__, self], ##__VA_ARGS__)
-# define sqlitekit_cverbose(object, format, ...)    __sqlitekit_log([NSString stringWithFormat:@"%@ [%@:%d]", format, [[NSString stringWithUTF8String:__FILE__] lastPathComponent], __LINE__], ##__VA_ARGS__)
+# define sqlitekit_cverbose(format, ...)    __sqlitekit_log([NSString stringWithFormat:@"%@ [%@:%d]", format, [[NSString stringWithUTF8String:__FILE__] lastPathComponent], __LINE__], ##__VA_ARGS__)
 #else
 # define sqlitekit_verbose(format, ...)
-# define sqlitekit_cverbose(object, format, ...)
+# define sqlitekit_cverbose(format, ...)
 #endif
 #define sqlitekit_log(format, ...)                  __sqlitekit_log([NSString stringWithFormat:@"%@ [%@:%d, object = %p]", format, [[NSString stringWithUTF8String:__FILE__] lastPathComponent], __LINE__, self], ##__VA_ARGS__)
-#define sqlitekit_clog(object, format, ...)         __sqlitekit_log([NSString stringWithFormat:@"%@ [%@:%d]", format, [[NSString stringWithUTF8String:__FILE__] lastPathComponent], __LINE__], ##__VA_ARGS__)
+#define sqlitekit_clog(format, ...)         __sqlitekit_log([NSString stringWithFormat:@"%@ [%@:%d]", format, [[NSString stringWithUTF8String:__FILE__] lastPathComponent], __LINE__], ##__VA_ARGS__)
 #define sqlitekit_warning(format, ...)              __sqlitekit_warning([NSString stringWithFormat:@"%@ [%@:%d, object = %p]", format, [[NSString stringWithUTF8String:__FILE__] lastPathComponent], __LINE__, self], ##__VA_ARGS__)
-#define sqlitekit_cwarning(object, format, ...)     __sqlitekit_warning([NSString stringWithFormat:@"%@ [%@:%d]", format, [[NSString stringWithUTF8String:__FILE__] lastPathComponent], __LINE__], ##__VA_ARGS__)
+#define sqlitekit_cwarning(format, ...)     __sqlitekit_warning([NSString stringWithFormat:@"%@ [%@:%d]", format, [[NSString stringWithUTF8String:__FILE__] lastPathComponent], __LINE__], ##__VA_ARGS__)
 #define sqlitekit_error(format, ...)                __sqlitekit_error([NSString stringWithFormat:@"%@ [%@:%d, object = %p]", format, [[NSString stringWithUTF8String:__FILE__] lastPathComponent], __LINE__, self], ##__VA_ARGS__)
-#define sqlitekit_cerror(object, format, ...)       __sqlitekit_error([NSString stringWithFormat:@"%@ [%@:%d]", format, [[NSString stringWithUTF8String:__FILE__] lastPathComponent], __LINE__], ##__VA_ARGS__)
+#define sqlitekit_cerror(format, ...)       __sqlitekit_error([NSString stringWithFormat:@"%@ [%@:%d]", format, [[NSString stringWithUTF8String:__FILE__] lastPathComponent], __LINE__], ##__VA_ARGS__)
 
 #define sqlitekit_create_error(error, errorDomain, errorCode, errorDescription)\
     if ( error != nil )\

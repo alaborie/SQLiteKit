@@ -56,7 +56,7 @@
     SQLFunction *sha1Function = nil;
     NSError *error = nil;
 
-    sha1Function = [SQLFunction functionWithNumberOfArguments:1 block:^(SQLFunction *function, NSArray *arguments, id context) {
+    sha1Function = [SQLFunction functionWithNumberOfArguments:1 block:^id(SQLFunction *function, NSArray *arguments, id context) {
         NSCAssert(arguments.count == 1, @"Invalid number of arguments.");
         NSString *string = [arguments objectAtIndex:0];
         NSCAssert([string isKindOfClass:[NSString class]] == YES, @"Invalid kind of class.");

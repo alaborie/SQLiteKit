@@ -75,7 +75,7 @@ NSArray *sqlfunction_get_objc_values(int numberOfArguments, sqlite3_value **valu
                 }
                 else
                 {
-                    sqlitekit_cwarning(nil, @"Cannot allocate memory to hold the blob object (values[%i] = %p).", index, values[index]);
+                    sqlitekit_cwarning(@"Cannot allocate memory to hold the blob object (values[%i] = %p).", index, values[index]);
                     [arguments addObject:[NSNull null]];
                 }
                 break;
@@ -92,7 +92,7 @@ NSArray *sqlfunction_get_objc_values(int numberOfArguments, sqlite3_value **valu
             }
             default:
             {
-                sqlitekit_cwarning(nil, @"Cannot find the type of the argument (values[%i] = %p).", index, values[index]);
+                sqlitekit_cwarning(@"Cannot find the type of the argument (values[%i] = %p).", index, values[index]);
             }
         }
     }
@@ -143,7 +143,7 @@ void sqlfunction_set_result(sqlite3_context *context, id returnValue)
             }
             default:
             {
-                sqlitekit_cwarning(nil, @"The encoded type for the specified NSNumber is invalid (returnValue = %@, type = %c).", returnValue, encodedType[0]);
+                sqlitekit_cwarning(@"The encoded type for the specified NSNumber is invalid (returnValue = %@, type = %c).", returnValue, encodedType[0]);
                 // Makes sure to have the same treatment than if it was a string.
                 return sqlfunction_set_result(context, [returnValue description]);
             }

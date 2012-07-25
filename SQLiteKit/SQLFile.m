@@ -138,6 +138,7 @@ bool parser_read_next_chunk(FILE *stream, buffer_t streamBuffer)
     return true;
 }
 
+#ifndef __clang_analyzer__
 unsigned int parser_get_next_request(FILE *stream, buffer_t streamBuffer, buffer_t lineBuffer, unsigned int startingIndex)
 {
     NSCParameterAssert(stream);
@@ -175,7 +176,6 @@ unsigned int parser_get_next_request(FILE *stream, buffer_t streamBuffer, buffer
             continue;
         }
         currentChar = buffer_char_at_index(streamBuffer, index);
-
         switch ( currentChar )
         {
             case '*':
@@ -306,6 +306,7 @@ unsigned int parser_get_next_request(FILE *stream, buffer_t streamBuffer, buffer
     }
     return ++index;
 }
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 #pragma mark -

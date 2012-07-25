@@ -60,7 +60,7 @@ void sqldatabase_update_hook(void *object, int type, char const *databaseName, c
         }
         default:
         {
-            sqlitekit_cwarning(database, @"Cannot determine the type of the update, call ignored (database = %s, table = %s, type = %d).", databaseName, tableName, type);
+            sqlitekit_cwarning(@"Cannot determine the type of the update, call ignored (database = %s, table = %s, type = %d).", databaseName, tableName, type);
         }
     }
     if ( notificationName != nil )
@@ -71,7 +71,7 @@ void sqldatabase_update_hook(void *object, int type, char const *databaseName, c
                                       [NSString stringWithUTF8String:tableName], kSQLTableNameKey,
                                       nil];
 
-        sqlitekit_cverbose(database, @"Posts notification '%@'.", notificationName);
+        sqlitekit_cverbose(@"Posts notification '%@'.", notificationName);
         [database.notificationCenter postNotificationName:notificationName object:database userInfo:userInfoDict];
     }
 }
@@ -81,7 +81,7 @@ int sqldatabase_commit_hook(void *object)
     SQLDatabase *database = (SQLDatabase *)object;
     NSCAssert([database isKindOfClass:[SQLDatabase class]] == YES, @"Invalid kind of class.");
 
-    sqlitekit_cverbose(database, @"Posts notification '%@'.", kSQLDatabaseCommitNotification);
+    sqlitekit_cverbose(@"Posts notification '%@'.", kSQLDatabaseCommitNotification);
     [database.notificationCenter postNotificationName:kSQLTransactionCommitNotification object:database];
     return 0;
 }
@@ -91,7 +91,7 @@ void sqldatabase_rollback_hook(void *object)
     SQLDatabase *database = (SQLDatabase *)object;
     NSCAssert([database isKindOfClass:[SQLDatabase class]] == YES, @"Invalid kind of class.");
 
-    sqlitekit_cverbose(database, @"Posts notification '%@'.", kSQLDatabaseRollbackNotification);
+    sqlitekit_cverbose(@"Posts notification '%@'.", kSQLDatabaseRollbackNotification);
     [database.notificationCenter postNotificationName:kSQLTransactionRollbackNotification object:database];
 }
 
@@ -516,7 +516,7 @@ void sqldatabase_rollback_hook(void *object)
             case SQLITE_STATUS_MEMORY_USED:
             {
                 [output setString:@""];
-                [output appendFormat:@"MEMORY: used = %@ [ max = % @]", [self _humanReadableStringWithBytes:currentValue], [self _humanReadableStringWithBytes:maxValue]];
+                [output appendFormat:@"MEMORY: used = %@ [ max = %@ ]", [self _humanReadableStringWithBytes:currentValue], [self _humanReadableStringWithBytes:maxValue]];
                 break;
             }
             case SQLITE_STATUS_MALLOC_SIZE:
@@ -539,7 +539,7 @@ void sqldatabase_rollback_hook(void *object)
             }
             case SQLITE_STATUS_PAGECACHE_OVERFLOW:
             {
-                [output appendFormat:@", overflow = %@ [ max = %@]", [self _humanReadableStringWithBytes:currentValue], [self _humanReadableStringWithBytes:maxValue]];
+                [output appendFormat:@", overflow = %@ [ max = %@ ]", [self _humanReadableStringWithBytes:currentValue], [self _humanReadableStringWithBytes:maxValue]];
                 break;
             }
             case SQLITE_STATUS_PAGECACHE_SIZE:

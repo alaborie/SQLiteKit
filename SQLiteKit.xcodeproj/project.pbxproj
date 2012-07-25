@@ -280,7 +280,7 @@
 		FA30A93B148AD33900A269C8 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0430;
+				LastUpgradeCheck = 0440;
 			};
 			buildConfigurationList = FA30A93E148AD33900A269C8 /* Build configuration list for PBXProject "SQLiteKit" */;
 			compatibilityVersion = "Xcode 3.2";
