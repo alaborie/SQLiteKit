@@ -81,7 +81,7 @@ int sqldatabase_commit_hook(void *object)
     SQLDatabase *database = (SQLDatabase *)object;
     NSCAssert([database isKindOfClass:[SQLDatabase class]] == YES, @"Invalid kind of class.");
 
-    sqlitekit_cverbose(@"Posts notification '%@'.", kSQLDatabaseCommitNotification);
+    sqlitekit_cverbose(@"Posts notification '%@'.", kSQLTransactionCommitNotification);
     [database.notificationCenter postNotificationName:kSQLTransactionCommitNotification object:database];
     return 0;
 }
@@ -91,7 +91,7 @@ void sqldatabase_rollback_hook(void *object)
     SQLDatabase *database = (SQLDatabase *)object;
     NSCAssert([database isKindOfClass:[SQLDatabase class]] == YES, @"Invalid kind of class.");
 
-    sqlitekit_cverbose(@"Posts notification '%@'.", kSQLDatabaseRollbackNotification);
+    sqlitekit_cverbose(@"Posts notification '%@'.", kSQLTransactionRollbackNotification);
     [database.notificationCenter postNotificationName:kSQLTransactionRollbackNotification object:database];
 }
 
@@ -168,7 +168,7 @@ void sqldatabase_rollback_hook(void *object)
     {
         _localPath = [filePath retain];
         _statementsCache = [[NSCache alloc] init];
-        sqlitekit_verbose(@"The database has been initialized (storePath = %@).", storePath);
+        sqlitekit_verbose(@"The database has been initialized (storePath = %@).", filePath);
     }
     return self;
 }
