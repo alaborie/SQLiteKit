@@ -89,10 +89,10 @@
     NSAssert(self.compiledStatement != NULL, @"The compiled statement should not be NULL.");
     int resultFinalize = sqlite3_finalize(self.compiledStatement);
 
+    // NULL out the compiled statement after the finalize operation, the pointer became obsolete.
+    _compiledStatement = NULL;
     if ( resultFinalize == SQLITE_OK )
     {
-        // NULL out the compiled statement as soon as the finalize operation succeed, the pointer became obsolete.
-        _compiledStatement = NULL;
         return YES;
     }
     sqlitekit_verbose(@"A problem occurred while finalizing the prepared statement.");
