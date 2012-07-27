@@ -17,6 +17,7 @@ extern NSString * const kSQLiteKitErrorDomain;
 void __sqlitekit_log(NSString *file, NSUInteger line, NSString *format, ...) __attribute__ ((format(__NSString__, 3, 4)));
 void __sqlitekit_warning(NSString *file, NSUInteger line, NSString *format, ...) __attribute__ ((format(__NSString__, 3, 4)));
 void __sqlitekit_error(NSString *file, NSUInteger line, NSString *format, ...) __attribute__ ((format(__NSString__, 3, 4)));
+void __sqlitekit_nop(NSString *file, NSUInteger line, NSString *format, ...) __attribute__ ((naked));
 
 #ifdef SQLITEKIT_VERBOSE
 # define sqlitekit_verbose(format, ...)     __sqlitekit_log([[NSString stringWithUTF8String:__FILE__] lastPathComponent], __LINE__, format, ##__VA_ARGS__)

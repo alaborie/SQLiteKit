@@ -53,3 +53,8 @@ void __sqlitekit_error(NSString *file, NSUInteger line, NSString *format, ...)
     NSLogv([@"(SQLiteKit)" stringByAppendingFormat:@" Error: %@", format], arguments);
     va_end(arguments);
 }
+
+void __sqlitekit_nop(NSString *file, NSUInteger line, NSString *format, ...)
+{
+    __asm__ ("nop");
+}
