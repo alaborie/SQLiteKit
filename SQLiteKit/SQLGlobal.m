@@ -12,32 +12,44 @@
 
 NSString * const kSQLiteKitErrorDomain = @"SQLiteKitErrorDomain";
 
-void __sqlitekit_log(NSString *format, ...)
+void __sqlitekit_log(NSString *file, NSUInteger line, NSString *format, ...)
 {
     NSCParameterAssert(format);
     va_list arguments;
 
     va_start(arguments, format);
+    if ( file != nil )
+    {
+        format = [format stringByAppendingFormat:@" [%@:%d]", file, line];
+    }
     NSLogv([@"(SQLiteKit)" stringByAppendingFormat:@" %@", format], arguments);
     va_end(arguments);
 }
 
-void __sqlitekit_warning(NSString *format, ...)
+void __sqlitekit_warning(NSString *file, NSUInteger line, NSString *format, ...)
 {
     NSCParameterAssert(format);
     va_list arguments;
 
     va_start(arguments, format);
+    if ( file != nil )
+    {
+        format = [format stringByAppendingFormat:@" [%@:%d]", file, line];
+    }
     NSLogv([@"(SQLiteKit)" stringByAppendingFormat:@" Warning: %@", format], arguments);
     va_end(arguments);
 }
 
-void __sqlitekit_error(NSString *format, ...)
+void __sqlitekit_error(NSString *file, NSUInteger line, NSString *format, ...)
 {
     NSCParameterAssert(format);
     va_list arguments;
 
     va_start(arguments, format);
+    if ( file != nil )
+    {
+        format = [format stringByAppendingFormat:@" [%@:%d]", file, line];
+    }
     NSLogv([@"(SQLiteKit)" stringByAppendingFormat:@" Error: %@", format], arguments);
     va_end(arguments);
 }
