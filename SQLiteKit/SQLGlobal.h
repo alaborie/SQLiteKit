@@ -12,26 +12,36 @@
 #import <Foundation/NSError.h>
 #import <Foundation/NSException.h>
 
+/**
+ A string that contains the name of the error domain for all the errors related to SQLiteKit.
+ */
 extern NSString * const kSQLiteKitErrorDomain;
+
+/**
+ A string that contains the name of the environment variable used to enable the debug mode.
+ */
+extern NSString * const kSQLiteKitDebugEnvironmentKey;
 
 void __sqlitekit_log(NSString *file, NSUInteger line, NSString *format, ...) __attribute__ ((format(__NSString__, 3, 4)));
 void __sqlitekit_warning(NSString *file, NSUInteger line, NSString *format, ...) __attribute__ ((format(__NSString__, 3, 4)));
 void __sqlitekit_error(NSString *file, NSUInteger line, NSString *format, ...) __attribute__ ((format(__NSString__, 3, 4)));
-void __sqlitekit_nop(NSString *file, NSUInteger line, NSString *format, ...) __attribute__ ((naked));
+void __sqlitekit_nop(NSString *file, NSUInteger line, NSString *format, ...); // __attribute__ ((naked));
 
-#ifdef SQLITEKIT_VERBOSE
-# define sqlitekit_verbose(format, ...)     __sqlitekit_log([[NSString stringWithUTF8String:__FILE__] lastPathComponent], __LINE__, format, ##__VA_ARGS__)
-# define sqlitekit_cverbose(format, ...)    __sqlitekit_log([[NSString stringWithUTF8String:__FILE__] lastPathComponent], __LINE__, format, ##__VA_ARGS__)
-#else
-# define sqlitekit_verbose(format, ...)
-# define sqlitekit_cverbose(format, ...)
-#endif
-#define sqlitekit_log(format, ...)          __sqlitekit_log([[NSString stringWithUTF8String:__FILE__] lastPathComponent], __LINE__, format, ##__VA_ARGS__)
-#define sqlitekit_clog(format, ...)         __sqlitekit_log([[NSString stringWithUTF8String:__FILE__] lastPathComponent], __LINE__, format, ##__VA_ARGS__)
-#define sqlitekit_warning(format, ...)      __sqlitekit_warning([[NSString stringWithUTF8String:__FILE__] lastPathComponent], __LINE__, format, ##__VA_ARGS__)
-#define sqlitekit_cwarning(format, ...)     __sqlitekit_warning([[NSString stringWithUTF8String:__FILE__] lastPathComponent], __LINE__, format, ##__VA_ARGS__)
-#define sqlitekit_error(format, ...)        __sqlitekit_error([[NSString stringWithUTF8String:__FILE__] lastPathComponent], __LINE__, format, ##__VA_ARGS__)
-#define sqlitekit_cerror(format, ...)       __sqlitekit_error([[NSString stringWithUTF8String:__FILE__] lastPathComponent], __LINE__, format, ##__VA_ARGS__)
+void (*__p_sqlitekit_log)(NSString *, NSUInteger, NSString *, ...);
+void (*__p_sqlitekit_warning)(NSString *, NSUInteger, NSString *, ...);
+void (*__p_sqlitekit_error)(NSString *, NSUInteger, NSString *, ...);
+
+#define sqlitekit_verbose(format, ...)     __p_sqlitekit_log([[NSString stringWithUTF8String:__FILE__] lastPathComponent], __LINE__, format, ##__VA_ARGS__)
+#define sqlitekit_cverbose(format, ...)    __p_sqlitekit_log([[NSString stringWithUTF8String:__FILE__] lastPathComponent], __LINE__, format, ##__VA_ARGS__)
+
+#define sqlitekit_log(format, ...)          __p_sqlitekit_log([[NSString stringWithUTF8String:__FILE__] lastPathComponent], __LINE__, format, ##__VA_ARGS__)
+#define sqlitekit_clog(format, ...)         __p_sqlitekit_log([[NSString stringWithUTF8String:__FILE__] lastPathComponent], __LINE__, format, ##__VA_ARGS__)
+
+#define sqlitekit_warning(format, ...)      __p_sqlitekit_warning([[NSString stringWithUTF8String:__FILE__] lastPathComponent], __LINE__, format, ##__VA_ARGS__)
+#define sqlitekit_cwarning(format, ...)     __p_sqlitekit_warning([[NSString stringWithUTF8String:__FILE__] lastPathComponent], __LINE__, format, ##__VA_ARGS__)
+
+#define sqlitekit_error(format, ...)        __p_sqlitekit_error([[NSString stringWithUTF8String:__FILE__] lastPathComponent], __LINE__, format, ##__VA_ARGS__)
+#define sqlitekit_cerror(format, ...)       __p_sqlitekit_error([[NSString stringWithUTF8String:__FILE__] lastPathComponent], __LINE__, format, ##__VA_ARGS__)
 
 #define sqlitekit_create_error(error, errorDomain, errorCode, errorDescription)\
     if ( error != nil )\

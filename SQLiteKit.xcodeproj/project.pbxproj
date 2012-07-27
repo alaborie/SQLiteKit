@@ -238,9 +238,9 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		FA179AE214CF5FAF002FB17F /* SQKLiteTests */ = {
+		FA179AE214CF5FAF002FB17F /* SQLiteKitTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = FA179AF314CF5FAF002FB17F /* Build configuration list for PBXNativeTarget "SQKLiteTests" */;
+			buildConfigurationList = FA179AF314CF5FAF002FB17F /* Build configuration list for PBXNativeTarget "SQLiteKitTests" */;
 			buildPhases = (
 				FA179ADE14CF5FAF002FB17F /* Sources */,
 				FA179ADF14CF5FAF002FB17F /* Frameworks */,
@@ -252,7 +252,7 @@
 			dependencies = (
 				FA179B0114CF6130002FB17F /* PBXTargetDependency */,
 			);
-			name = SQKLiteTests;
+			name = SQLiteKitTests;
 			productName = SQKLiteTests;
 			productReference = FA179AE314CF5FAF002FB17F /* SQKLiteTests.octest */;
 			productType = "com.apple.product-type.bundle";
@@ -295,7 +295,7 @@
 			projectRoot = "";
 			targets = (
 				FA30A943148AD33900A269C8 /* SQLiteKit */,
-				FA179AE214CF5FAF002FB17F /* SQKLiteTests */,
+				FA179AE214CF5FAF002FB17F /* SQLiteKitTests */,
 			);
 		};
 /* End PBXProject section */
@@ -489,7 +489,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		FA179AF314CF5FAF002FB17F /* Build configuration list for PBXNativeTarget "SQKLiteTests" */ = {
+		FA179AF314CF5FAF002FB17F /* Build configuration list for PBXNativeTarget "SQLiteKitTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				FA179AF414CF5FAF002FB17F /* Debug */,

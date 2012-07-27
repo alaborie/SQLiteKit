@@ -11,6 +11,7 @@
 #import "SQLGlobal.h"
 
 NSString * const kSQLiteKitErrorDomain = @"SQLiteKitErrorDomain";
+NSString * const kSQLiteKitDebugEnvironmentKey = @"SQLiteKitDebug";
 
 void __sqlitekit_log(NSString *file, NSUInteger line, NSString *format, ...)
 {

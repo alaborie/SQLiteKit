@@ -190,14 +190,27 @@ void sqldatabase_rollback_hook(void *object)
 #pragma mark -
 #pragma mark NSObject
 
-+ (void)initialize
++ (void)load
 {
+    NSProcessInfo *processInfo = [NSProcessInfo processInfo];
+
+    if ( [processInfo.environment objectForKey:kSQLiteKitDebugEnvironmentKey] != nil )
+    {
+        NSLog(@" > SQLite version %s [ ID %s ] ", sqlite3_libversion(), sqlite3_sourceid());
+        __p_sqlitekit_log = &__sqlitekit_log;
+    }
+    else
+    {
+        __p_sqlitekit_log = &__sqlitekit_nop;
+    }
+    __p_sqlitekit_warning = &__sqlitekit_warning;
+    __p_sqlitekit_error = &__sqlitekit_error;
     if ( strcmp(sqlite3_sourceid(), SQLITE_SOURCE_ID) != 0 )
     {
         sqlitekit_error(@"SQLite header and source version mismatch, this might cause a crash caused by a symbol not found (header = %s, source = %s).", sqlite3_sourceid(), SQLITE_SOURCE_ID);
     }
 #ifdef SQLITEKIT_VERBOSE
-    NSLog(@" > SQLite version %s [ ID %s ] ", sqlite3_libversion(), sqlite3_sourceid());
+
 #endif
 }
 
