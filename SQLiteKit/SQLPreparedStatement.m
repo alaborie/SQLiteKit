@@ -120,7 +120,7 @@
 {
     NSAssert(self.compiledStatement != NULL, @"The compiled statement should not be NULL.");
     int argumentsCount = sqlite3_bind_parameter_count(_compiledStatement);
-    NSAssert([arguments count] == argumentsCount, @"The number of arguments doesn't match (value = %u, expected = %d, query = '%s').", [arguments count], argumentsCount, sqlite3_sql(self.compiledStatement));
+    NSAssert([arguments count] == argumentsCount, @"Cannot bind the arguments, the number of arguments required does not match the number of arguments given (numberGiven = %u, numberRequired = %u, query = '%s', arguments = %@).", [arguments count], argumentsCount, sqlite3_sql(self.compiledStatement), arguments);
 
     if ( argumentsCount > 0 )
     {
