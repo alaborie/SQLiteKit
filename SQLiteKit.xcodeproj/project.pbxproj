@@ -63,7 +63,7 @@
 		FA179AD714CF4199002FB17F /* SQLGlobal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SQLGlobal.h; sourceTree = "<group>"; };
 		FA179AD814CF4199002FB17F /* SQLGlobal.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SQLGlobal.m; sourceTree = "<group>"; };
 		FA179ADC14CF4F56002FB17F /* libsqlite3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.dylib; path = /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS5.1.sdk/usr/lib/libsqlite3.dylib; sourceTree = "<absolute>"; };
-		FA179AE314CF5FAF002FB17F /* SQKLiteTests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SQKLiteTests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
+		FA179AE314CF5FAF002FB17F /* SQKLiteTests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = SQKLiteTests.octest; path = SQLiteKitTests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FA179AE414CF5FAF002FB17F /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = Library/Frameworks/SenTestingKit.framework; sourceTree = DEVELOPER_DIR; };
 		FA179AF614CF6052002FB17F /* SQKLiteTests.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SQKLiteTests.pch; sourceTree = "<group>"; };
 		FA179AF714CF6052002FB17F /* SQKLiteTests.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = SQKLiteTests.plist; sourceTree = "<group>"; };
@@ -280,7 +280,7 @@
 		FA30A93B148AD33900A269C8 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0440;
+				LastUpgradeCheck = 0450;
 			};
 			buildConfigurationList = FA30A93E148AD33900A269C8 /* Build configuration list for PBXProject "SQLiteKit" */;
 			compatibilityVersion = "Xcode 3.2";
