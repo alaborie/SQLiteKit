@@ -31,8 +31,14 @@ void (*__p_sqlitekit_log)(NSString *, NSUInteger, NSString *, ...);
 void (*__p_sqlitekit_warning)(NSString *, NSUInteger, NSString *, ...);
 void (*__p_sqlitekit_error)(NSString *, NSUInteger, NSString *, ...);
 
-#define sqlitekit_verbose(format, ...)     __p_sqlitekit_log([[NSString stringWithUTF8String:__FILE__] lastPathComponent], __LINE__, format, ##__VA_ARGS__)
-#define sqlitekit_cverbose(format, ...)    __p_sqlitekit_log([[NSString stringWithUTF8String:__FILE__] lastPathComponent], __LINE__, format, ##__VA_ARGS__)
+#define SQLITEKIT_VERBOSE false
+#if SQLITEKIT_VERBOSE
+# define sqlitekit_verbose(format, ...)     __p_sqlitekit_log([[NSString stringWithUTF8String:__FILE__] lastPathComponent], __LINE__, format, ##__VA_ARGS__)
+# define sqlitekit_cverbose(format, ...)    __p_sqlitekit_log([[NSString stringWithUTF8String:__FILE__] lastPathComponent], __LINE__, format, ##__VA_ARGS__)
+#else
+# define sqlitekit_verbose(format, ...)
+# define sqlitekit_cverbose(format, ...)
+#endif
 
 #define sqlitekit_log(format, ...)          __p_sqlitekit_log([[NSString stringWithUTF8String:__FILE__] lastPathComponent], __LINE__, format, ##__VA_ARGS__)
 #define sqlitekit_clog(format, ...)         __p_sqlitekit_log([[NSString stringWithUTF8String:__FILE__] lastPathComponent], __LINE__, format, ##__VA_ARGS__)
