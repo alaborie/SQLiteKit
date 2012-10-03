@@ -92,4 +92,28 @@
  */
 - (id)initWithStatement:(NSString *)SQLStatement arguments:(NSArray *)arguments orArgumentsList:(va_list)argumentsList __attribute__ ((nonnull(1)));
 
+#pragma mark -
+/// @name Transaction Queries
+
+/**
+ Returns a query that begins a transaction.
+
+ @return A query that begins a transaction.
+ */
++ (id)beginTransaction;
+
+/**
+ Returns a query that commits a transaction.
+
+ @return A query that commits a transaction.
+ */
++ (id)commitTransaction;
+
+/**
+ Returns a query that rollback a transaction.
+
+ @return A query that rollback a transaction.
+ */
++ (id)rollbackTransaction;
+
 @end

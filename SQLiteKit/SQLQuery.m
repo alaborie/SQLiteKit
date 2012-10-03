@@ -108,4 +108,40 @@
     return [NSString stringWithFormat:@"%@ [ %@ ]", self.SQLStatement, [self.arguments componentsJoinedByString:@", "]];
 }
 
+#pragma mark -
+#pragma mark Public
+
++ (id)beginTransaction
+{
+    static SQLQuery *beginTransaction;
+    static dispatch_once_t predicate;
+
+    dispatch_once(&predicate, ^{
+        beginTransaction = [[SQLQuery alloc] initWithStatement:@"BEGIN TRANSACTION;"];
+    });
+    return beginTransaction;
+}
+
++ (id)commitTransaction
+{
+    static SQLQuery *commitTransaction;
+    static dispatch_once_t predicate;
+
+    dispatch_once(&predicate, ^{
+        commitTransaction = [[SQLQuery alloc] initWithStatement:@"COMMIT TRANSACTION;"];
+    });
+    return commitTransaction;
+}
+
++ (id)rollbackTransaction
+{
+    static SQLQuery *rollbackTransaction;
+    static dispatch_once_t predicate;
+
+    dispatch_once(&predicate, ^{
+        rollbackTransaction = [[SQLQuery alloc] initWithStatement:@"ROLLBACK TRANSACTION;"];
+    });
+    return rollbackTransaction;
+}
+
 @end
