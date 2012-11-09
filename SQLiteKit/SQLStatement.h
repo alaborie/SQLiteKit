@@ -8,46 +8,40 @@
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-@class SQLEnumerator;
-
-/**
- \brief A class that represents a SQLite database.
- */
-@interface SQLDatabase : NSObject <NSCacheDelegate> {
+@interface SQLStatement : NSObject {
 @private
     sqlite3 *_handle;
-    struct {
-        unsigned int isOpen:1;
-        unsigned int isReadOnly:1;
-    } _state;
+    sqlite3_stmt *_statement;
+
+@private
+    NSUInteger _numberOfColumns;
+    NSDictionary *_columnsName;
 }
 
-/**
- A string that indicates the path to locate the database file.
- */
-@property (nonatomic, copy, readonly) NSString *path;
+- (NSUInteger)numberOfColumns;
+- (id)objectForColumnAtIndex:(NSUInteger)index;
+- (NSDictionary *)columnsName;
+- (id)objectForColumn:(NSString *)name;
 
-#pragma mark -
+- (NSArray *)allObjects;
+- (NSDictionary *)allObjectsAndColumns;
+- (NSDictionary *)allNonNullObjectsAndColumns;
 
-+ (id)database;
-+ (id)databaseWithURL:(NSURL *)url;
-+ (id)databaseWithPath:(NSString *)path;
+- (int)intForColumnAtIndex:(NSUInteger)index;
+- (int)intForColumn:(NSString *)name;
 
-- (id)initWithURL:(NSURL *)url;
-- (id)initWithPath:(NSString *)path;
+- (long long)longlongForColumnAtIndex:(NSUInteger)index;
+- (long long)longlongForColumn:(NSString *)name;
 
-#pragma mark -
+- (double)doubleForColumnAtIndex:(NSUInteger)index;
+- (double)doubleForColumn:(NSString *)name;
 
-- (void)open;
-- (void)openWithFlags:(NSInteger)flags;
-- (void)close;
+- (const char *)textForColumnAtIndex:(NSUInteger)index;
+- (const char *)textForColumn:(NSString *)name;
 
-#pragma mark -
-
-- (SQLEnumerator *)executeSQL:(NSString *)sql;
-- (SQLEnumerator *)executeSQLWithArguments:(NSString *)sql, ...;
-- (SQLEnumerator *)executeSQL:(NSString *)sql arguments:(NSArray *)arguments;
-
-- (void)executeSQLFile:(NSString *)path;
+- (int)blobLengthForColumnAtIndex:(NSUInteger)index;
+- (int)blobLengthForColumn:(NSString *)name;
+- (void *)blobForColumnAtIndex:(NSUInteger)index buffer:(void *)buffer length:(int *)length;
+- (void *)blobForColumn:(NSString *)name buffer:(void *)buffer length:(int *)length;
 
 @end

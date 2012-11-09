@@ -12,5 +12,5 @@
 
 #ifdef __OBJC__
 # import <Foundation/Foundation.h>
-# import "SQLGlobal.h"
+# import "SQLiteKit.h"
 #endif
